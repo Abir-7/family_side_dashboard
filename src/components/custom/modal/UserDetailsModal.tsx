@@ -23,7 +23,7 @@ interface UserDetailModalProps {
   onOpenChange: (open: boolean) => void;
 }
 
-export function UserDetailModal({
+export function UserDetailsModal({
   isOpen,
   onOpenChange,
 }: UserDetailModalProps) {

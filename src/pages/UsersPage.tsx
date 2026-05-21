@@ -1,4 +1,3 @@
-/* eslint-disable @typescript-eslint/no-unused-vars */
 import { useState } from "react";
 import { Eye, Ban, ChevronDown } from "lucide-react";
 import {
@@ -23,7 +22,7 @@ import {
   TooltipProvider,
   TooltipTrigger,
 } from "@/components/ui/tooltip";
-import { UserDetailModal } from "@/components/custom/modal/UserDetailModal";
+import { UserDetailsModal } from "@/components/custom/modal/UserDetailsModal";
 
 type Subscription = "Free" | "Premium" | "Smart";
 type Status = "Active" | "Suspend";
@@ -367,7 +366,7 @@ export default function UsersPage() {
         </div>
 
         {/* User Detail Modal */}
-        <UserDetailModal isOpen={isModalOpen} onOpenChange={setIsModalOpen} />
+        <UserDetailsModal isOpen={isModalOpen} onOpenChange={setIsModalOpen} />
       </div>
     </TooltipProvider>
   );
