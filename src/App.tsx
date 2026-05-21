@@ -1,14 +1,18 @@
 import type { ReactNode } from "react";
 import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
-import { useSelector } from "react-redux";
+import { useAuth } from "./lib/auth/AuthProvider";
 
 import LoginPage from "./pages/auth/LoginPage";
+import ForgotPasswordPage from "./pages/auth/ForgotPasswordPage";
+import OtpPage from "./pages/auth/OtpPage";
+import ResetPasswordPage from "./pages/auth/ResetPasswordPage";
 import DashboardLayout from "./layout/DashboardLayout";
 import OverviewPage from "./pages/OverviewPage";
-import type { RootState } from "./lib/redux/store";
+import NotificationsPage from "./pages/NotificationsPage";
+import UsersPage from "./pages/UsersPage";
 
 function ProtectedRoute({ children }: { children: ReactNode }) {
-  const { isAuthenticated } = useSelector((state: RootState) => state.auth);
+  const { isAuthenticated } = useAuth();
   return isAuthenticated ? <>{children}</> : <Navigate to="/signin" />;
 }
 
@@ -17,15 +21,18 @@ export default function App() {
     <BrowserRouter>
       <Routes>
         <Route path="/signin" element={<LoginPage />} />
-        <Route
-          path="/dashboard"
-          element={
+        <Route path="/forgot-password" element={<ForgotPasswordPage />} />
+        <Route path="/verify-otp" element={<OtpPage />} />
+        <Route path="/reset-password" element={<ResetPasswordPage />} />
+        <Route path="/dashboard" element={
             <ProtectedRoute>
               <DashboardLayout />
             </ProtectedRoute>
           }
         >
           <Route index element={<OverviewPage />} />
+          <Route path="users" element={<UsersPage />} />
+          <Route path="notifications" element={<NotificationsPage />} />
         </Route>
         <Route path="/" element={<Navigate to="/dashboard" />} />
       </Routes>

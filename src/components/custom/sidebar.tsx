@@ -13,7 +13,7 @@ import {
 } from "@/components/ui/sidebar";
 import { useDispatch } from "react-redux";
 import { logout } from "../../lib/redux/authSlice";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, Link } from "react-router-dom";
 
 const navItems = [
   { title: "Dashboard", url: "/dashboard", icon: LayoutDashboard },
@@ -45,10 +45,10 @@ export function AppSidebar() {
               {navItems.map((item) => (
                 <SidebarMenuItem key={item.title}>
                   <SidebarMenuButton asChild tooltip={item.title}>
-                    <a href={item.url}>
+                    <Link to={item.url}>
                       <item.icon />
                       <span>{item.title}</span>
-                    </a>
+                    </Link>
                   </SidebarMenuButton>
                 </SidebarMenuItem>
               ))}
