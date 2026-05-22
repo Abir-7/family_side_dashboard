@@ -70,7 +70,7 @@ export function ItemsByStatusChart({
   title = "Items by status",
 }: ItemsByStatusChartProps) {
   return (
-    <div className="flex h-full w-full border flex-col items-center bg-white rounded-2xl shadow-md px-6 pt-5 pb-6">
+    <div className="flex h-full w-full border flex-col items-center bg-white rounded-2xl  px-6 pt-5 pb-6">
       {/* Title */}
       <p className="text-sm font-semibold text-gray-900 mb-3">{title}</p>
 

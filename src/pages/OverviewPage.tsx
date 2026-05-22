@@ -1,6 +1,9 @@
 import { ItemsByStatusChart } from "@/components/custom/charts/Itemsbystatuschart";
 import ActivityOverview from "@/components/custom/charts/line_chart_dashboard";
 import DashboardStats from "@/components/custom/state_card/dashboard_state";
+import { RecentFlaggedItems } from "@/components/custom/state_card/RecentFlaggedItems";
+import { ToDoToday } from "@/components/custom/state_card/ToDoToday";
+import { UpcomingEvents } from "@/components/custom/state_card/UpcomingEvents";
 
 export default function OverviewPage() {
   return (
@@ -36,6 +39,11 @@ export default function OverviewPage() {
             ]}
           />
         </div>
+      </div>
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+        <RecentFlaggedItems />
+        <ToDoToday />
+        <UpcomingEvents />
       </div>
     </div>
   );
