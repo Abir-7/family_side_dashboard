@@ -12,6 +12,8 @@ import NotificationsPage from "./pages/NotificationsPage";
 import ActivityPage from "./pages/ActivityPage";
 import CreateActivityPage from "./pages/CreateActivityPage";
 import UsersPage from "./pages/UsersPage";
+import EventsPage from "./pages/EventsPage";
+import CreateEventPage from "./pages/CreateEventPage";
 
 function ProtectedRoute({ children }: { children: ReactNode }) {
   const { isAuthenticated } = useAuth();
@@ -34,6 +36,8 @@ export default function App() {
         >
           <Route index element={<OverviewPage />} />
           <Route path="users" element={<UsersPage />} />
+          <Route path="events" element={<EventsPage />} />
+          <Route path="events/create" element={<CreateEventPage />} />
           <Route path="activity" element={<ActivityPage />} />
           <Route path="activity/create" element={<CreateActivityPage />} />
           <Route path="notifications" element={<NotificationsPage />} />

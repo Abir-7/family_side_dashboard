@@ -1,4 +1,4 @@
-import { LayoutDashboard, Users, Activity, Settings, LogOut } from "lucide-react";
+import { LayoutDashboard, Users, Activity, Settings, LogOut, CalendarDays } from "lucide-react";
 import {
   Sidebar,
   SidebarContent,
@@ -18,6 +18,7 @@ import { useNavigate, Link } from "react-router-dom";
 const navItems = [
   { title: "Dashboard", url: "/dashboard", icon: LayoutDashboard },
   { title: "Users", url: "/dashboard/users", icon: Users },
+  { title: "Events", url: "/dashboard/events", icon: CalendarDays },
   { title: "Activity", url: "/dashboard/activity", icon: Activity },
   { title: "Settings", url: "/dashboard/settings", icon: Settings },
 ];

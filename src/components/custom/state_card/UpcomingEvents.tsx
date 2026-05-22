@@ -1,6 +1,7 @@
 // components/dashboard/UpcomingEvents.tsx
 import { CalendarDays } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
+import { Link } from "react-router-dom";
 
 interface UpcomingEvent {
   id: number;
@@ -65,9 +66,12 @@ export function UpcomingEvents() {
         <h2 className="text-base font-semibold text-gray-900">
           Upcoming Events
         </h2>
-        <button className="text-sm font-medium text-rose-400 underline underline-offset-2 hover:text-rose-500">
+        <Link 
+          to="/dashboard/events" 
+          className="text-sm font-medium text-rose-400 underline underline-offset-2 hover:text-rose-500"
+        >
           View all
-        </button>
+        </Link>
       </div>
 
       {/* Events */}
