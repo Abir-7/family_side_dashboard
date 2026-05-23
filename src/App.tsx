@@ -14,6 +14,12 @@ import CreateActivityPage from "./pages/CreateActivityPage";
 import UsersPage from "./pages/UsersPage";
 import EventsPage from "./pages/EventsPage";
 import CreateEventPage from "./pages/CreateEventPage";
+import GiftsPage from "./pages/GiftsPage";
+import CreateGiftPage from "./pages/CreateGiftPage";
+import CategoryPage from "./pages/CategoryPage";
+import SubCategoryPage from "./pages/SubCategoryPage";
+import TagsPage from "./pages/TagsPage";
+import SettingsPage from "./pages/SettingsPage";
 
 function ProtectedRoute({ children }: { children: ReactNode }) {
   const { isAuthenticated } = useAuth();
@@ -28,7 +34,9 @@ export default function App() {
         <Route path="/forgot-password" element={<ForgotPasswordPage />} />
         <Route path="/verify-otp" element={<OtpPage />} />
         <Route path="/reset-password" element={<ResetPasswordPage />} />
-        <Route path="/dashboard" element={
+        <Route
+          path="/dashboard"
+          element={
             <ProtectedRoute>
               <DashboardLayout />
             </ProtectedRoute>
@@ -38,6 +46,12 @@ export default function App() {
           <Route path="users" element={<UsersPage />} />
           <Route path="events" element={<EventsPage />} />
           <Route path="events/create" element={<CreateEventPage />} />
+          <Route path="gifts" element={<GiftsPage />} />
+          <Route path="gifts/create" element={<CreateGiftPage />} />
+          <Route path="category" element={<CategoryPage />} />
+          <Route path="sub-category" element={<SubCategoryPage />} />
+          <Route path="tags" element={<TagsPage />} />
+          <Route path="settings" element={<SettingsPage />} />
           <Route path="activity" element={<ActivityPage />} />
           <Route path="activity/create" element={<CreateActivityPage />} />
           <Route path="notifications" element={<NotificationsPage />} />

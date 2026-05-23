@@ -59,9 +59,12 @@ export function FormSelect({
       >
         <SelectTrigger
           className={cn(
-            "rounded-xl h-10 text-sm border-gray-200 focus:ring-rose-200 text-gray-400",
-            fieldError && "border-rose-400",
+            "rounded-full w-full px-4 text-sm text-gray-500 bg-[#fafafa] focus:ring-0 focus:ring-offset-0 transition-colors",
+            fieldError
+              ? "border-[1.5px] border-[#e05a6a] focus:border-[#e05a6a]"
+              : "border-[1.5px] border-[#e0e0e0] focus:border-[#c0bfff]",
           )}
+          style={{ fontFamily: "'DM Sans', sans-serif", height: "2.8rem" }}
         >
           <SelectValue placeholder={placeholder} />
         </SelectTrigger>

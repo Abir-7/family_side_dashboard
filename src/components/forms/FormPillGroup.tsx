@@ -68,7 +68,7 @@ export function FormPillGroup({
               type="button"
               onClick={() => toggle(opt)}
               className={cn(
-                "px-3 py-1 rounded-full text-xs font-medium border transition-colors",
+                "px-3 py-1 rounded-full font-medium border transition-colors",
                 active
                   ? "bg-rose-400 text-white border-rose-400"
                   : "bg-white text-gray-500 border-gray-200 hover:border-rose-300 hover:text-rose-400",

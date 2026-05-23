@@ -12,17 +12,15 @@ import { FormLocationSearch } from "@/components/forms/FormLocationSearch";
 
 const schema = z.object({
   location: z.string().min(1, "Location is required"),
-  eventName: z.string().min(1, "Event name is required"),
+  giftName: z.string().min(1, "Gift name is required"),
   whatsapp: z.string().min(1, "WhatsApp number is required"),
   category: z.string().min(1, "Category is required"),
+  price: z.string().min(1, "Price is required"),
   instagram: z.string().optional(),
   subCategory: z.array(z.string()).min(1),
   email: z.string().optional(),
   tags: z.array(z.string()).min(1),
   date: z.string().min(1, "Date is required"),
-  price: z.string().min(1, "Price is required"),
-  startTime: z.string().min(1, "Start time is required"),
-  endTime: z.string().min(1, "End time is required"),
   photos: z.array(z.any()).optional(),
   description: z.string().optional(),
 });
@@ -51,7 +49,7 @@ const inputStyle = {
   color: "#374151",
 };
 
-export default function CreateEventPage() {
+export default function CreateGiftPage() {
   const navigate = useNavigate();
 
   const onSubmit = (data: FormValues) => {
@@ -82,19 +80,19 @@ export default function CreateEventPage() {
             <ArrowLeft className="w-4 h-4" />
           </Button>
           <h1 className="text-base font-semibold text-gray-800">
-            Create Events
+            Create Gift
           </h1>
         </div>
 
         {/* Location */}
         <FormLocationSearch name="location" placeholder="Enter your location" />
 
-        {/* Row 1: Event Name + WhatsApp */}
+        {/* Row 1: Gift Name + WhatsApp */}
         <div className="grid grid-cols-2 gap-4">
           <FormInput
-            name="eventName"
-            label="Event Name"
-            placeholder="Enter your event name..."
+            name="giftName"
+            label="Gift Name"
+            placeholder="Enter your gift name..."
             style={inputStyle}
           />
           <FormInput
@@ -105,8 +103,8 @@ export default function CreateEventPage() {
           />
         </div>
 
-        {/* Row 2: Category + Instagram */}
-        <div className="grid grid-cols-2 gap-4">
+        {/* Row 2: Category + Price + Instagram */}
+        <div className="grid grid-cols-3 gap-4">
           <FormSelect
             name="category"
             label="Category"
@@ -114,9 +112,15 @@ export default function CreateEventPage() {
             options={CATEGORY_OPTIONS}
           />
           <FormInput
+            name="price"
+            label="Price*"
+            placeholder="$00"
+            style={inputStyle}
+          />
+          <FormInput
             name="instagram"
             label="Instagram Link"
-            placeholder="Enter phone number..."
+            placeholder="Enter link..."
             style={inputStyle}
           />
         </div>
@@ -131,7 +135,7 @@ export default function CreateEventPage() {
           <FormInput
             name="email"
             label="Email"
-            placeholder="Enter phone number..."
+            placeholder="Enter email..."
             style={inputStyle}
           />
         </div>
@@ -146,32 +150,6 @@ export default function CreateEventPage() {
             type="date"
             style={inputStyle}
           />
-        </div>
-
-        {/* Row 5: Event Price + Start Time + End Time */}
-        <div className="grid grid-cols-2 gap-4">
-          <FormInput
-            name="price"
-            label="Event Price*"
-            placeholder="$00"
-            style={inputStyle}
-          />
-          <div className="grid grid-cols-2 gap-3">
-            <FormInput
-              name="startTime"
-              label="Start Time"
-              placeholder="10:00 AM"
-              type="time"
-              style={inputStyle}
-            />
-            <FormInput
-              name="endTime"
-              label="End Time"
-              placeholder="09:00 PM"
-              type="time"
-              style={inputStyle}
-            />
-          </div>
         </div>
 
         {/* Row 6: Photos + Description */}
@@ -198,7 +176,7 @@ export default function CreateEventPage() {
             type="submit"
             className="h-11 rounded-xl bg-rose-400 hover:bg-rose-500 text-white font-semibold border-0"
           >
-            Submit activity
+            Submit gift
           </Button>
         </div>
       </FormWrapper>
