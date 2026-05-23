@@ -95,7 +95,7 @@ export function GiftDetailModal({
     <Dialog open={isOpen} onOpenChange={onOpenChange}>
       <DialogContent showCloseButton={false} className="sm:max-w-xl p-2 gap-0 overflow-hidden rounded-3xl border-0 shadow-2xl">
         {/* Hero */}
-        <div className="relative h-44 overflow-hidden bg-rose-50">
+        <div className="relative h-44 overflow-hidden bg-brand-50">
           {heroImage ? (
             <img
               src={heroImage}
@@ -104,10 +104,10 @@ export function GiftDetailModal({
             />
           ) : (
             <div className="w-full h-full flex items-center justify-center rounded-2xl">
-              <Gift className="w-16 h-16 text-rose-200" />
+              <Gift className="w-16 h-16 text-brand-200" />
             </div>
           )}
-          <span className="absolute top-3 right-3 bg-rose-500 text-white text-[11px] font-semibold px-3 py-1 rounded-full shadow">
+          <span className="absolute top-3 right-3 bg-brand-500 text-white text-[11px] font-semibold px-3 py-1 rounded-full shadow">
             Gift
           </span>
         </div>
@@ -137,7 +137,7 @@ export function GiftDetailModal({
                   {"... "}
                   <button
                     onClick={() => setExpanded(true)}
-                    className="text-rose-400 font-medium text-[12px] hover:underline"
+                    className="text-brand-400 font-medium text-[12px] hover:underline"
                   >
                     Read more
                   </button>
@@ -205,7 +205,7 @@ export function GiftDetailModal({
             </button>
             <button
               onClick={onCancel ?? (() => onOpenChange(false))}
-              className="py-3.5 rounded-2xl bg-rose-400 text-[13px] font-semibold text-white hover:bg-rose-500 transition-colors shadow-sm"
+              className="py-3.5 rounded-2xl bg-brand-400 text-[13px] font-semibold text-white hover:bg-brand-500 transition-colors shadow-sm"
             >
               Cancel
             </button>

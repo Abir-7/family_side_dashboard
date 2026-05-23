@@ -219,7 +219,7 @@ export default function ActivityPage() {
 
           {/* Create Activity Button */}
           <Button
-            className="rounded-full h-11 px-4 text-sm font-semibold bg-rose-400 hover:bg-rose-500 text-white border-0 gap-1.5 shrink-0"
+            className="rounded-full h-11 px-4 text-sm font-semibold bg-brand-400 hover:bg-brand-500 text-white border-0 gap-1.5 shrink-0"
             onClick={() => navigate("/dashboard/activity/create")}
           >
             Create activity
@@ -310,7 +310,7 @@ export default function ActivityPage() {
                           <Button
                             variant="ghost"
                             size="icon"
-                            className="h-8 w-8 text-rose-400 hover:text-rose-600 hover:bg-rose-50"
+                            className="h-8 w-8 text-brand-400 hover:text-brand-600 hover:bg-brand-50"
                           >
                             <Trash2 className="w-4 h-4" />
                           </Button>

@@ -64,8 +64,8 @@ export function FormImageUpload({
               onClick={() => inputRef.current?.click()}
               className={cn(
                 "border-2 border-dashed rounded-xl flex flex-col items-center justify-center gap-1 cursor-pointer transition-colors",
-                "hover:border-rose-300 hover:bg-rose-50/30",
-                fieldError ? "border-rose-400 bg-rose-50/20" : "border-gray-200",
+                "hover:border-brand-300 hover:bg-brand-50/30",
+                fieldError ? "border-brand-400 bg-brand-50/20" : "border-gray-200",
                 files.length > 0 ? "min-h-20 p-3" : "h-40",
               )}
             >
@@ -104,7 +104,7 @@ export function FormImageUpload({
         <p
           style={{
             fontSize: "12px",
-            color: "#e05a6a",
+            color: "#E55F68",
             paddingLeft: "4px",
             margin: 0,
           }}
@@ -138,7 +138,7 @@ function ImagePreview({ file, onRemove }: { file: File; onRemove: () => void }) 
           e.stopPropagation();
           onRemove();
         }}
-        className="absolute -top-1.5 -right-1.5 bg-rose-400 text-white rounded-full w-4 h-4 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity"
+        className="absolute -top-1.5 -right-1.5 bg-brand-400 text-white rounded-full w-4 h-4 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity"
       >
         <X className="w-2.5 h-2.5" />
       </button>

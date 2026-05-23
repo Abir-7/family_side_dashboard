@@ -4,6 +4,7 @@ import { toast } from "sonner";
 import { useAuth } from "../../lib/auth/useAuth";
 import { FormWrapper } from "@/components/forms/FormWrapper";
 import { FormInput } from "@/components/forms/FormInput";
+import bgImg from "../../assets/bg.png";
 
 const loginSchema = z.object({
   username: z
@@ -40,7 +41,7 @@ export default function LoginPage() {
           width: 100%;
           padding: 13px;
           border-radius: 50px;
-          background: #e05a6a;
+          background: #E55F68;
           color: #fff;
           font-size: 15px;
           font-weight: 600;
@@ -50,13 +51,13 @@ export default function LoginPage() {
           letter-spacing: 0.3px;
           transition: background 0.2s, transform 0.1s;
         }
-        .login-btn:hover { background: #c94a5a; }
+        .login-btn:hover { background: #d14d56; }
         .login-btn:active { transform: scale(0.98); }
-        .login-btn:disabled { background: #e9a0aa; cursor: not-allowed; }
-        .login-checkbox { width: 15px; height: 15px; accent-color: #e05a6a; cursor: pointer; }
+        .login-btn:disabled { background: #f2a7ad; cursor: not-allowed; }
+        .login-checkbox { width: 15px; height: 15px; accent-color: #E55F68; cursor: pointer; }
         .forgot-btn {
           font-size: 13px;
-          color: #e05a6a;
+          color: #E55F68;
           font-weight: 500;
           background: none;
           border: none;
@@ -66,7 +67,7 @@ export default function LoginPage() {
         }
         .forgot-btn:hover { text-decoration: underline; }
         .contact-btn {
-          color: #e05a6a;
+          color: #E55F68;
           font-weight: 500;
           background: none;
           border: none;
@@ -84,14 +85,17 @@ export default function LoginPage() {
           justifyContent: "center",
           minHeight: "100vh",
           padding: "1rem",
-          background:
-            "linear-gradient(135deg, #b8c6db 0%, #f5f7fa 50%, #c3cfe2 100%)",
+          backgroundImage: `url(${bgImg})`,
+          backgroundSize: "cover",
+          backgroundPosition: "center",
+          backgroundRepeat: "no-repeat",
           fontFamily: "'DM Sans', sans-serif",
         }}
       >
         <div
           style={{
-            background: "#fff",
+            background: "rgba(255, 255, 255, 0.95)",
+            backdropFilter: "blur(10px)",
             borderRadius: "20px",
             padding: "2.5rem 2rem",
             width: "100%",
@@ -194,11 +198,11 @@ export default function LoginPage() {
                 style={{ marginTop: "2px", flexShrink: 0 }}
               />
               I agree to the{" "}
-              <span style={{ color: "#e05a6a", fontWeight: 500 }}>
+              <span style={{ color: "#E55F68", fontWeight: 500 }}>
                 Terms &amp; Conditions
               </span>{" "}
               and{" "}
-              <span style={{ color: "#e05a6a", fontWeight: 500 }}>
+              <span style={{ color: "#E55F68", fontWeight: 500 }}>
                 Privacy Policy
               </span>
             </label>

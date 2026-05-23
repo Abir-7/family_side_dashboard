@@ -59,7 +59,7 @@ export function RecentFlaggedItems() {
         <h2 className="text-base font-semibold text-gray-900">
           Recent flagged items
         </h2>
-        <button className="text-sm font-medium text-rose-400 underline underline-offset-2 hover:text-rose-500">
+        <button className="text-sm font-medium text-brand-400 underline underline-offset-2 hover:text-brand-500">
           View all
         </button>
       </div>

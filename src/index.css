@@ -14,6 +14,18 @@
   --color-popover: var(--popover);
   --color-popover-foreground: var(--popover-foreground);
 
+  --color-brand: #E55F68;
+  --color-brand-50: #fdf2f3;
+  --color-brand-100: #fbe4e6;
+  --color-brand-200: #f7ccd1;
+  --color-brand-300: #f1a6af;
+  --color-brand-400: #E55F68;
+  --color-brand-500: #d14d56;
+  --color-brand-600: #af3d44;
+  --color-brand-700: #91353a;
+  --color-brand-800: #7a2f33;
+  --color-brand-900: #65262a;
+
   --color-primary: var(--primary);
   --color-primary-foreground: var(--primary-foreground);
 
@@ -61,7 +73,8 @@
     --card-foreground: oklch(0.145 0 0);
     --popover: oklch(1 0 0);
     --popover-foreground: oklch(0.145 0 0);
-    --primary: oklch(0.205 0 0);
+    --brand: #E55F68;
+    --primary: oklch(0.607 0.17 15.6);
     --primary-foreground: oklch(0.985 0 0);
     --secondary: oklch(0.97 0 0);
     --secondary-foreground: oklch(0.205 0 0);

@@ -31,7 +31,7 @@ export function Pagination({
       <button
         onClick={() => onPageChange(Math.max(1, currentPage - 1))}
         disabled={currentPage === 1}
-        className="flex items-center gap-1.5 text-sm text-rose-400 hover:text-rose-500 disabled:text-gray-300 disabled:cursor-not-allowed font-medium transition-colors"
+        className="flex items-center gap-1.5 text-sm text-brand-400 hover:text-brand-500 disabled:text-gray-300 disabled:cursor-not-allowed font-medium transition-colors"
       >
         <span className="text-base">←</span> Previous
       </button>
@@ -53,7 +53,7 @@ export function Pagination({
               className={cn(
                 "w-8 h-8 rounded-lg text-sm font-medium transition-colors",
                 currentPage === p
-                  ? "bg-rose-400 text-white"
+                  ? "bg-brand-400 text-white"
                   : "text-gray-500 hover:bg-gray-100",
               )}
             >
@@ -67,7 +67,7 @@ export function Pagination({
       <button
         onClick={() => onPageChange(Math.min(totalPages, currentPage + 1))}
         disabled={currentPage === totalPages}
-        className="flex items-center gap-1.5 text-sm text-rose-400 hover:text-rose-500 disabled:text-gray-300 disabled:cursor-not-allowed font-medium transition-colors"
+        className="flex items-center gap-1.5 text-sm text-brand-400 hover:text-brand-500 disabled:text-gray-300 disabled:cursor-not-allowed font-medium transition-colors"
       >
         Next <span className="text-base">→</span>
       </button>

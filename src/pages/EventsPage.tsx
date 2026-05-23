@@ -108,7 +108,7 @@ const MOCK_EVENTS: Event[] = [
 ];
 
 const tagClass: Record<Event["tag"], string> = {
-  Today: "bg-rose-100 text-rose-400 hover:bg-rose-100 border-0 rounded-full",
+  Today: "bg-brand-100 text-brand-400 hover:bg-brand-100 border-0 rounded-full",
   Tomorrow:
     "bg-amber-100 text-amber-500 hover:bg-amber-100 border-0 rounded-full",
   Soon: "bg-gray-100 text-gray-500 hover:bg-gray-100 border-0 rounded-full",
@@ -147,7 +147,7 @@ export default function EventsPage() {
 
           {/* Create Event Button */}
           <Button
-            className="rounded-full h-11 px-4 text-sm font-semibold bg-rose-400 hover:bg-rose-500 text-white border-0 gap-1.5 shrink-0"
+            className="rounded-full h-11 px-4 text-sm font-semibold bg-brand-400 hover:bg-brand-500 text-white border-0 gap-1.5 shrink-0"
             onClick={() => navigate("/dashboard/events/create")}
           >
             Create Event
@@ -244,7 +244,7 @@ export default function EventsPage() {
                           <Button
                             variant="ghost"
                             size="icon"
-                            className="h-8 w-8 text-rose-400 hover:text-rose-600 hover:bg-rose-50"
+                            className="h-8 w-8 text-brand-400 hover:text-brand-600 hover:bg-brand-50"
                           >
                             <Trash2 className="w-4 h-4" />
                           </Button>

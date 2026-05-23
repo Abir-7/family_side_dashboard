@@ -29,7 +29,7 @@ export function CreateCategoryModal() {
   return (
     <Dialog>
       <DialogTrigger asChild>
-        <Button className="h-11 px-4 rounded-full bg-rose-400 hover:bg-rose-500 text-white text-sm font-semibold gap-1.5 shadow-none">
+        <Button className="h-11 px-4 rounded-full bg-brand-400 hover:bg-brand-500 text-white text-sm font-semibold gap-1.5 shadow-none">
           Create category
           <Plus className="w-4 h-4" />
         </Button>

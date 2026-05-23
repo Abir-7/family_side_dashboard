@@ -1,26 +1,54 @@
+import { useRef, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import * as z from "zod";
 import { toast } from "sonner";
-import { FormWrapper } from "@/components/forms/FormWrapper";
-import { FormInput } from "@/components/forms/FormInput";
-
-const otpSchema = z.object({
-  otp: z
-    .string()
-    .min(6, "OTP must be 6 digits")
-    .max(6, "OTP must be 6 digits")
-    .regex(/^\d+$/, "OTP must contain only numbers"),
-});
-
-type OtpFormValues = z.infer<typeof otpSchema>;
+import bgImg from "../../assets/bg.png";
 
 export default function OtpPage() {
   const navigate = useNavigate();
+  const [otp, setOtp] = useState<string[]>(["", "", "", "", "", ""]);
+  const inputs = useRef<(HTMLInputElement | null)[]>([]);
 
-  const onSubmit = (data: OtpFormValues) => {
-    console.log("Verifying OTP:", data.otp);
+  const handleChange = (index: number, value: string) => {
+    if (!/^\d?$/.test(value)) return;
+    const next = [...otp];
+    next[index] = value;
+    setOtp(next);
+    if (value && index < 5) {
+      inputs.current[index + 1]?.focus();
+    }
+  };
+
+  const handleKeyDown = (
+    index: number,
+    e: React.KeyboardEvent<HTMLInputElement>,
+  ) => {
+    if (e.key === "Backspace" && !otp[index] && index > 0) {
+      inputs.current[index - 1]?.focus();
+    }
+  };
+
+  const handlePaste = (e: React.ClipboardEvent) => {
+    e.preventDefault();
+    const pasted = e.clipboardData
+      .getData("text")
+      .replace(/\D/g, "")
+      .slice(0, 6);
+    const next = [...otp];
+    pasted.split("").forEach((char, i) => {
+      next[i] = char;
+    });
+    setOtp(next);
+    const focusIndex = Math.min(pasted.length, 5);
+    inputs.current[focusIndex]?.focus();
+  };
+
+  const handleSubmit = () => {
+    const code = otp.join("");
+    if (code.length < 6) {
+      toast.error("Please enter all 6 digits.");
+      return;
+    }
     toast.success("OTP verified successfully!");
-    // In a real app, you might navigate to a Reset Password page here
     navigate("/reset-password");
   };
 
@@ -28,9 +56,28 @@ export default function OtpPage() {
     <>
       <style>{`
         @import url('https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600&display=swap');
-        .submit-btn {
+        .otp-box {
+          width: 52px;
+          height: 52px;
+          border-radius: 50%;
+          border: 1.5px solid #e05a6a;
+          background: #fff;
+          text-align: center;
+          font-size: 20px;
+          font-weight: 600;
+          color: #e05a6a;
+          font-family: 'DM Sans', sans-serif;
+          outline: none;
+          transition: border-color 0.2s, box-shadow 0.2s;
+          caret-color: #e05a6a;
+        }
+        .otp-box:focus {
+          border-color: #e05a6a;
+          box-shadow: 0 0 0 3px rgba(224, 90, 106, 0.15);
+        }
+        .verify-btn {
           width: 100%;
-          padding: 13px;
+          padding: 14px;
           border-radius: 50px;
           background: #e05a6a;
           color: #fff;
@@ -41,12 +88,9 @@ export default function OtpPage() {
           font-family: 'DM Sans', sans-serif;
           letter-spacing: 0.3px;
           transition: background 0.2s, transform 0.1s;
-          margin-top: 0.5rem;
         }
-        .submit-btn:hover { background: #c94a5a; }
-        .submit-btn:active { transform: scale(0.98); }
-        .submit-btn:disabled { background: #e9a0aa; cursor: not-allowed; }
-        
+        .verify-btn:hover { background: #c94a5a; }
+        .verify-btn:active { transform: scale(0.98); }
         .resend-btn {
           font-size: 13px;
           color: #e05a6a;
@@ -56,15 +100,8 @@ export default function OtpPage() {
           cursor: pointer;
           padding: 0;
           font-family: 'DM Sans', sans-serif;
-          margin-top: 1.5rem;
         }
         .resend-btn:hover { text-decoration: underline; }
-
-        .otp-input input {
-            text-align: center;
-            letter-spacing: 0.5rem;
-            font-size: 1.5rem !important;
-        }
       `}</style>
 
       <div
@@ -74,80 +111,93 @@ export default function OtpPage() {
           justifyContent: "center",
           minHeight: "100vh",
           padding: "1rem",
-          background:
-            "linear-gradient(135deg, #b8c6db 0%, #f5f7fa 50%, #c3cfe2 100%)",
+          backgroundImage: `url(${bgImg})`,
+          backgroundSize: "cover",
+          backgroundPosition: "center",
+          backgroundRepeat: "no-repeat",
           fontFamily: "'DM Sans', sans-serif",
         }}
       >
         <div
           style={{
-            background: "#fff",
+            background: "rgba(255,255,255,0.96)",
+            backdropFilter: "blur(10px)",
             borderRadius: "20px",
             padding: "2.5rem 2rem",
             width: "100%",
             maxWidth: "420px",
-            boxShadow: "0 8px 40px rgba(0,0,0,0.10)",
+            boxShadow: "0 8px 40px rgba(0,0,0,0.12)",
             textAlign: "center",
+            display: "flex",
+            flexDirection: "column",
+            gap: "1.5rem",
           }}
         >
           {/* Header */}
-          <h1
-            style={{
-              fontSize: "22px",
-              fontWeight: 600,
-              color: "#1a1a2e",
-              margin: "0 0 6px",
-            }}
-          >
-            OTP Verification
-          </h1>
-          <p
-            style={{
-              fontSize: "13px",
-              color: "#888",
-              margin: "0 0 1.8rem",
-              lineHeight: 1.5,
-            }}
-          >
-            We've sent a 6-digit verification code to your email.
-            <br />
-            Please enter it below to continue.
-          </p>
+          <div>
+            <h1
+              style={{
+                fontSize: "22px",
+                fontWeight: 600,
+                color: "#1a1a2e",
+                margin: "0 0 8px",
+              }}
+            >
+              Recover Password
+            </h1>
+            <p
+              style={{
+                fontSize: "13px",
+                color: "#888",
+                margin: 0,
+                lineHeight: 1.6,
+              }}
+            >
+              Please provide the email address associated with your
+              <br />
+              account, and we'll send you verification code to reset
+              <br />
+              your password.
+            </p>
+          </div>
 
-          {/* Form */}
-          <FormWrapper
-            schema={otpSchema}
-            onSubmit={onSubmit}
-            style={{ display: "flex", flexDirection: "column", gap: "1rem", textAlign: "left" }}
-          >
-            <FormInput
-              name="otp"
-              label="Verification Code"
-              type="text"
-              placeholder="000000"
-              maxLength={6}
-              containerClassName="otp-input"
-            />
-
-            {/* Submit */}
-            <button type="submit" className="submit-btn">
-              Verify OTP
-            </button>
-          </FormWrapper>
-
-          {/* Resend Code */}
-          <p
+          {/* OTP Circles */}
+          <div
             style={{
-              fontSize: "13px",
-              color: "#888",
-              marginTop: "1.5rem",
+              display: "flex",
+              justifyContent: "center",
+              gap: "10px",
             }}
+            onPaste={handlePaste}
           >
+            {otp.map((digit, i) => (
+              <input
+                key={i}
+                ref={(el) => {
+                  inputs.current[i] = el;
+                }}
+                type="text"
+                inputMode="numeric"
+                maxLength={1}
+                value={digit}
+                onChange={(e) => handleChange(i, e.target.value)}
+                onKeyDown={(e) => handleKeyDown(i, e)}
+                className="otp-box"
+              />
+            ))}
+          </div>
+
+          {/* Verify Button */}
+          <button className="verify-btn" onClick={handleSubmit}>
+            Verify
+          </button>
+
+          {/* Resend */}
+          <p style={{ fontSize: "13px", color: "#888", margin: 0 }}>
             Didn't receive the code?{" "}
-            <button 
-              onClick={() => toast.success("OTP resent successfully!")} 
+            <button
               className="resend-btn"
-              style={{ marginTop: 0 }}
+              onClick={() => toast.success("OTP resent successfully!")}
             >
               Resend Code
             </button>

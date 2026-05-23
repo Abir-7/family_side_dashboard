@@ -94,23 +94,23 @@ export function UserDetailsModal({
                 <Star className="w-4 h-4 text-amber-400 fill-amber-400" />
                 <span className="text-[11px] text-gray-400">Reviews</span>
               </div>
-              <p className="text-lg font-bold text-rose-400 leading-none">32</p>
+              <p className="text-lg font-bold text-brand-400 leading-none">32</p>
             </div>
             {/* Activities */}
             <div className="bg-white border border-gray-100 rounded-xl p-3 shadow-sm flex flex-col gap-1">
               <div className="flex items-center gap-1">
-                <Activity className="w-4 h-4 text-rose-400" />
+                <Activity className="w-4 h-4 text-brand-400" />
                 <span className="text-[11px] text-gray-400">Activities</span>
               </div>
-              <p className="text-lg font-bold text-rose-400 leading-none">12</p>
+              <p className="text-lg font-bold text-brand-400 leading-none">12</p>
             </div>
             {/* Saved */}
             <div className="bg-white border border-gray-100 rounded-xl p-3 shadow-sm flex flex-col gap-1">
               <div className="flex items-center gap-1">
-                <Bookmark className="w-4 h-4 text-rose-300 fill-rose-300" />
+                <Bookmark className="w-4 h-4 text-brand-300 fill-brand-300" />
                 <span className="text-[11px] text-gray-400">Saved item</span>
               </div>
-              <p className="text-lg font-bold text-rose-400 leading-none">12</p>
+              <p className="text-lg font-bold text-brand-400 leading-none">12</p>
             </div>
           </div>
 
@@ -142,7 +142,7 @@ export function UserDetailsModal({
             <div className="flex items-center gap-3 bg-white border border-gray-100 rounded-xl p-3 shadow-sm">
               <Avatar className="h-10 w-10 rounded-xl">
                 <AvatarImage src="https://i.pravatar.cc/150?img=47" />
-                <AvatarFallback className="rounded-xl bg-rose-100 text-rose-600 font-semibold text-sm">
+                <AvatarFallback className="rounded-xl bg-brand-100 text-brand-600 font-semibold text-sm">
                   SH
                 </AvatarFallback>
               </Avatar>

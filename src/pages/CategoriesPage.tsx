@@ -57,7 +57,7 @@ export default function CategoriesPage() {
                 </TableCell>
                 <TableCell className="text-right space-x-2">
                   <Button variant="ghost" size="icon"><Edit2 className="w-4 h-4" /></Button>
-                  <Button variant="ghost" size="icon" className="text-rose-500"><Trash2 className="w-4 h-4" /></Button>
+                  <Button variant="ghost" size="icon" className="text-brand-500"><Trash2 className="w-4 h-4" /></Button>
                 </TableCell>
               </TableRow>
             </TableBody>

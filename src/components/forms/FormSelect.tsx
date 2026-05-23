@@ -64,7 +64,7 @@ export function FormSelect({
                 "rounded-full w-full px-4 text-sm bg-[#fafafa] focus:ring-0 focus:ring-offset-0 transition-colors",
                 field.value ? "text-gray-900" : "text-gray-500",
                 fieldError
-                  ? "border-[1.5px] border-[#e05a6a] focus:border-[#e05a6a]"
+                  ? "border-[1.5px] border-[#E55F68] focus:border-[#E55F68]"
                   : "border-[1.5px] border-[#e0e0e0] focus:border-[#c0bfff]",
               )}
               style={{ fontFamily: "'DM Sans', sans-serif", height: "44px" }}
@@ -85,7 +85,7 @@ export function FormSelect({
         <p
           style={{
             fontSize: "12px",
-            color: "#e05a6a",
+            color: "#E55F68",
             paddingLeft: "4px",
             margin: 0,
           }}

@@ -28,7 +28,7 @@ export function FormLocationSearch({
         className="flex items-center gap-2 px-4 rounded-full"
         style={{
           background: "#fff0f0",
-          border: `1.5px solid ${fieldError ? "#e05a6a" : "#fdd0d0"}`,
+          border: `1.5px solid ${fieldError ? "#E55F68" : "#fdd0d0"}`,
           height: "44px",
         }}
       >
@@ -39,7 +39,7 @@ export function FormLocationSearch({
           className="flex-1 bg-transparent text-sm outline-none"
           style={{ color: "#555", fontFamily: "'DM Sans', sans-serif" }}
         />
-        <div className="h-8 w-8 bg-rose-400 rounded-full flex items-center justify-center shrink-0">
+        <div className="h-8 w-8 bg-brand-400 rounded-full flex items-center justify-center shrink-0">
           <MapPin className="w-4 h-4 text-white" />
         </div>
       </div>
@@ -47,7 +47,7 @@ export function FormLocationSearch({
         <p
           style={{
             fontSize: "12px",
-            color: "#e05a6a",
+            color: "#E55F68",
             paddingLeft: "4px",
             margin: 0,
           }}

@@ -227,14 +227,14 @@ export default function CreateActivityPage() {
           <Button
             type="button"
             variant="outline"
-            className="h-11 rounded-xl border-rose-200 text-rose-400 hover:bg-rose-50 hover:text-rose-500 font-semibold"
+            className="h-11 rounded-xl border-brand-200 text-brand-400 hover:bg-brand-50 hover:text-brand-500 font-semibold"
             onClick={() => navigate(-1)}
           >
             Cancel
           </Button>
           <Button
             type="submit"
-            className="h-11 rounded-full bg-rose-400 hover:bg-rose-500 text-white font-semibold border-0"
+            className="h-11 rounded-full bg-brand-400 hover:bg-brand-500 text-white font-semibold border-0"
           >
             Submit activity
           </Button>

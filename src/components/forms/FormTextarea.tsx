@@ -48,7 +48,7 @@ export function FormTextarea({
           width: "100%",
           padding: "11px 16px",
           borderRadius: "12px",
-          border: `1.5px solid ${fieldError ? "#e05a6a" : "#e0e0e0"}`,
+          border: `1.5px solid ${fieldError ? "#E55F68" : "#e0e0e0"}`,
           fontSize: "14px",
           color: "#333",
           background: "#fafafa",
@@ -60,17 +60,17 @@ export function FormTextarea({
           minHeight: "160px",
         }}
         onFocus={(e) =>
-          (e.target.style.borderColor = fieldError ? "#e05a6a" : "#c0bfff")
+          (e.target.style.borderColor = fieldError ? "#E55F68" : "#c0bfff")
         }
         onBlur={(e) =>
-          (e.target.style.borderColor = fieldError ? "#e05a6a" : "#e0e0e0")
+          (e.target.style.borderColor = fieldError ? "#E55F68" : "#e0e0e0")
         }
       />
       {fieldError && (
         <p
           style={{
             fontSize: "12px",
-            color: "#e05a6a",
+            color: "#E55F68",
             paddingLeft: "4px",
             margin: 0,
           }}

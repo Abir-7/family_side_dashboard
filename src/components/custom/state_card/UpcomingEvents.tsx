@@ -52,7 +52,7 @@ const UPCOMING_EVENTS: UpcomingEvent[] = [
 ];
 
 const tagClass: Record<UpcomingEvent["tag"], string> = {
-  Today: "bg-rose-100 text-rose-400 hover:bg-rose-100 border-0 rounded-full",
+  Today: "bg-brand-100 text-brand-400 hover:bg-brand-100 border-0 rounded-full",
   Tomorrow:
     "bg-amber-100 text-amber-500 hover:bg-amber-100 border-0 rounded-full",
   Soon: "bg-gray-100 text-gray-500 hover:bg-gray-100 border-0 rounded-full",
@@ -68,7 +68,7 @@ export function UpcomingEvents() {
         </h2>
         <Link 
           to="/dashboard/events" 
-          className="text-sm font-medium text-rose-400 underline underline-offset-2 hover:text-rose-500"
+          className="text-sm font-medium text-brand-400 underline underline-offset-2 hover:text-brand-500"
         >
           View all
         </Link>

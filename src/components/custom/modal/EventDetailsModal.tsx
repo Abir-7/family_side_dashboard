@@ -197,7 +197,7 @@ export function EventDetailsModal({
             </svg>
           )}
           {/* Event badge */}
-          <span className="absolute top-3 right-3 bg-rose-500 text-white text-[11px] font-semibold px-3.5 py-1 rounded-full shadow">
+          <span className="absolute top-3 right-3 bg-brand-500 text-white text-[11px] font-semibold px-3.5 py-1 rounded-full shadow">
             Event
           </span>
         </div>
@@ -222,7 +222,7 @@ export function EventDetailsModal({
             </p>
             <p className="text-[11.5px] text-gray-500 leading-relaxed">
               {description}{" "}
-              <span className="text-rose-500 cursor-pointer font-medium underline underline-offset-2">
+              <span className="text-brand-500 cursor-pointer font-medium underline underline-offset-2">
                 Read more
               </span>
             </p>
@@ -246,7 +246,7 @@ export function EventDetailsModal({
             </button>
             <button
               onClick={onCancel ?? (() => onOpenChange(false))}
-              className="py-3 rounded-2xl bg-rose-500 text-[13px] font-semibold text-white hover:bg-rose-600 transition-colors shadow-sm"
+              className="py-3 rounded-2xl bg-brand-500 text-[13px] font-semibold text-white hover:bg-brand-600 transition-colors shadow-sm"
             >
               Cancel
             </button>

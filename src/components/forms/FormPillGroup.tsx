@@ -73,8 +73,8 @@ export function FormPillGroup({
                     className={cn(
                       "px-3 py-1 rounded-full font-medium border transition-colors",
                       active
-                        ? "bg-rose-400 text-white border-rose-400"
-                        : "bg-white text-gray-500 border-gray-200 hover:border-rose-300 hover:text-rose-400",
+                        ? "bg-brand-400 text-white border-brand-400"
+                        : "bg-white text-gray-500 border-gray-200 hover:border-brand-300 hover:text-brand-400",
                     )}
                   >
                     {opt}
@@ -89,7 +89,7 @@ export function FormPillGroup({
         <p
           style={{
             fontSize: "12px",
-            color: "#e05a6a",
+            color: "#E55F68",
             paddingLeft: "4px",
             margin: 0,
           }}

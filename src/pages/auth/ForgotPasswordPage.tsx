@@ -3,6 +3,7 @@ import * as z from "zod";
 import { toast } from "sonner";
 import { FormWrapper } from "@/components/forms/FormWrapper";
 import { FormInput } from "@/components/forms/FormInput";
+import bgImg from "../../assets/bg.png";
 
 const forgotPasswordSchema = z.object({
   email: z
@@ -30,7 +31,7 @@ export default function ForgotPasswordPage() {
           width: 100%;
           padding: 13px;
           border-radius: 50px;
-          background: #e05a6a;
+          background: #E55F68;
           color: #fff;
           font-size: 15px;
           font-weight: 600;
@@ -41,13 +42,13 @@ export default function ForgotPasswordPage() {
           transition: background 0.2s, transform 0.1s;
           margin-top: 0.5rem;
         }
-        .submit-btn:hover { background: #c94a5a; }
+        .submit-btn:hover { background: #d14d56; }
         .submit-btn:active { transform: scale(0.98); }
-        .submit-btn:disabled { background: #e9a0aa; cursor: not-allowed; }
+        .submit-btn:disabled { background: #f2a7ad; cursor: not-allowed; }
         
         .back-btn {
           font-size: 13px;
-          color: #e05a6a;
+          color: #E55F68;
           font-weight: 500;
           background: none;
           border: none;
@@ -66,14 +67,17 @@ export default function ForgotPasswordPage() {
           justifyContent: "center",
           minHeight: "100vh",
           padding: "1rem",
-          background:
-            "linear-gradient(135deg, #b8c6db 0%, #f5f7fa 50%, #c3cfe2 100%)",
+          backgroundImage: `url(${bgImg})`,
+          backgroundSize: "cover",
+          backgroundPosition: "center",
+          backgroundRepeat: "no-repeat",
           fontFamily: "'DM Sans', sans-serif",
         }}
       >
         <div
           style={{
-            background: "#fff",
+            background: "rgba(255, 255, 255, 0.95)",
+            backdropFilter: "blur(10px)",
             borderRadius: "20px",
             padding: "2.5rem 2rem",
             width: "100%",

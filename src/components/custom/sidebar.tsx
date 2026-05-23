@@ -87,7 +87,7 @@ export function AppSidebar() {
                         className={cn(
                           "h-11 rounded-xl px-4 gap-3 text-sm font-medium transition-colors w-full",
                           active
-                            ? "bg-rose-400! text-white! hover:bg-rose-400! hover:text-white!"
+                            ? "bg-brand-400! text-white! hover:bg-brand-400! hover:text-white!"
                             : "text-gray-600 hover:bg-gray-100 hover:text-gray-800",
                         )}
                       >
@@ -117,13 +117,13 @@ export function AppSidebar() {
               <SidebarMenuButton
                 onClick={() => setIsLogoutModalOpen(true)}
                 tooltip="Logout"
-                className="h-11 rounded-xl px-4 gap-3 text-sm font-medium text-rose-500 hover:bg-rose-50 hover:text-rose-600 transition-colors"
+                className="h-11 rounded-xl px-4 gap-3 text-sm font-medium text-brand-500 hover:bg-brand-50 hover:text-brand-600 transition-colors"
               >
                 <LogOut
-                  className="w-5 h-5 shrink-0 text-rose-500"
+                  className="w-5 h-5 shrink-0 text-brand-500"
                   strokeWidth={1.6}
                 />
-                <span className="text-rose-500">Logout</span>
+                <span className="text-brand-500">Logout</span>
               </SidebarMenuButton>
             </SidebarMenuItem>
           </SidebarMenu>

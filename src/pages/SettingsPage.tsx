@@ -38,7 +38,7 @@ function SectionCard({
         {!editing && (
           <button
             onClick={onEdit}
-            className="text-rose-400 hover:text-rose-500 transition-colors p-1"
+            className="text-brand-400 hover:text-brand-500 transition-colors p-1"
           >
             <Pencil className="w-4 h-4" strokeWidth={1.8} />
           </button>
@@ -114,7 +114,7 @@ export default function SettingsPage() {
                 </Button>
                 <Button
                   type="submit"
-                  className="h-11 px-5 bg-rose-400 hover:bg-rose-500 text-white text-sm font-semibold rounded-full shadow-none"
+                  className="h-11 px-5 bg-brand-400 hover:bg-brand-500 text-white text-sm font-semibold rounded-full shadow-none"
                 >
                   Save Changes
                 </Button>
@@ -176,7 +176,7 @@ export default function SettingsPage() {
                 </Button>
                 <Button
                   type="submit"
-                  className="h-11 px-5 bg-rose-400 hover:bg-rose-500 text-white text-sm font-semibold rounded-full shadow-none"
+                  className="h-11 px-5 bg-brand-400 hover:bg-brand-500 text-white text-sm font-semibold rounded-full shadow-none"
                 >
                   Update Password
                 </Button>

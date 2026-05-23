@@ -177,7 +177,7 @@ export function ActivityDetailsModal({
             />
           </svg>
           {/* Activity badge */}
-          <span className="absolute top-2.5 right-2.5 bg-rose-500 text-white text-[11px] font-medium px-3 py-1 rounded-full">
+          <span className="absolute top-2.5 right-2.5 bg-brand-500 text-white text-[11px] font-medium px-3 py-1 rounded-full">
             Activity
           </span>
         </div>
@@ -202,7 +202,7 @@ export function ActivityDetailsModal({
             </p>
             <p className="text-[11px] text-gray-500 leading-relaxed">
               {description}{" "}
-              <span className="text-rose-500 cursor-pointer">Read more</span>
+              <span className="text-brand-500 cursor-pointer">Read more</span>
             </p>
           </div>
 
@@ -236,7 +236,7 @@ export function ActivityDetailsModal({
                   key={i}
                   className={
                     i === 0
-                      ? "bg-rose-100 text-rose-600 hover:bg-rose-100 border-0 rounded-full text-[10px] px-3 py-1 font-medium"
+                      ? "bg-brand-100 text-brand-600 hover:bg-brand-100 border-0 rounded-full text-[10px] px-3 py-1 font-medium"
                       : "bg-gray-100 text-gray-500 hover:bg-gray-100 border-0 rounded-full text-[10px] px-3 py-1 font-normal"
                   }
                 >
@@ -256,7 +256,7 @@ export function ActivityDetailsModal({
             </button>
             <button
               onClick={onCancel ?? (() => onOpenChange(false))}
-              className="py-3 rounded-xl bg-rose-500 text-[13px] font-medium text-white hover:bg-rose-600 transition-colors"
+              className="py-3 rounded-xl bg-brand-500 text-[13px] font-medium text-white hover:bg-brand-600 transition-colors"
             >
               Cancel
             </button>

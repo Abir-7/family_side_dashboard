@@ -44,7 +44,7 @@ function SubCategoryCard({
 }) {
   return (
     <div className="flex items-center gap-3 px-3 py-2.5 rounded-2xl border border-gray-200 bg-white hover:border-gray-300 transition-colors">
-      <div className="w-9 h-9 rounded-xl overflow-hidden shrink-0 bg-rose-50 border border-gray-100 flex items-center justify-center">
+      <div className="w-9 h-9 rounded-xl overflow-hidden shrink-0 bg-brand-50 border border-gray-100 flex items-center justify-center">
         <img
           src={subCategory.logo}
           alt={subCategory.name}

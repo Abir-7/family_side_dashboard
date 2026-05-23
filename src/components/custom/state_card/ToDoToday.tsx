@@ -43,11 +43,11 @@ export function ToDoToday() {
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-2">
           <h2 className="text-base font-semibold text-gray-900">To do today</h2>
-          <Badge className="bg-rose-400 text-white hover:bg-rose-400 border-0 rounded-full text-xs px-2 py-0 font-semibold h-5 min-w-5 flex items-center justify-center">
+          <Badge className="bg-brand-400 text-white hover:bg-brand-400 border-0 rounded-full text-xs px-2 py-0 font-semibold h-5 min-w-5 flex items-center justify-center">
             20
           </Badge>
         </div>
-        <button className="text-sm font-medium text-rose-400 underline underline-offset-2 hover:text-rose-500">
+        <button className="text-sm font-medium text-brand-400 underline underline-offset-2 hover:text-brand-500">
           View all
         </button>
       </div>
@@ -60,8 +60,8 @@ export function ToDoToday() {
             className="flex items-center gap-4 py-3.5 hover:bg-gray-50/60 transition-colors -mx-1 px-1 rounded-xl"
           >
             {/* Clock Icon */}
-            <div className="h-10 w-10 rounded-full border-2 border-rose-200 flex items-center justify-center shrink-0">
-              <Clock className="w-4 h-4 text-rose-400" />
+            <div className="h-10 w-10 rounded-full border-2 border-brand-200 flex items-center justify-center shrink-0">
+              <Clock className="w-4 h-4 text-brand-400" />
             </div>
 
             {/* Count + Text */}

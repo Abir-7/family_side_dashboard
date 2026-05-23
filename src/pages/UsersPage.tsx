@@ -253,7 +253,7 @@ export default function UsersPage() {
             </DropdownMenuContent>
           </DropdownMenu>
 
-          <span className="text-sm font-semibold text-rose-400">
+          <span className="text-sm font-semibold text-brand-400">
             {(12426).toLocaleString()} Users
           </span>
         </div>
