@@ -1,6 +1,6 @@
 import type { ReactNode } from "react";
 import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
-import { useAuth } from "./lib/auth/AuthProvider";
+import { useAuth } from "./lib/auth/useAuth";
 
 import LoginPage from "./pages/auth/LoginPage";
 import ForgotPasswordPage from "./pages/auth/ForgotPasswordPage";

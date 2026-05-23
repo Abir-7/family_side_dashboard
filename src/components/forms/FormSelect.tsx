@@ -1,4 +1,4 @@
-import { useFormContext } from "react-hook-form";
+import { useFormContext, Controller } from "react-hook-form";
 import { cn } from "@/lib/utils";
 import {
   Select,
@@ -31,13 +31,11 @@ export function FormSelect({
   containerClassName,
 }: FormSelectProps) {
   const {
-    setValue,
-    watch,
+    control,
     formState: { errors },
   } = useFormContext();
 
   const fieldError = error || (errors[name]?.message as string);
-  const value = watch(name);
 
   return (
     <div className={cn("w-full flex flex-col gap-1.5", containerClassName)}>
@@ -53,29 +51,36 @@ export function FormSelect({
           {label}
         </label>
       )}
-      <Select
-        value={value}
-        onValueChange={(val) => setValue(name, val, { shouldValidate: true })}
-      >
-        <SelectTrigger
-          className={cn(
-            "rounded-full w-full px-4 text-sm text-gray-500 bg-[#fafafa] focus:ring-0 focus:ring-offset-0 transition-colors",
-            fieldError
-              ? "border-[1.5px] border-[#e05a6a] focus:border-[#e05a6a]"
-              : "border-[1.5px] border-[#e0e0e0] focus:border-[#c0bfff]",
-          )}
-          style={{ fontFamily: "'DM Sans', sans-serif", height: "44px" }}
-        >
-          <SelectValue placeholder={placeholder} />
-        </SelectTrigger>
-        <SelectContent>
-          {options.map((opt) => (
-            <SelectItem key={opt.value} value={opt.value}>
-              {opt.label}
-            </SelectItem>
-          ))}
-        </SelectContent>
-      </Select>
+      <Controller
+        name={name}
+        control={control}
+        render={({ field }) => (
+          <Select
+            value={field.value}
+            onValueChange={field.onChange}
+          >
+            <SelectTrigger
+              className={cn(
+                "rounded-full w-full px-4 text-sm bg-[#fafafa] focus:ring-0 focus:ring-offset-0 transition-colors",
+                field.value ? "text-gray-900" : "text-gray-500",
+                fieldError
+                  ? "border-[1.5px] border-[#e05a6a] focus:border-[#e05a6a]"
+                  : "border-[1.5px] border-[#e0e0e0] focus:border-[#c0bfff]",
+              )}
+              style={{ fontFamily: "'DM Sans', sans-serif", height: "44px" }}
+            >
+              <SelectValue placeholder={placeholder} />
+            </SelectTrigger>
+            <SelectContent>
+              {options.map((opt) => (
+                <SelectItem key={opt.value} value={opt.value}>
+                  {opt.label}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+        )}
+      />
       {fieldError && (
         <p
           style={{

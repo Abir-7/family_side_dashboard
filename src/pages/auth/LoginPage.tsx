@@ -1,7 +1,7 @@
 import { useNavigate } from "react-router-dom";
 import * as z from "zod";
 import { toast } from "sonner";
-import { useAuth } from "../../lib/auth/AuthProvider";
+import { useAuth } from "../../lib/auth/useAuth";
 import { FormWrapper } from "@/components/forms/FormWrapper";
 import { FormInput } from "@/components/forms/FormInput";
 

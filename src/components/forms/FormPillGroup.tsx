@@ -1,4 +1,4 @@
-import { useFormContext } from "react-hook-form";
+import { useFormContext, Controller } from "react-hook-form";
 import { cn } from "@/lib/utils";
 
 interface FormPillGroupProps {
@@ -19,31 +19,11 @@ export function FormPillGroup({
   containerClassName,
 }: FormPillGroupProps) {
   const {
-    watch,
-    setValue,
+    control,
     formState: { errors },
   } = useFormContext();
 
   const fieldError = error || (errors[name]?.message as string);
-  const value: string[] = watch(name) ?? [];
-
-  const toggle = (opt: string) => {
-    if (!multiple) {
-      setValue(name, [opt], { shouldValidate: true });
-      return;
-    }
-    if (opt === "All") {
-      setValue(name, ["All"], { shouldValidate: true });
-      return;
-    }
-    const without = value.filter((v) => v !== "All");
-    const next = without.includes(opt)
-      ? without.filter((v) => v !== opt)
-      : [...without, opt];
-    setValue(name, next.length === 0 ? ["All"] : next, {
-      shouldValidate: true,
-    });
-  };
 
   return (
     <div className={cn("w-full flex flex-col gap-2", containerClassName)}>
@@ -59,26 +39,52 @@ export function FormPillGroup({
           {label}
         </label>
       )}
-      <div className="flex flex-wrap gap-2">
-        {options.map((opt) => {
-          const active = value.includes(opt);
+      <Controller
+        name={name}
+        control={control}
+        render={({ field: { value, onChange } }) => {
+          const currentValues = value ?? [];
+
+          const toggle = (opt: string) => {
+            if (!multiple) {
+              onChange([opt]);
+              return;
+            }
+            if (opt === "All") {
+              onChange(["All"]);
+              return;
+            }
+            const without = currentValues.filter((v: string) => v !== "All");
+            const next = without.includes(opt)
+              ? without.filter((v: string) => v !== opt)
+              : [...without, opt];
+            onChange(next.length === 0 ? ["All"] : next);
+          };
+
           return (
-            <button
-              key={opt}
-              type="button"
-              onClick={() => toggle(opt)}
-              className={cn(
-                "px-3 py-1 rounded-full font-medium border transition-colors",
-                active
-                  ? "bg-rose-400 text-white border-rose-400"
-                  : "bg-white text-gray-500 border-gray-200 hover:border-rose-300 hover:text-rose-400",
-              )}
-            >
-              {opt}
-            </button>
+            <div className="flex flex-wrap gap-2">
+              {options.map((opt) => {
+                const active = currentValues.includes(opt);
+                return (
+                  <button
+                    key={opt}
+                    type="button"
+                    onClick={() => toggle(opt)}
+                    className={cn(
+                      "px-3 py-1 rounded-full font-medium border transition-colors",
+                      active
+                        ? "bg-rose-400 text-white border-rose-400"
+                        : "bg-white text-gray-500 border-gray-200 hover:border-rose-300 hover:text-rose-400",
+                    )}
+                  >
+                    {opt}
+                  </button>
+                );
+              })}
+            </div>
           );
-        })}
-      </div>
+        }}
+      />
       {fieldError && (
         <p
           style={{

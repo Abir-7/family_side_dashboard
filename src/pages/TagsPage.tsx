@@ -97,11 +97,6 @@ export default function TagsPage() {
 
   const selectedTag = tags.find((t) => t.id === selectedTagId);
 
-  const handleSearch = (val: string) => {
-    setSearch(val);
-    setCurrentPage(1);
-  };
-
   const handleStatusChange = (id: number) => {
     setSelectedTagId(id);
     setIsStatusModalOpen(true);

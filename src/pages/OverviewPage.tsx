@@ -7,7 +7,7 @@ import { UpcomingEvents } from "@/components/custom/state_card/UpcomingEvents";
 
 export default function OverviewPage() {
   return (
-    <div className="space-y-4">
+    <div className="space-y-6">
       <DashboardStats />
       <div className="grid grid-cols-3 gap-6">
         <div className="col-span-2">
@@ -40,7 +40,7 @@ export default function OverviewPage() {
           />
         </div>
       </div>
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
         <RecentFlaggedItems />
         <ToDoToday />
         <UpcomingEvents />

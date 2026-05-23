@@ -1,4 +1,3 @@
-import { ArrowLeft } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useNavigate } from "react-router-dom";
 import * as z from "zod";
@@ -9,6 +8,8 @@ import { FormTextarea } from "@/components/forms/FormTextarea";
 import { FormPillGroup } from "@/components/forms/FormPillGroup";
 import { FormImageUpload } from "@/components/forms/FormImageUpload";
 import { FormLocationSearch } from "@/components/forms/FormLocationSearch";
+import { FormDatePicker } from "@/components/forms/FormDatePicker";
+import { FormTimePicker } from "@/components/forms/FormTimePicker";
 
 const schema = z.object({
   location: z.string().min(1, "Location is required"),
@@ -123,13 +124,7 @@ export default function CreateEventPage() {
         {/* Row 4: Tag + Date */}
         <div className="grid grid-cols-2 gap-4">
           <FormPillGroup name="tags" label="Tag" options={TAG_OPTIONS} />
-          <FormInput
-            name="date"
-            label="Date"
-            placeholder="dd/mm/yyyy"
-            type="date"
-            style={inputStyle}
-          />
+          <FormDatePicker name="date" label="Date" />
         </div>
 
         {/* Row 5: Event Price + Start Time + End Time */}
@@ -141,20 +136,8 @@ export default function CreateEventPage() {
             style={inputStyle}
           />
           <div className="grid grid-cols-2 gap-3">
-            <FormInput
-              name="startTime"
-              label="Start Time"
-              placeholder="10:00 AM"
-              type="time"
-              style={inputStyle}
-            />
-            <FormInput
-              name="endTime"
-              label="End Time"
-              placeholder="09:00 PM"
-              type="time"
-              style={inputStyle}
-            />
+            <FormTimePicker name="startTime" label="Start Time" />
+            <FormTimePicker name="endTime" label="End Time" />
           </div>
         </div>
 
