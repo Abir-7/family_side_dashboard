@@ -86,7 +86,10 @@ export function ActivityDetailsModal({
 
   return (
     <Dialog open={isOpen} onOpenChange={onOpenChange}>
-      <DialogContent className="sm:max-w-sm p-0 gap-0 overflow-hidden rounded-2xl border-0 shadow-2xl">
+      <DialogContent
+        className="sm:max-w-md p-2 gap-0 overflow-hidden rounded-2xl border-0 shadow-2xl"
+        showCloseButton={false}
+      >
         {/* Hero Image */}
         <div className="relative h-40 overflow-hidden">
           <svg
@@ -94,7 +97,7 @@ export function ActivityDetailsModal({
             height="100%"
             viewBox="0 0 380 160"
             xmlns="http://www.w3.org/2000/svg"
-            className="absolute inset-0"
+            className="absolute inset-0 rounded-xl"
             preserveAspectRatio="xMidYMid slice"
           >
             <rect width="380" height="160" fill="#3d7a4a" />

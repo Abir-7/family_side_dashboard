@@ -58,14 +58,17 @@ export function EventDetailsModal({
 
   return (
     <Dialog open={isOpen} onOpenChange={onOpenChange}>
-      <DialogContent className="sm:max-w-sm p-0 gap-0 overflow-hidden rounded-3xl border-0 shadow-2xl">
+      <DialogContent
+        className="sm:max-w-md p-2 gap-0 overflow-hidden rounded-3xl border-0 shadow-2xl"
+        showCloseButton={false}
+      >
         {/* Hero Image */}
-        <div className="relative h-44 overflow-hidden rounded-t-3xl">
+        <div className="relative h-44 overflow-hidden rounded-2xl">
           {heroImage ? (
             <img
               src={heroImage}
               alt={title}
-              className="w-full h-full object-cover"
+              className="w-full h-full object-cover rounded-2xl"
             />
           ) : (
             /* Fallback illustrated park scene */
@@ -74,7 +77,7 @@ export function EventDetailsModal({
               height="100%"
               viewBox="0 0 380 176"
               xmlns="http://www.w3.org/2000/svg"
-              className="absolute inset-0"
+              className="absolute inset-0 rounded-2xl"
               preserveAspectRatio="xMidYMid slice"
             >
               <rect width="380" height="176" fill="#4a7c45" />
@@ -200,7 +203,7 @@ export function EventDetailsModal({
         </div>
 
         {/* Body */}
-        <div className="px-5 pt-4 pb-5 space-y-3 bg-white">
+        <div className="p-4 space-y-3 bg-white rounded-b-3xl">
           {/* Title row */}
           <div className="flex items-start justify-between gap-2">
             <h2 className="text-[17px] font-bold text-gray-900 leading-snug">

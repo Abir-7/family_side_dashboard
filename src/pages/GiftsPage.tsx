@@ -24,6 +24,7 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { ChevronDown } from "lucide-react";
+import { GiftDetailModal } from "@/components/custom/modal/GiftDetailsModal";
 
 interface Gift {
   id: number;
@@ -164,6 +165,9 @@ export default function GiftsPage() {
   const [search, setSearch] = useState("");
   const [role, setRole] = useState("Admin");
 
+  const [isDetailsModalOpen, setIsDetailsModalOpen] = useState(false);
+  const [selectedGift, setSelectedGift] = useState<Gift | null>(null);
+
   const filtered = gifts.filter(
     (g) =>
       g.name.toLowerCase().includes(search.toLowerCase()) ||
@@ -173,6 +177,11 @@ export default function GiftsPage() {
 
   const handleDelete = (id: number) => {
     setGifts((prev) => prev.filter((g) => g.id !== id));
+  };
+
+  const handleView = (gift: Gift) => {
+    setSelectedGift(gift);
+    setIsDetailsModalOpen(true);
   };
 
   return (
@@ -278,7 +287,7 @@ export default function GiftsPage() {
                     </TableCell>
 
                     {/* Created By */}
-                    <TableCell className="text-sm text-gray-500 py-3">
+                    <TableCell className="py-3 text-sm text-gray-500">
                       {gift.createdBy}
                     </TableCell>
 
@@ -299,7 +308,7 @@ export default function GiftsPage() {
                     </TableCell>
 
                     {/* Fee */}
-                    <TableCell className="text-sm text-gray-500 py-3">
+                    <TableCell className="py-3 text-sm text-gray-500">
                       {gift.fee}
                     </TableCell>
 
@@ -312,6 +321,7 @@ export default function GiftsPage() {
                               variant="ghost"
                               size="icon"
                               className="h-8 w-8 text-gray-400 hover:text-gray-600 hover:bg-gray-100"
+                              onClick={() => handleView(gift)}
                             >
                               <Eye className="w-4 h-4" />
                             </Button>
@@ -340,6 +350,18 @@ export default function GiftsPage() {
             </TableBody>
           </Table>
         </div>
+
+        {selectedGift && (
+          <GiftDetailModal
+            isOpen={isDetailsModalOpen}
+            onOpenChange={setIsDetailsModalOpen}
+            gift={{
+              name: selectedGift.name,
+              location: selectedGift.location,
+              price: selectedGift.fee,
+            }}
+          />
+        )}
       </div>
     </TooltipProvider>
   );

@@ -29,7 +29,7 @@ export function UserDetailsModal({
 }: UserDetailModalProps) {
   return (
     <Dialog open={isOpen} onOpenChange={onOpenChange}>
-      <DialogContent className="sm:max-w-sm p-0 gap-0 overflow-hidden rounded-2xl">
+      <DialogContent className="sm:max-w-sm p-0 gap-0 overflow-hidden rounded-2xl" showCloseButton={false}>
         {/* Header */}
         <DialogHeader className="px-5 pt-5 pb-3">
           <DialogTitle className="flex items-center gap-2 text-base font-semibold text-gray-800">
