@@ -149,10 +149,6 @@ export default function NotificationsPage() {
 
   return (
     <div className="space-y-4 p-6">
-      <h1 className="text-3xl font-bold tracking-tight text-gray-900">
-        Notifications
-      </h1>
-
       {notifications.length === 0 ? (
         <div className="rounded-xl border border-gray-200 bg-white p-10 text-center shadow-sm">
           <div className="mx-auto mb-3 flex h-12 w-12 items-center justify-center rounded-full bg-gray-100">

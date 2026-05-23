@@ -18,8 +18,6 @@ export default function CategoriesPage() {
 
   return (
     <div className="space-y-6">
-      <h1 className="text-2xl font-bold tracking-tight">Taxonomy Management</h1>
-
       <div className="flex gap-4">
         {(["category", "subcategory", "tag"] as const).map((tab) => (
           <Button

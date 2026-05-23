@@ -112,12 +112,6 @@ export default function SettingsPage() {
 
   return (
     <div className="">
-      {/* Page heading */}
-      <h1 className="text-xl font-semibold text-gray-800">Settings</h1>
-      <p className="text-sm text-gray-400 mt-0.5 mb-6">
-        Manage your account and application preferences
-      </p>
-
       <div className="flex flex-col gap-5">
         {/* ── Account Information ── */}
         <SectionCard

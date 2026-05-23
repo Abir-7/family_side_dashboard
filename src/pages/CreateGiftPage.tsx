@@ -68,22 +68,6 @@ export default function CreateGiftPage() {
         }}
         style={{ display: "flex", flexDirection: "column", gap: "1.1rem" }}
       >
-        {/* Title */}
-        <div className="flex items-center gap-2 mb-1">
-          <Button
-            type="button"
-            variant="ghost"
-            size="icon"
-            className="h-7 w-7 rounded-full text-gray-500 hover:bg-gray-100"
-            onClick={() => navigate(-1)}
-          >
-            <ArrowLeft className="w-4 h-4" />
-          </Button>
-          <h1 className="text-base font-semibold text-gray-800">
-            Create Gift
-          </h1>
-        </div>
-
         {/* Location */}
         <FormLocationSearch name="location" placeholder="Enter your location" />
 
