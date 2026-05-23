@@ -64,7 +64,7 @@ export function FormSelect({
               ? "border-[1.5px] border-[#e05a6a] focus:border-[#e05a6a]"
               : "border-[1.5px] border-[#e0e0e0] focus:border-[#c0bfff]",
           )}
-          style={{ fontFamily: "'DM Sans', sans-serif", height: "2.8rem" }}
+          style={{ fontFamily: "'DM Sans', sans-serif", height: "44px" }}
         >
           <SelectValue placeholder={placeholder} />
         </SelectTrigger>

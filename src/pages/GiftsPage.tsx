@@ -185,7 +185,7 @@ export default function GiftsPage() {
             <DropdownMenuTrigger asChild>
               <Button
                 variant="outline"
-                className="h-9 px-4 text-sm font-medium text-gray-800 border border-gray-200 rounded-full gap-1.5 bg-white hover:bg-gray-50 shadow-none shrink-0"
+                className="h-11 px-4 text-sm font-medium text-gray-800 border border-gray-200 rounded-full gap-1.5 bg-white hover:bg-gray-50 shadow-none shrink-0"
               >
                 {role}
                 <ChevronDown className="w-3.5 h-3.5 text-gray-500" />
@@ -207,13 +207,13 @@ export default function GiftsPage() {
               placeholder="Search gift"
               value={search}
               onChange={(e) => setSearch(e.target.value)}
-              className="pl-9 h-9 rounded-full border-gray-200 text-sm focus-visible:ring-0 focus-visible:border-gray-300"
+              className="pl-9 h-11 rounded-full border-gray-200 text-sm focus-visible:ring-0 focus-visible:border-gray-300"
             />
           </div>
 
           {/* Create Gift Button */}
           <Button
-            className="rounded-full h-9 px-4 text-sm font-semibold bg-rose-400 hover:bg-rose-500 text-white border-0 gap-1.5 shrink-0"
+            className="rounded-full h-11 px-4 text-sm font-semibold bg-rose-400 hover:bg-rose-500 text-white border-0 gap-1.5 shrink-0"
             onClick={() => navigate("/dashboard/gifts/create")}
           >
             Create gift

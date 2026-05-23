@@ -232,7 +232,7 @@ export default function UsersPage() {
             <DropdownMenuTrigger asChild>
               <Button
                 variant="outline"
-                className="rounded-full h-8 px-4 text-sm font-medium gap-1.5 border-gray-200"
+                className="rounded-full h-11 px-4 text-sm font-medium gap-1.5 border-gray-200"
               >
                 {filter === "All" ? "Users" : filter}
                 <ChevronDown className="w-3.5 h-3.5 text-gray-500" />

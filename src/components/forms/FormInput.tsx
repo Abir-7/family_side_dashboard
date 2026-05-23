@@ -49,7 +49,7 @@ export function FormInput({
         className={cn(className)}
         style={{
           width: "100%",
-          padding: "11px 16px",
+          padding: "13px 16px",
           borderRadius: "50px",
           border: `1.5px solid ${fieldError ? "#e05a6a" : "#e0e0e0"}`,
           fontSize: "14px",

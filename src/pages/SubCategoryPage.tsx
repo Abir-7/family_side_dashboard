@@ -136,11 +136,11 @@ export default function SubCategoryPage() {
                     placeholder="Search sub-category"
                     value={search}
                     onChange={(e) => handleSearch(e.target.value)}
-                    className="pl-9 h-9 rounded-full border-gray-200 text-sm focus-visible:ring-0 focus-visible:border-gray-300"
+                    className="pl-9 h-11 rounded-full border-gray-200 text-sm focus-visible:ring-0 focus-visible:border-gray-300"
                 />
             </div>
             <Select value={filterCategory} onValueChange={(v) => { setFilterCategory(v); setCurrentPage(1); }}>
-                <SelectTrigger className="h-9 w-40 rounded-full border-gray-200 text-sm text-gray-600">
+                <SelectTrigger className="!h-11 w-40 rounded-full border-gray-200 text-sm text-gray-600">
                     <SelectValue placeholder="Category" />
                 </SelectTrigger>
                 <SelectContent>
@@ -152,7 +152,7 @@ export default function SubCategoryPage() {
                 </SelectContent>
             </Select>
         </div>
-        <Button className="h-9 px-4 rounded-lg bg-rose-400 hover:bg-rose-500 text-white text-sm font-semibold gap-1.5 shadow-none">
+        <Button className="h-11 px-4 rounded-full bg-rose-400 hover:bg-rose-500 text-white text-sm font-semibold gap-1.5 shadow-none">
           Create sub-category
           <Plus className="w-4 h-4" />
         </Button>

@@ -141,13 +141,13 @@ export default function EventsPage() {
               placeholder="Search events"
               value={search}
               onChange={(e) => setSearch(e.target.value)}
-              className="pl-9 h-9 rounded-full border-gray-200 text-sm focus-visible:ring-0 focus-visible:border-gray-300"
+              className="pl-9 h-11 rounded-full border-gray-200 text-sm focus-visible:ring-0 focus-visible:border-gray-300"
             />
           </div>
 
           {/* Create Event Button */}
           <Button
-            className="rounded-full h-9 px-4 text-sm font-semibold bg-rose-400 hover:bg-rose-500 text-white border-0 gap-1.5 shrink-0"
+            className="rounded-full h-11 px-4 text-sm font-semibold bg-rose-400 hover:bg-rose-500 text-white border-0 gap-1.5 shrink-0"
             onClick={() => navigate("/dashboard/events/create")}
           >
             Create Event

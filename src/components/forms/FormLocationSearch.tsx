@@ -25,10 +25,11 @@ export function FormLocationSearch({
   return (
     <div className={cn("w-full flex flex-col gap-1.5", containerClassName)}>
       <div
-        className="flex items-center gap-2 px-4 py-2.5 rounded-xl"
+        className="flex items-center gap-2 px-4 rounded-full"
         style={{
           background: "#fff0f0",
           border: `1.5px solid ${fieldError ? "#e05a6a" : "#fdd0d0"}`,
+          height: "44px",
         }}
       >
         <Search className="w-4 h-4 shrink-0" style={{ color: "#f9a8b4" }} />
@@ -38,7 +39,7 @@ export function FormLocationSearch({
           className="flex-1 bg-transparent text-sm outline-none"
           style={{ color: "#555", fontFamily: "'DM Sans', sans-serif" }}
         />
-        <div className="h-8 w-8 bg-rose-400 rounded-lg flex items-center justify-center shrink-0">
+        <div className="h-8 w-8 bg-rose-400 rounded-full flex items-center justify-center shrink-0">
           <MapPin className="w-4 h-4 text-white" />
         </div>
       </div>

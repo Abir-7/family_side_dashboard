@@ -235,7 +235,7 @@ export default function CreateActivityPage() {
           </Button>
           <Button
             type="submit"
-            className="h-11 rounded-xl bg-rose-400 hover:bg-rose-500 text-white font-semibold border-0"
+            className="h-11 rounded-full bg-rose-400 hover:bg-rose-500 text-white font-semibold border-0"
           >
             Submit activity
           </Button>
