@@ -1,8 +1,9 @@
 import { useState } from "react";
-import { Search, Plus, Pencil, Trash2, Ban } from "lucide-react";
+import { Search, Pencil, Trash2, Ban } from "lucide-react";
 import { Input } from "@/components/ui/input";
-import { Button } from "@/components/ui/button";
+
 import { Pagination } from "@/components/custom/pagination";
+import { CreateCategoryModal } from "@/components/custom/modal/create_category";
 
 interface Category {
   id: number;
@@ -135,10 +136,7 @@ export default function CategoryPage() {
             className="pl-9 h-11 rounded-full border-gray-200 text-sm focus-visible:ring-0 focus-visible:border-gray-300"
           />
         </div>
-        <Button className="h-11 px-4 rounded-full bg-rose-400 hover:bg-rose-500 text-white text-sm font-semibold gap-1.5 shadow-none">
-          Create category
-          <Plus className="w-4 h-4" />
-        </Button>
+        <CreateCategoryModal></CreateCategoryModal>
       </div>
 
       {/* Grid */}
