@@ -60,26 +60,26 @@ export default function OtpPage() {
           width: 52px;
           height: 52px;
           border-radius: 50%;
-          border: 1.5px solid #e05a6a;
+          border: 1.5px solid #E55F68;
           background: #fff;
           text-align: center;
           font-size: 20px;
           font-weight: 600;
-          color: #e05a6a;
+          color: #E55F68;
           font-family: 'DM Sans', sans-serif;
           outline: none;
           transition: border-color 0.2s, box-shadow 0.2s;
-          caret-color: #e05a6a;
+          caret-color: #E55F68;
         }
         .otp-box:focus {
-          border-color: #e05a6a;
-          box-shadow: 0 0 0 3px rgba(224, 90, 106, 0.15);
+          border-color: #E55F68;
+          box-shadow: 0 0 0 3px rgba(229, 95, 104, 0.15);
         }
         .verify-btn {
           width: 100%;
           padding: 14px;
           border-radius: 50px;
-          background: #e05a6a;
+          background: #E55F68;
           color: #fff;
           font-size: 15px;
           font-weight: 600;
@@ -89,11 +89,11 @@ export default function OtpPage() {
           letter-spacing: 0.3px;
           transition: background 0.2s, transform 0.1s;
         }
-        .verify-btn:hover { background: #c94a5a; }
+        .verify-btn:hover { background: #d14d56; }
         .verify-btn:active { transform: scale(0.98); }
         .resend-btn {
           font-size: 13px;
-          color: #e05a6a;
+          color: #E55F68;
           font-weight: 500;
           background: none;
           border: none;

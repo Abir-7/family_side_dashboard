@@ -52,7 +52,9 @@ export function FormImageUpload({
 
           const handleFiles = (e: React.ChangeEvent<HTMLInputElement>) => {
             const selected = Array.from(e.target.files ?? []);
-            onChange([...files, ...selected]);
+            if (selected.length > 0) {
+              onChange([selected[0]]);
+            }
           };
 
           const remove = (index: number) => {
@@ -63,34 +65,25 @@ export function FormImageUpload({
             <div
               onClick={() => inputRef.current?.click()}
               className={cn(
-                "border-2 border-dashed rounded-xl flex flex-col items-center justify-center gap-1 cursor-pointer transition-colors",
+                "relative border-2 border-dashed rounded-xl flex flex-col items-center justify-center gap-1 cursor-pointer transition-colors overflow-hidden h-40",
                 "hover:border-brand-300 hover:bg-brand-50/30",
                 fieldError ? "border-brand-400 bg-brand-50/20" : "border-gray-200",
-                files.length > 0 ? "min-h-20 p-3" : "h-40",
               )}
             >
               {files.length === 0 ? (
                 <>
                   <ImageIcon className="w-8 h-8 text-gray-300" />
                   <p className="text-sm font-medium text-gray-500">
-                    Click to upload photos
+                    Click to upload photo
                   </p>
                   <p className="text-xs text-gray-400">PNG, JPG, up to 10MB</p>
                 </>
               ) : (
-                <div className="flex flex-wrap gap-2 w-full">
-                  {files.map((file, i) => (
-                    <ImagePreview key={`${file.name}-${i}`} file={file} onRemove={() => remove(i)} />
-                  ))}
-                  <div className="h-16 w-16 border-2 border-dashed border-gray-200 rounded-lg flex items-center justify-center">
-                    <ImageIcon className="w-5 h-5 text-gray-300" />
-                  </div>
-                </div>
+                <ImagePreview file={files[0]} onRemove={() => remove(0)} />
               )}
               <input
                 ref={inputRef}
                 type="file"
-                multiple
                 accept="image/*"
                 className="hidden"
                 onChange={handleFiles}
@@ -126,22 +119,24 @@ function ImagePreview({ file, onRemove }: { file: File; onRemove: () => void }) 
   }, [file]);
 
   return (
-    <div className="relative group">
+    <div className="absolute inset-0 group">
       <img
         src={preview}
-        className="h-16 w-16 object-cover rounded-lg border border-gray-200"
+        className="h-full w-full object-cover"
         alt={file.name}
       />
-      <button
-        type="button"
-        onClick={(e) => {
-          e.stopPropagation();
-          onRemove();
-        }}
-        className="absolute -top-1.5 -right-1.5 bg-brand-400 text-white rounded-full w-4 h-4 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity"
-      >
-        <X className="w-2.5 h-2.5" />
-      </button>
+      <div className="absolute inset-0 bg-black/20 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
+        <button
+          type="button"
+          onClick={(e) => {
+            e.stopPropagation();
+            onRemove();
+          }}
+          className="bg-white/90 text-brand-500 rounded-full p-1.5 hover:bg-white transition-colors shadow-lg"
+        >
+          <X className="w-5 h-5" />
+        </button>
+      </div>
     </div>
   );
 }
