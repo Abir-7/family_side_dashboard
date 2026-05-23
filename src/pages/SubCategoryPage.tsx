@@ -1,7 +1,6 @@
 import { useState } from "react";
-import { Search, Plus, Pencil, Trash2, Ban } from "lucide-react";
+import { Search, Pencil, Trash2, Ban } from "lucide-react";
 import { Input } from "@/components/ui/input";
-import { Button } from "@/components/ui/button";
 import { Pagination } from "@/components/custom/pagination";
 import {
   Select,
@@ -10,13 +9,16 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import { CreateSubCategoryModal } from "@/components/custom/modal/create_sub_category";
+import { UpdateSubCategoryModal } from "@/components/custom/modal/update_sub_category";
+import { ConfirmationModal } from "@/components/custom/modal/confirmation_modal";
 
 interface SubCategory {
   id: number;
   name: string;
   category: string; // The category it belongs to
   logo: string;
-  blocked: boolean;
+  active: boolean;
 }
 
 const ALL_SUBCATEGORIES: SubCategory[] = Array.from({ length: 80 }, (_, i) => ({
@@ -24,19 +26,19 @@ const ALL_SUBCATEGORIES: SubCategory[] = Array.from({ length: 80 }, (_, i) => ({
   name: "Sub-Category Name",
   category: ["Doctor", "Nursery", "Playground", "Sports"][i % 4],
   logo: `https://api.dicebear.com/7.x/shapes/svg?seed=${i + 1}`,
-  blocked: false,
+  active: true,
 }));
 
 const PAGE_SIZE = 28;
 
 function SubCategoryCard({
   subCategory,
-  onBlock,
+  onToggleStatus,
   onDelete,
   onEdit,
 }: {
   subCategory: SubCategory;
-  onBlock: (id: number) => void;
+  onToggleStatus: (id: number) => void;
   onDelete: (id: number) => void;
   onEdit: (id: number) => void;
 }) {
@@ -60,12 +62,12 @@ function SubCategoryCard({
 
       <div className="flex items-center gap-0.5 shrink-0">
         <button
-          onClick={() => onBlock(subCategory.id)}
-          title={subCategory.blocked ? "Unblock" : "Block"}
+          onClick={() => onToggleStatus(subCategory.id)}
+          title={subCategory.active ? "Set Inactive" : "Set Active"}
           className={`p-1.5 rounded-lg transition-colors ${
-            subCategory.blocked
-              ? "text-rose-500 bg-rose-50 hover:bg-rose-100"
-              : "text-gray-400 hover:text-rose-500 hover:bg-rose-50"
+            !subCategory.active
+              ? "text-red-500 bg-red-50 hover:bg-red-100"
+              : "text-gray-400 hover:text-red-500 hover:bg-red-50"
           }`}
         >
           <Ban className="w-3.5 h-3.5" strokeWidth={1.8} />
@@ -95,6 +97,11 @@ export default function SubCategoryPage() {
   const [filterCategory, setFilterCategory] = useState("all");
   const [currentPage, setCurrentPage] = useState(1);
 
+  const [selectedSubCategoryId, setSelectedSubCategoryId] = useState<number | null>(null);
+  const [isUpdateModalOpen, setIsUpdateModalOpen] = useState(false);
+  const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
+  const [isStatusModalOpen, setIsStatusModalOpen] = useState(false);
+
   const filtered = subCategories.filter((c) => {
     const matchesSearch = c.name.toLowerCase().includes(search.toLowerCase());
     const matchesCategory = filterCategory === "all" || c.category === filterCategory;
@@ -107,23 +114,40 @@ export default function SubCategoryPage() {
     currentPage * PAGE_SIZE,
   );
 
+  const selectedSubCategory = subCategories.find((c) => c.id === selectedSubCategoryId);
+
   const handleSearch = (val: string) => {
     setSearch(val);
     setCurrentPage(1);
   };
 
-  const handleBlock = (id: number) => {
-    setSubCategories((prev) =>
-      prev.map((c) => (c.id === id ? { ...c, blocked: !c.blocked } : c)),
-    );
+  const handleStatusChange = (id: number) => {
+    setSelectedSubCategoryId(id);
+    setIsStatusModalOpen(true);
+  };
+
+  const confirmStatusChange = () => {
+    if (selectedSubCategoryId) {
+      setSubCategories((prev) =>
+        prev.map((c) => (c.id === selectedSubCategoryId ? { ...c, active: !c.active } : c)),
+      );
+    }
   };
 
   const handleDelete = (id: number) => {
-    setSubCategories((prev) => prev.filter((c) => c.id !== id));
+    setSelectedSubCategoryId(id);
+    setIsDeleteModalOpen(true);
+  };
+
+  const confirmDelete = () => {
+    if (selectedSubCategoryId) {
+      setSubCategories((prev) => prev.filter((c) => c.id !== selectedSubCategoryId));
+    }
   };
 
   const handleEdit = (id: number) => {
-    console.log("Edit sub-category", id);
+    setSelectedSubCategoryId(id);
+    setIsUpdateModalOpen(true);
   };
 
   return (
@@ -152,10 +176,7 @@ export default function SubCategoryPage() {
                 </SelectContent>
             </Select>
         </div>
-        <Button className="h-11 px-4 rounded-full bg-rose-400 hover:bg-rose-500 text-white text-sm font-semibold gap-1.5 shadow-none">
-          Create sub-category
-          <Plus className="w-4 h-4" />
-        </Button>
+        <CreateSubCategoryModal />
       </div>
 
       <div className="flex-1">
@@ -169,7 +190,7 @@ export default function SubCategoryPage() {
               <SubCategoryCard
                 key={cat.id}
                 subCategory={cat}
-                onBlock={handleBlock}
+                onToggleStatus={handleStatusChange}
                 onDelete={handleDelete}
                 onEdit={handleEdit}
               />
@@ -183,6 +204,37 @@ export default function SubCategoryPage() {
         totalPages={totalPages}
         onPageChange={setCurrentPage}
       />
+
+      {selectedSubCategory && (
+        <>
+          <UpdateSubCategoryModal
+            isOpen={isUpdateModalOpen}
+            onOpenChange={setIsUpdateModalOpen}
+            initialData={{ 
+              name: selectedSubCategory.name,
+              category: selectedSubCategory.category 
+            }}
+          />
+          <ConfirmationModal
+            isOpen={isDeleteModalOpen}
+            onOpenChange={setIsDeleteModalOpen}
+            title="Delete Sub-Category"
+            description={`Are you sure you want to delete ${selectedSubCategory.name}? This action cannot be undone.`}
+            onConfirm={confirmDelete}
+            confirmLabel="Delete"
+            variant="destructive"
+          />
+          <ConfirmationModal
+            isOpen={isStatusModalOpen}
+            onOpenChange={setIsStatusModalOpen}
+            title={selectedSubCategory.active ? "Set Inactive" : "Set Active"}
+            description={`Are you sure you want to set ${selectedSubCategory.name} to ${selectedSubCategory.active ? "inactive" : "active"}?`}
+            onConfirm={confirmStatusChange}
+            confirmLabel={selectedSubCategory.active ? "Set Inactive" : "Set Active"}
+            variant={selectedSubCategory.active ? "destructive" : "default"}
+          />
+        </>
+      )}
     </div>
   );
 }
