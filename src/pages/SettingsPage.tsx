@@ -1,7 +1,6 @@
 import { useState } from "react";
-import { Pencil, Eye, EyeOff } from "lucide-react";
+import { Pencil } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
 import { FormWrapper } from "@/components/forms/FormWrapper";
 import { FormInput } from "@/components/forms/FormInput";
 import { z } from "zod";
@@ -61,41 +60,6 @@ function FieldView({ label, value }: { label: string; value: string }) {
   );
 }
 
-// ─── Password Input ───────────────────────────────────────────────────────────
-function PasswordInput({
-  placeholder,
-  value,
-  onChange,
-}: {
-  placeholder: string;
-  value: string;
-  onChange: (v: string) => void;
-}) {
-  const [show, setShow] = useState(false);
-  return (
-    <div className="relative">
-      <Input
-        type={show ? "text" : "password"}
-        placeholder={placeholder}
-        value={value}
-        onChange={(e) => onChange(e.target.value)}
-        className="h-10 rounded-lg border-gray-200 text-sm pr-10 focus-visible:ring-rose-200"
-      />
-      <button
-        type="button"
-        onClick={() => setShow((s) => !s)}
-        className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600"
-      >
-        {show ? (
-          <EyeOff className="w-4 h-4" strokeWidth={1.6} />
-        ) : (
-          <Eye className="w-4 h-4" strokeWidth={1.6} />
-        )}
-      </button>
-    </div>
-  );
-}
-
 // ─── Main Page ────────────────────────────────────────────────────────────────
 export default function SettingsPage() {
   // Account info state
@@ -106,9 +70,6 @@ export default function SettingsPage() {
 
   // Security state
   const [editingSecurity, setEditingSecurity] = useState(false);
-  const [currentPassword, setCurrentPassword] = useState("");
-  const [newPassword, setNewPassword] = useState("");
-  const [confirmPassword, setConfirmPassword] = useState("");
 
   return (
     <div className="">
@@ -176,38 +137,34 @@ export default function SettingsPage() {
           onEdit={() => setEditingSecurity(true)}
         >
           {editingSecurity ? (
-            <div className="space-y-4">
-              <div className="space-y-1.5">
-                <label className="text-sm font-medium text-gray-700">
-                  Current Password
-                </label>
-                <PasswordInput
-                  placeholder="Enter Password"
-                  value={currentPassword}
-                  onChange={setCurrentPassword}
-                />
-              </div>
+            <FormWrapper
+              schema={z.object({
+                currentPassword: z.string().min(1, "Required"),
+                newPassword: z.string().min(1, "Required"),
+                confirmPassword: z.string().min(1, "Required"),
+              })}
+              onSubmit={() => setEditingSecurity(false)}
+              className="space-y-4"
+            >
+              <FormInput
+                name="currentPassword"
+                label="Current Password"
+                placeholder="Enter Password"
+                type="password"
+              />
               <div className="grid grid-cols-2 gap-4">
-                <div className="space-y-1.5">
-                  <label className="text-sm font-medium text-gray-700">
-                    New Password
-                  </label>
-                  <PasswordInput
-                    placeholder="Enter New Password"
-                    value={newPassword}
-                    onChange={setNewPassword}
-                  />
-                </div>
-                <div className="space-y-1.5">
-                  <label className="text-sm font-medium text-gray-700">
-                    Confirm New Password
-                  </label>
-                  <PasswordInput
-                    placeholder="Re-enter Password"
-                    value={confirmPassword}
-                    onChange={setConfirmPassword}
-                  />
-                </div>
+                <FormInput
+                  name="newPassword"
+                  label="New Password"
+                  placeholder="Enter New Password"
+                  type="password"
+                />
+                <FormInput
+                  name="confirmPassword"
+                  label="Confirm New Password"
+                  placeholder="Re-enter Password"
+                  type="password"
+                />
               </div>
               <div className="flex justify-end gap-2 pt-1">
                 <Button
@@ -218,13 +175,13 @@ export default function SettingsPage() {
                   Cancel
                 </Button>
                 <Button
-                  onClick={() => setEditingSecurity(false)}
+                  type="submit"
                   className="h-11 px-5 bg-rose-400 hover:bg-rose-500 text-white text-sm font-semibold rounded-full shadow-none"
                 >
                   Update Password
                 </Button>
               </div>
-            </div>
+            </FormWrapper>
           ) : (
             <div>
               <FieldView label="Current Password" value="*********" />
