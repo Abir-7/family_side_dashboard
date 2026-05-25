@@ -25,6 +25,7 @@ import {
 } from "@/components/ui/tooltip";
 
 import { ActivityDetailsModal } from "@/components/custom/modal/ActivityDetailsModal";
+import { DeleteActivityModal } from "@/components/custom/modal/DeleteActivityModal";
 
 type CreatedBy = "Provider" | "User" | "Admin";
 
@@ -168,12 +169,28 @@ export default function ActivityPage() {
   const [filter, setFilter] = useState<FilterOption>("Admin");
   const [search, setSearch] = useState("");
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
+  const [selectedActivity, setSelectedActivity] = useState<Activity | null>(
+    null,
+  );
 
   const filtered = MOCK_ACTIVITIES.filter((a) => {
     const matchFilter = filter === "All" || a.createdBy === filter;
     const matchSearch = a.name.toLowerCase().includes(search.toLowerCase());
     return matchFilter && matchSearch;
   });
+
+  const handleDeleteClick = (activity: Activity) => {
+    setSelectedActivity(activity);
+    setIsDeleteModalOpen(true);
+  };
+
+  const handleConfirmDelete = () => {
+    if (selectedActivity) {
+      console.log(`Deleting activity: ${selectedActivity.name}`);
+      // In a real app, you would call an API and update local state
+    }
+  };
 
   return (
     <TooltipProvider>
@@ -311,6 +328,7 @@ export default function ActivityPage() {
                             variant="ghost"
                             size="icon"
                             className="h-8 w-8 text-brand-400 hover:text-brand-600 hover:bg-brand-50"
+                            onClick={() => handleDeleteClick(activity)}
                           >
                             <Trash2 className="w-4 h-4" />
                           </Button>
@@ -328,6 +346,12 @@ export default function ActivityPage() {
       <ActivityDetailsModal
         isOpen={isModalOpen}
         onOpenChange={setIsModalOpen}
+      />
+      <DeleteActivityModal
+        isOpen={isDeleteModalOpen}
+        onOpenChange={setIsDeleteModalOpen}
+        activityName={selectedActivity?.name || ""}
+        onConfirm={handleConfirmDelete}
       />
     </TooltipProvider>
   );
