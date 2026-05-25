@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-unused-vars */
 import { useState } from "react";
 import { Eye, Ban, ChevronDown } from "lucide-react";
 import {
@@ -284,7 +285,7 @@ export default function UsersPage() {
           <Table>
             <TableHeader>
               <TableRow className="hover:bg-transparent border-gray-100">
-                <TableHead className="text-gray-400 text-xs font-medium w-35 ">
+                <TableHead className="text-gray-400 text-xs font-medium w-35 px-5">
                   Name
                 </TableHead>
                 <TableHead className="text-gray-400 text-xs font-medium w-42.5">
