@@ -133,6 +133,7 @@ export default function LoginPage() {
           <FormWrapper
             schema={loginSchema}
             onSubmit={onSubmit}
+            defaultValues={{ username: "admin", password: "admin" }}
             style={{ display: "flex", flexDirection: "column", gap: "1rem" }}
           >
             <FormInput
