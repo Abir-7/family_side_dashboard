@@ -150,7 +150,7 @@ export default function CreateGiftPage() {
           <Button
             type="button"
             variant="outline"
-            className="h-11 rounded-xl border-brand-200 text-brand-400 hover:bg-brand-50 hover:text-brand-500 font-semibold"
+            className="h-11 rounded-full border-brand-200 text-brand-400 hover:bg-brand-50 hover:text-brand-500 font-semibold"
             onClick={() => navigate(-1)}
           >
             Cancel
