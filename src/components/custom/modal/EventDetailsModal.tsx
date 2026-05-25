@@ -1,4 +1,3 @@
-/* eslint-disable @typescript-eslint/no-unused-vars */
 import { useState } from "react";
 import { Dialog, DialogContent } from "@/components/ui/dialog";
 import {
@@ -7,8 +6,6 @@ import {
   Calendar,
   Clock,
   MessageCircle,
-  PenLine,
-  Home,
 } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 
@@ -75,8 +72,6 @@ export function EventDetailsModal({
     date = "16 April 2026",
     time = "07:00 AM to 09:00 PM",
     whatsapp = "09839922",
-    createdBy = "Admin",
-    status = "Active",
     tags = ["Health", "Yoga", "Family", "Outdoor", "Wellness"],
     heroImage,
   } = event;

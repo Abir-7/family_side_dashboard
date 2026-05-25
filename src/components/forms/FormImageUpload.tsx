@@ -114,6 +114,7 @@ function ImagePreview({ file, onRemove }: { file: File; onRemove: () => void }) 
 
   useEffect(() => {
     const objectUrl = URL.createObjectURL(file);
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     setPreview(objectUrl);
     return () => URL.revokeObjectURL(objectUrl);
   }, [file]);

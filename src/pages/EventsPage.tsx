@@ -1,4 +1,3 @@
-/* eslint-disable @typescript-eslint/no-unused-vars */
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import {
@@ -6,7 +5,6 @@ import {
   Trash2,
   Search,
   Plus,
-  CalendarDays,
   ChevronDown,
 } from "lucide-react";
 import {
@@ -31,7 +29,6 @@ import {
   TooltipProvider,
   TooltipTrigger,
 } from "@/components/ui/tooltip";
-import { Badge } from "@/components/ui/badge";
 import { EventDetailsModal } from "@/components/custom/modal/EventDetailsModal";
 import { DeleteEventModal } from "@/components/custom/modal/DeleteEventModal";
 
@@ -131,13 +128,6 @@ const MOCK_EVENTS: Event[] = [
     tags: ["Art", "Culture", "Family", "Outdoor"],
   },
 ];
-
-const tagClass: Record<Event["tag"], string> = {
-  Today: "bg-brand-100 text-brand-400 hover:bg-brand-100 border-0 rounded-full",
-  Tomorrow:
-    "bg-amber-100 text-amber-500 hover:bg-amber-100 border-0 rounded-full",
-  Soon: "bg-gray-100 text-gray-500 hover:bg-gray-100 border-0 rounded-full",
-};
 
 type FilterOption = "Admin" | "User" | "Provider" | "All";
 

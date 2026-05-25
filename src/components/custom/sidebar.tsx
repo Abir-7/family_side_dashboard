@@ -7,7 +7,6 @@ import {
   CalendarDays,
   Gift,
   LayoutGrid,
-  Tag,
 } from "lucide-react";
 import {
   Sidebar,

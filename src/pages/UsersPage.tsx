@@ -1,4 +1,3 @@
-/* eslint-disable @typescript-eslint/no-unused-vars */
 import { useState } from "react";
 import { Eye, Ban, ChevronDown } from "lucide-react";
 import {
@@ -212,7 +211,7 @@ type FilterOption = "All" | Subscription;
 
 export default function UsersPage() {
   const [filter, setFilter] = useState<FilterOption>("All");
-  const [selectedUser, setSelectedUser] = useState<User | null>(null);
+  const [, setSelectedUser] = useState<User | null>(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isBlockModalOpen, setIsBlockModalOpen] = useState(false);
   const [selectedUserForBlock, setSelectedUserForBlock] = useState<User | null>(

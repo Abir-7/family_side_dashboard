@@ -18,7 +18,7 @@ import GiftsPage from "./pages/GiftsPage";
 import CreateGiftPage from "./pages/CreateGiftPage";
 import CategoryPage from "./pages/CategoryPage";
 import SubCategoryPage from "./pages/SubCategoryPage";
-import TagsPage from "./pages/TagsPage";
+// import TagsPage from "./pages/TagsPage";
 import SettingsPage from "./pages/SettingsPage";
 
 function ProtectedRoute({ children }: { children: ReactNode }) {
