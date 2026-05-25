@@ -50,7 +50,7 @@ export default function App() {
           <Route path="gifts/create" element={<CreateGiftPage />} />
           <Route path="category" element={<CategoryPage />} />
           <Route path="sub-category" element={<SubCategoryPage />} />
-          <Route path="tags" element={<TagsPage />} />
+          {/* <Route path="tags" element={<TagsPage />} /> */}
           <Route path="settings" element={<SettingsPage />} />
           <Route path="activity" element={<ActivityPage />} />
           <Route path="activity/create" element={<CreateActivityPage />} />

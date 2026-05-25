@@ -21,30 +21,52 @@ function SectionCard({
   onEdit,
   children,
 }: {
-  title: string;
-  subtitle: string;
+  title?: string;
+  subtitle?: string;
   editing: boolean;
   onEdit: () => void;
   children: React.ReactNode;
 }) {
+  const hasTitle = !!title || !!subtitle;
+
   return (
-    <div className="bg-white rounded-2xl border border-gray-200 px-6 py-5">
+    <div className="bg-white rounded-2xl border border-gray-200 px-6 py-5 relative">
       {/* Card header */}
-      <div className="flex items-start justify-between mb-1">
-        <div>
-          <h2 className="text-base font-semibold text-gray-800">{title}</h2>
-          <p className="text-sm text-gray-400 mt-0.5">{subtitle}</p>
-        </div>
-        {!editing && (
+      {hasTitle ? (
+        <>
+          <div className="flex items-start justify-between mb-1">
+            <div>
+              {title && (
+                <h2 className="text-base font-semibold text-gray-800">
+                  {title}
+                </h2>
+              )}
+              {subtitle && (
+                <p className="text-sm text-gray-400 mt-0.5">{subtitle}</p>
+              )}
+            </div>
+            {!editing && (
+              <button
+                onClick={onEdit}
+                className="text-brand-400 hover:text-brand-500 transition-colors p-1"
+              >
+                <Pencil className="w-4 h-4" strokeWidth={1.8} />
+              </button>
+            )}
+          </div>
+          <hr className="border-gray-100 my-4" />
+        </>
+      ) : (
+        /* Floating edit button when no title */
+        !editing && (
           <button
             onClick={onEdit}
-            className="text-brand-400 hover:text-brand-500 transition-colors p-1"
+            className="absolute right-5 top-5 text-brand-400 hover:text-brand-500 transition-colors p-1 z-10"
           >
             <Pencil className="w-4 h-4" strokeWidth={1.8} />
           </button>
-        )}
-      </div>
-      <hr className="border-gray-100 my-4" />
+        )
+      )}
       {children}
     </div>
   );
@@ -62,7 +84,7 @@ function FieldView({ label, value }: { label: string; value: string }) {
 
 // ─── Main Page ────────────────────────────────────────────────────────────────
 export default function SettingsPage() {
-  // Account info state
+  // Account state
   const [editingAccount, setEditingAccount] = useState(false);
   const [name, setName] = useState("Sarah");
   const [email, setEmail] = useState("example@gmail.com");
@@ -74,10 +96,10 @@ export default function SettingsPage() {
   return (
     <div className="">
       <div className="flex flex-col gap-5">
-        {/* ── Account Information ── */}
+        {/* ── Account ── */}
         <SectionCard
-          title="Account Information"
-          subtitle="Update your account details"
+          title="Account"
+          subtitle=""
           editing={editingAccount}
           onEdit={() => setEditingAccount(true)}
         >
@@ -129,10 +151,8 @@ export default function SettingsPage() {
           )}
         </SectionCard>
 
-        {/* ── Security ── */}
+        {/* ── Change Password ── */}
         <SectionCard
-          title="Security"
-          subtitle="Manage password and security settings"
           editing={editingSecurity}
           onEdit={() => setEditingSecurity(true)}
         >
@@ -148,7 +168,7 @@ export default function SettingsPage() {
             >
               <FormInput
                 name="currentPassword"
-                label="Current Password"
+                label="Change Password"
                 placeholder="Enter Password"
                 type="password"
               />
@@ -184,7 +204,7 @@ export default function SettingsPage() {
             </FormWrapper>
           ) : (
             <div>
-              <FieldView label="Current Password" value="*********" />
+              <FieldView label="Change Password" value="*********" />
             </div>
           )}
         </SectionCard>

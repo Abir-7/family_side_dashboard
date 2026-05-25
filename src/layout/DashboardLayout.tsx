@@ -15,7 +15,7 @@ const PAGE_INFO: Record<string, { title: string; subtitle: string }> = {
   "/dashboard/gifts/create": { title: "Create Gift", subtitle: "Add a new item to your registry" },
   "/dashboard/category": { title: "Categories", subtitle: "Organize items into categories" },
   "/dashboard/sub-category": { title: "Sub-Categories", subtitle: "Organize items into sub-categories" },
-  "/dashboard/tags": { title: "Tags", subtitle: "Manage your system tags" },
+  // "/dashboard/tags": { title: "Tags", subtitle: "Manage your system tags" },
   "/dashboard/settings": { title: "Settings", subtitle: "Manage your account and app settings" },
   "/dashboard/activity": { title: "Activity", subtitle: "Track recent system activities" },
   "/dashboard/activity/create": { title: "Create Activity", subtitle: "Add a new activity record" },
