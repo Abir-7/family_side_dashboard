@@ -249,7 +249,7 @@ export default function ActivityPage() {
           <Table>
             <TableHeader>
               <TableRow className="hover:bg-transparent border-gray-100">
-                <TableHead className="text-gray-400 text-xs font-medium w-75">
+                <TableHead className="text-gray-400 text-xs font-medium w-75 px-5">
                   Name
                 </TableHead>
                 <TableHead className="text-gray-400 text-xs font-medium w-30">

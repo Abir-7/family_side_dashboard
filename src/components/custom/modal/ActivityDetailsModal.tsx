@@ -1,3 +1,4 @@
+import { useState } from "react";
 import { Badge } from "@/components/ui/badge";
 import { Dialog, DialogContent } from "@/components/ui/dialog";
 import {
@@ -61,6 +62,8 @@ export function ActivityDetailsModal({
   onBlock,
   onCancel,
 }: ActivityDetailModalProps) {
+  const [isExpanded, setIsExpanded] = useState(false);
+
   const {
     name = "Green Meadows Park",
     distance = "1.7 km",
@@ -201,8 +204,15 @@ export function ActivityDetailsModal({
               Description
             </p>
             <p className="text-[11px] text-gray-500 leading-relaxed">
-              {description}{" "}
-              <span className="text-brand-500 cursor-pointer">Read more</span>
+              {isExpanded
+                ? description
+                : `${description.slice(0, 120)}...`}{" "}
+              <button
+                onClick={() => setIsExpanded(!isExpanded)}
+                className="text-brand-500 hover:text-brand-600 font-medium transition-colors"
+              >
+                {isExpanded ? "Read less" : "Read more"}
+              </button>
             </p>
           </div>
 

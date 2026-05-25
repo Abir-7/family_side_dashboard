@@ -1,5 +1,16 @@
+/* eslint-disable @typescript-eslint/no-unused-vars */
+import { useState } from "react";
 import { Dialog, DialogContent } from "@/components/ui/dialog";
-import { Globe, MapPin, Calendar, Clock } from "lucide-react";
+import {
+  Globe,
+  MapPin,
+  Calendar,
+  Clock,
+  MessageCircle,
+  PenLine,
+  Home,
+} from "lucide-react";
+import { Badge } from "@/components/ui/badge";
 
 interface EventDetailModalProps {
   isOpen: boolean;
@@ -12,6 +23,10 @@ interface EventDetailModalProps {
     location?: string;
     date?: string;
     time?: string;
+    whatsapp?: string;
+    createdBy?: string;
+    status?: string;
+    tags?: string[];
     heroImage?: string;
   };
   onBlock?: () => void;
@@ -22,17 +37,21 @@ const InfoCell = ({
   icon: Icon,
   label,
   value,
+  valueClass = "",
 }: {
   icon: React.ElementType;
   label: string;
   value: string;
+  valueClass?: string;
 }) => (
-  <div className="border border-gray-100 rounded-2xl p-3 flex flex-col gap-1.5">
-    <div className="flex items-center gap-1.5">
-      <Icon className="w-3.5 h-3.5 text-gray-400" />
-      <span className="text-[10px] text-gray-400">{label}</span>
+  <div className="bg-gray-50 rounded-xl p-3">
+    <div className="flex items-center gap-1.5 mb-1">
+      <Icon className="w-3.5 h-3.5 text-gray-500" />
+      <span className="text-[10px] text-gray-500">{label}</span>
     </div>
-    <p className="text-[12px] font-semibold text-gray-800 leading-tight pl-0.5">
+    <p
+      className={`text-[11px] font-medium text-gray-800 leading-tight ${valueClass}`}
+    >
       {value}
     </p>
   </div>
@@ -45,171 +64,141 @@ export function EventDetailsModal({
   onBlock,
   onCancel,
 }: EventDetailModalProps) {
+  const [isExpanded, setIsExpanded] = useState(false);
+
   const {
-    title = "Little Stars Pediatric Clinic",
+    title = "Family Yoga Day",
     distance = "1.7 km",
     description = "Welcome to Adventure Play Center, where children can explore, learn, and have fun in a safe and engaging environment. Our facility offers a wide range of activities designed to promote physical development, creativity, and social skills.",
     website = "www.familyside.com",
-    location = "321 Arts Boulevard......",
+    location = "321 Arts Boulevard, Creative District",
     date = "16 April 2026",
     time = "07:00 AM to 09:00 PM",
+    whatsapp = "09839922",
+    createdBy = "Admin",
+    status = "Active",
+    tags = ["Health", "Yoga", "Family", "Outdoor", "Wellness"],
     heroImage,
   } = event;
 
   return (
     <Dialog open={isOpen} onOpenChange={onOpenChange}>
       <DialogContent
-        className="sm:max-w-md p-2 gap-0 overflow-hidden rounded-3xl border-0 shadow-2xl"
+        className="sm:max-w-md p-2 gap-0 overflow-hidden rounded-2xl border-0 shadow-2xl"
         showCloseButton={false}
       >
         {/* Hero Image */}
-        <div className="relative h-44 overflow-hidden rounded-2xl">
+        <div className="relative h-40 overflow-hidden rounded-xl">
           {heroImage ? (
             <img
               src={heroImage}
               alt={title}
-              className="w-full h-full object-cover rounded-2xl"
+              className="w-full h-full object-cover rounded-xl"
             />
           ) : (
-            /* Fallback illustrated park scene */
             <svg
               width="100%"
               height="100%"
-              viewBox="0 0 380 176"
+              viewBox="0 0 380 160"
               xmlns="http://www.w3.org/2000/svg"
-              className="absolute inset-0 rounded-2xl"
+              className="absolute inset-0 rounded-xl"
               preserveAspectRatio="xMidYMid slice"
             >
-              <rect width="380" height="176" fill="#4a7c45" />
-              {/* Sky */}
-              <rect width="380" height="100" fill="#b8d4a8" opacity="0.6" />
-              {/* Path */}
-              <path
-                d="M160,176 Q190,100 220,176"
-                fill="#c8b87a"
-                opacity="0.7"
+              <rect width="380" height="160" fill="#3d7a4a" />
+              <ellipse
+                cx="60"
+                cy="90"
+                rx="55"
+                ry="75"
+                fill="#2d5e38"
+                opacity="0.85"
               />
+              <ellipse
+                cx="60"
+                cy="55"
+                rx="45"
+                ry="58"
+                fill="#4a8a5a"
+                opacity="0.9"
+              />
+              <rect x="55" y="118" width="10" height="42" fill="#2a4a30" />
+              <ellipse
+                cx="140"
+                cy="80"
+                rx="50"
+                ry="68"
+                fill="#2d6040"
+                opacity="0.75"
+              />
+              <ellipse
+                cx="140"
+                cy="50"
+                rx="42"
+                ry="54"
+                fill="#5a9e6a"
+                opacity="0.88"
+              />
+              <rect x="135" y="118" width="9" height="42" fill="#2a4a30" />
+              <ellipse
+                cx="260"
+                cy="85"
+                rx="58"
+                ry="78"
+                fill="#2a5a38"
+                opacity="0.8"
+              />
+              <ellipse
+                cx="260"
+                cy="52"
+                rx="48"
+                ry="62"
+                fill="#4a8a58"
+                opacity="0.92"
+              />
+              <rect x="255" y="122" width="10" height="38" fill="#2a4a30" />
+              <ellipse
+                cx="340"
+                cy="90"
+                rx="46"
+                ry="65"
+                fill="#336845"
+                opacity="0.82"
+              />
+              <ellipse
+                cx="340"
+                cy="60"
+                rx="38"
+                ry="50"
+                fill="#5aaa6a"
+                opacity="0.9"
+              />
+              <rect x="336" y="122" width="8" height="38" fill="#2a4a30" />
               <path
-                d="M165,176 Q190,108 215,176"
-                fill="#d4c484"
+                d="M140,160 Q190,118 240,160"
+                fill="#8aaf7a"
                 opacity="0.5"
               />
-              {/* Left trees */}
-              <rect x="20" y="60" width="14" height="116" fill="#3a2a1a" />
-              <ellipse
-                cx="27"
-                cy="55"
-                rx="38"
-                ry="52"
-                fill="#2d5e28"
-                opacity="0.9"
-              />
-              <ellipse
-                cx="27"
-                cy="40"
-                rx="30"
-                ry="42"
-                fill="#4a8a3a"
-                opacity="0.85"
-              />
-              <rect x="75" y="75" width="12" height="101" fill="#3a2a1a" />
-              <ellipse
-                cx="81"
-                cy="68"
-                rx="32"
-                ry="46"
-                fill="#336628"
-                opacity="0.88"
-              />
-              <ellipse
-                cx="81"
-                cy="55"
-                rx="26"
-                ry="36"
-                fill="#5a9a48"
-                opacity="0.8"
-              />
-              {/* Right trees */}
-              <rect x="310" y="55" width="14" height="121" fill="#3a2a1a" />
-              <ellipse
-                cx="317"
-                cy="50"
-                rx="40"
-                ry="54"
-                fill="#2d5e28"
-                opacity="0.9"
-              />
-              <ellipse
-                cx="317"
-                cy="36"
-                rx="32"
-                ry="44"
-                fill="#4a8a3a"
-                opacity="0.85"
-              />
-              <rect x="350" y="70" width="12" height="106" fill="#3a2a1a" />
-              <ellipse
-                cx="356"
-                cy="64"
-                rx="30"
-                ry="44"
-                fill="#336628"
-                opacity="0.88"
-              />
-              <ellipse
-                cx="356"
-                cy="52"
-                rx="24"
-                ry="34"
-                fill="#5a9a48"
-                opacity="0.8"
-              />
-              {/* Mid trees */}
-              <rect x="135" y="85" width="8" height="91" fill="#3a2a1a" />
-              <ellipse
-                cx="139"
-                cy="80"
-                rx="22"
-                ry="32"
-                fill="#2a5a24"
-                opacity="0.85"
-              />
-              <rect x="232" y="82" width="8" height="94" fill="#3a2a1a" />
-              <ellipse
-                cx="236"
-                cy="76"
-                rx="22"
-                ry="32"
-                fill="#2a5a24"
-                opacity="0.85"
-              />
-              {/* Ground */}
               <path
-                d="M0,148 Q95,128 190,138 Q285,148 380,130 L380,176 L0,176 Z"
+                d="M0,148 Q95,112 190,132 Q285,150 380,130 L380,160 L0,160 Z"
                 fill="#5a9e4a"
-                opacity="0.6"
-              />
-              <path
-                d="M0,160 Q95,144 190,152 Q285,160 380,145 L380,176 L0,176 Z"
-                fill="#4a8a3a"
                 opacity="0.55"
               />
             </svg>
           )}
           {/* Event badge */}
-          <span className="absolute top-3 right-3 bg-brand-500 text-white text-[11px] font-semibold px-3.5 py-1 rounded-full shadow">
+          <span className="absolute top-2.5 right-2.5 bg-brand-500 text-white text-[11px] font-medium px-3 py-1 rounded-full">
             Event
           </span>
         </div>
 
         {/* Body */}
-        <div className="p-4 space-y-3 bg-white rounded-b-3xl">
+        <div className="px-4 pt-3 pb-4 space-y-3 overflow-y-auto max-h-[70vh]">
           {/* Title row */}
           <div className="flex items-start justify-between gap-2">
-            <h2 className="text-[17px] font-bold text-gray-900 leading-snug">
+            <h2 className="text-[15px] font-semibold text-gray-900 leading-tight">
               {title}
             </h2>
-            <span className="flex items-center gap-1 text-[11px] text-gray-400 whitespace-nowrap mt-0.5 shrink-0">
+            <span className="flex items-center gap-1 text-[11px] text-gray-500 whitespace-nowrap mt-0.5 shrink-0">
               <MapPin className="w-3 h-3" />
               {distance}
             </span>
@@ -217,36 +206,61 @@ export function EventDetailsModal({
 
           {/* Description */}
           <div>
-            <p className="text-[12px] font-semibold text-gray-900 mb-1">
+            <p className="text-[11px] font-semibold text-gray-800 mb-1">
               Description
             </p>
-            <p className="text-[11.5px] text-gray-500 leading-relaxed">
-              {description}{" "}
-              <span className="text-brand-500 cursor-pointer font-medium underline underline-offset-2">
-                Read more
-              </span>
+            <p className="text-[11px] text-gray-500 leading-relaxed">
+              {isExpanded ? description : `${description.slice(0, 120)}...`}{" "}
+              <button
+                onClick={() => setIsExpanded(!isExpanded)}
+                className="text-brand-500 hover:text-brand-600 font-medium transition-colors"
+              >
+                {isExpanded ? "Read less" : "Read more"}
+              </button>
             </p>
           </div>
 
-          {/* Info grid — 2×2 */}
+          {/* Info grid */}
           <div className="grid grid-cols-2 gap-2">
             <InfoCell icon={Globe} label="Website" value={website} />
-            <InfoCell icon={Calendar} label="Date" value={date} />
             <InfoCell icon={MapPin} label="Location" value={location} />
-            <InfoCell icon={Clock} label="Time" value={time} />
+            <InfoCell icon={Calendar} label="Date" value={date} />
+            <InfoCell icon={MessageCircle} label="Whatsapp" value={whatsapp} />
+            <div className="col-span-2">
+              <InfoCell icon={Clock} label="Time" value={time} />
+            </div>
           </div>
+
+          {/* Tags */}
+          {tags && tags.length > 0 && (
+            <div>
+              <p className="text-[11px] font-semibold text-gray-800 mb-2">
+                Tag
+              </p>
+              <div className="flex flex-wrap gap-1.5">
+                {tags.map((tag, i) => (
+                  <Badge
+                    key={i}
+                    className="bg-brand-400 text-white border-0 rounded-full text-[10px] px-3 py-1 font-medium"
+                  >
+                    {tag}
+                  </Badge>
+                ))}
+              </div>
+            </div>
+          )}
 
           {/* Actions */}
           <div className="grid grid-cols-2 gap-3 pt-1">
             <button
               onClick={onBlock}
-              className="py-3 rounded-2xl border border-gray-200 text-[13px] font-medium text-gray-700 hover:bg-gray-50 transition-colors"
+              className="py-3 rounded-xl border border-gray-200 text-[13px] font-medium text-gray-700 hover:bg-gray-50 transition-colors"
             >
               Block
             </button>
             <button
               onClick={onCancel ?? (() => onOpenChange(false))}
-              className="py-3 rounded-2xl bg-brand-500 text-[13px] font-semibold text-white hover:bg-brand-600 transition-colors shadow-sm"
+              className="py-3 rounded-xl bg-brand-500 text-[13px] font-medium text-white hover:bg-brand-600 transition-colors"
             >
               Cancel
             </button>

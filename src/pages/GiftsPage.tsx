@@ -235,7 +235,7 @@ export default function GiftsPage() {
           <Table>
             <TableHeader>
               <TableRow className="hover:bg-transparent border-gray-100">
-                <TableHead className="text-gray-400 text-xs font-medium">
+                <TableHead className="text-gray-400 text-xs px-5 font-medium">
                   Name
                 </TableHead>
                 <TableHead className="text-gray-400 text-xs font-medium">
