@@ -23,6 +23,7 @@ import {
   TooltipTrigger,
 } from "@/components/ui/tooltip";
 import { UserDetailsModal } from "@/components/custom/modal/UserDetailsModal";
+import { BlockUserModal } from "@/components/custom/modal/BlockUserModal";
 
 type Subscription = "Free" | "Premium" | "Smart";
 type Status = "Active" | "Suspend";
@@ -210,8 +211,12 @@ type FilterOption = "All" | Subscription;
 
 export default function UsersPage() {
   const [filter, setFilter] = useState<FilterOption>("All");
-  const [, setSelectedUser] = useState<User | null>(null);
+  const [selectedUser, setSelectedUser] = useState<User | null>(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [isBlockModalOpen, setIsBlockModalOpen] = useState(false);
+  const [selectedUserForBlock, setSelectedUserForBlock] = useState<User | null>(
+    null,
+  );
 
   const filtered =
     filter === "All"
@@ -221,6 +226,22 @@ export default function UsersPage() {
   const handleViewUser = (user: User) => {
     setSelectedUser(user);
     setIsModalOpen(true);
+  };
+
+  const handleBlockClick = (user: User) => {
+    setSelectedUserForBlock(user);
+    setIsBlockModalOpen(true);
+  };
+
+  const handleConfirmBlock = () => {
+    if (selectedUserForBlock) {
+      console.log(
+        `User ${selectedUserForBlock.name} is now ${
+          selectedUserForBlock.status === "Suspend" ? "Active" : "Suspend"
+        }`,
+      );
+      // In a real app, you would update the status via API or state
+    }
   };
 
   return (
@@ -349,6 +370,7 @@ export default function UsersPage() {
                                 ? "text-red-400 hover:text-red-600"
                                 : "text-gray-400 hover:text-gray-600"
                             }`}
+                            onClick={() => handleBlockClick(user)}
                           >
                             <Ban className="w-4 h-4" />
                           </Button>
@@ -367,6 +389,15 @@ export default function UsersPage() {
 
         {/* User Detail Modal */}
         <UserDetailsModal isOpen={isModalOpen} onOpenChange={setIsModalOpen} />
+
+        {/* Block User Modal */}
+        <BlockUserModal
+          isOpen={isBlockModalOpen}
+          onOpenChange={setIsBlockModalOpen}
+          userName={selectedUserForBlock?.name || ""}
+          isSuspended={selectedUserForBlock?.status === "Suspend"}
+          onConfirm={handleConfirmBlock}
+        />
       </div>
     </TooltipProvider>
   );

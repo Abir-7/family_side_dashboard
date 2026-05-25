@@ -24,6 +24,7 @@ interface StatCardProps {
   iconColor: string;
   iconBg: string;
   cardBg: string;
+  borderColor: string;
   linkColor?: string;
 }
 
@@ -38,10 +39,13 @@ function StatCard({
   iconColor,
   iconBg,
   cardBg,
+  borderColor,
   linkColor = "text-blue-500",
 }: StatCardProps) {
   return (
-    <div className={`rounded-2xl ${cardBg} p-5 flex flex-col gap-2 min-w-0`}>
+    <div
+      className={`rounded-2xl border ${borderColor} ${cardBg} p-5 flex flex-col gap-2 min-w-0`}
+    >
       <div className="flex items-start gap-3">
         <div
           className={`flex h-9 w-9 items-center justify-center rounded-full ${iconBg} shrink-0 mt-0.5`}
@@ -91,6 +95,7 @@ const statsData: StatCardProps[] = [
     iconColor: "text-red-400",
     iconBg: "bg-red-100",
     cardBg: "bg-red-50",
+    borderColor: "border-red-100",
   },
   {
     title: "Flagged reviews",
@@ -102,6 +107,7 @@ const statsData: StatCardProps[] = [
     iconColor: "text-yellow-500",
     iconBg: "bg-yellow-100",
     cardBg: "bg-yellow-50",
+    borderColor: "border-yellow-100",
   },
   {
     title: "New providers",
@@ -113,6 +119,7 @@ const statsData: StatCardProps[] = [
     iconColor: "text-blue-400",
     iconBg: "bg-blue-100",
     cardBg: "bg-blue-50",
+    borderColor: "border-blue-100",
   },
   {
     title: "Total Users",
@@ -122,6 +129,7 @@ const statsData: StatCardProps[] = [
     iconColor: "text-purple-400",
     iconBg: "bg-purple-100",
     cardBg: "bg-purple-50",
+    borderColor: "border-purple-100",
   },
   {
     title: "New Users",
@@ -131,6 +139,7 @@ const statsData: StatCardProps[] = [
     iconColor: "text-green-500",
     iconBg: "bg-green-100",
     cardBg: "bg-green-50",
+    borderColor: "border-green-100",
   },
   {
     title: "Activity",
@@ -140,6 +149,7 @@ const statsData: StatCardProps[] = [
     iconColor: "text-blue-400",
     iconBg: "bg-blue-100",
     cardBg: "bg-blue-50",
+    borderColor: "border-blue-100",
   },
   {
     title: "Events",
@@ -149,6 +159,7 @@ const statsData: StatCardProps[] = [
     iconColor: "text-red-400",
     iconBg: "bg-red-100",
     cardBg: "bg-red-50",
+    borderColor: "border-red-100",
   },
   {
     title: "Gift",
@@ -158,6 +169,7 @@ const statsData: StatCardProps[] = [
     iconColor: "text-orange-400",
     iconBg: "bg-orange-100",
     cardBg: "bg-orange-50",
+    borderColor: "border-orange-100",
   },
 ];
 
