@@ -1,6 +1,6 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
-import { Eye, Trash2, Search, Plus, ChevronDown } from "lucide-react";
+import { Eye, Trash2, Search, Plus, Loader2 } from "lucide-react";
 import {
   Table,
   TableBody,
@@ -12,12 +12,6 @@ import {
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
-import {
   Tooltip,
   TooltipContent,
   TooltipProvider,
@@ -26,208 +20,117 @@ import {
 
 import { ActivityDetailsModal } from "@/components/custom/modal/ActivityDetailsModal";
 import { DeleteActivityModal } from "@/components/custom/modal/DeleteActivityModal";
-
-type CreatedBy = "Provider" | "User" | "Admin";
+import { Pagination } from "@/components/custom/pagination";
+import { useAuth } from "@/lib/auth/useAuth";
+import { toast } from "sonner";
 
 interface Activity {
   id: number;
-  image: string;
+  image_url: string | null;
   name: string;
-  createdBy: CreatedBy;
+  created_by: string;
   category: string;
   location: string;
-  fee: string;
+  fee: number;
 }
-
-const MOCK_ACTIVITIES: Activity[] = [
-  {
-    id: 1,
-    image:
-      "https://images.unsplash.com/photo-1576765608535-5f04d1e3f289?w=80&h=80&fit=crop",
-    name: "Little Stars Pediatric Clinic",
-    createdBy: "Provider",
-    category: "Doctor",
-    location: "New work, UAS",
-    fee: "$00",
-  },
-  {
-    id: 2,
-    image:
-      "https://images.unsplash.com/photo-1576765608535-5f04d1e3f289?w=80&h=80&fit=crop",
-    name: "Little Stars Pediatric Clinic",
-    createdBy: "User",
-    category: "Playgrounds",
-    location: "New work, UAS",
-    fee: "$00",
-  },
-  {
-    id: 3,
-    image:
-      "https://images.unsplash.com/photo-1576765608535-5f04d1e3f289?w=80&h=80&fit=crop",
-    name: "Little Stars Pediatric Clinic",
-    createdBy: "Admin",
-    category: "Playgrounds",
-    location: "New work, UAS",
-    fee: "$00",
-  },
-  {
-    id: 4,
-    image:
-      "https://images.unsplash.com/photo-1576765608535-5f04d1e3f289?w=80&h=80&fit=crop",
-    name: "Little Stars Pediatric Clinic",
-    createdBy: "Provider",
-    category: "Playgrounds",
-    location: "New work, UAS",
-    fee: "$00",
-  },
-  {
-    id: 5,
-    image:
-      "https://images.unsplash.com/photo-1576765608535-5f04d1e3f289?w=80&h=80&fit=crop",
-    name: "Little Stars Pediatric Clinic",
-    createdBy: "Admin",
-    category: "Playgrounds",
-    location: "New work, UAS",
-    fee: "$00",
-  },
-  {
-    id: 6,
-    image:
-      "https://images.unsplash.com/photo-1576765608535-5f04d1e3f289?w=80&h=80&fit=crop",
-    name: "Little Stars Pediatric Clinic",
-    createdBy: "Provider",
-    category: "Playgrounds",
-    location: "New work, UAS",
-    fee: "$00",
-  },
-  {
-    id: 7,
-    image:
-      "https://images.unsplash.com/photo-1576765608535-5f04d1e3f289?w=80&h=80&fit=crop",
-    name: "Little Stars Pediatric Clinic",
-    createdBy: "User",
-    category: "Playgrounds",
-    location: "New work, UAS",
-    fee: "$00",
-  },
-  {
-    id: 8,
-    image:
-      "https://images.unsplash.com/photo-1576765608535-5f04d1e3f289?w=80&h=80&fit=crop",
-    name: "Little Stars Pediatric Clinic",
-    createdBy: "User",
-    category: "Playgrounds",
-    location: "New work, UAS",
-    fee: "$00",
-  },
-  {
-    id: 9,
-    image:
-      "https://images.unsplash.com/photo-1576765608535-5f04d1e3f289?w=80&h=80&fit=crop",
-    name: "Little Stars Pediatric Clinic",
-    createdBy: "User",
-    category: "Playgrounds",
-    location: "New work, UAS",
-    fee: "$00",
-  },
-  {
-    id: 10,
-    image:
-      "https://images.unsplash.com/photo-1576765608535-5f04d1e3f289?w=80&h=80&fit=crop",
-    name: "Little Stars Pediatric Clinic",
-    createdBy: "User",
-    category: "Playgrounds",
-    location: "New work, UAS",
-    fee: "$00",
-  },
-  {
-    id: 11,
-    image:
-      "https://images.unsplash.com/photo-1576765608535-5f04d1e3f289?w=80&h=80&fit=crop",
-    name: "Little Stars Pediatric Clinic",
-    createdBy: "User",
-    category: "Playgrounds",
-    location: "New work, UAS",
-    fee: "$00",
-  },
-  {
-    id: 12,
-    image:
-      "https://images.unsplash.com/photo-1576765608535-5f04d1e3f289?w=80&h=80&fit=crop",
-    name: "Little Stars Pediatric Clinic",
-    createdBy: "User",
-    category: "Playgrounds",
-    location: "New work, UAS",
-    fee: "$00",
-  },
-];
-
-type FilterOption = "Admin" | "User" | "Provider" | "All";
 
 export default function ActivityPage() {
   const navigate = useNavigate();
-  const [filter, setFilter] = useState<FilterOption>("Admin");
+  const { accessToken } = useAuth();
+  
+  const [activities, setActivities] = useState<Activity[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
   const [search, setSearch] = useState("");
+  const [currentPage, setCurrentPage] = useState(1);
+  const [totalPages, setTotalPages] = useState(1);
+  const [limit] = useState(10);
+  
+  const [selectedActivityId, setSelectedActivityId] = useState<number | null>(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
   const [selectedActivity, setSelectedActivity] = useState<Activity | null>(
     null,
   );
 
-  const filtered = MOCK_ACTIVITIES.filter((a) => {
-    const matchFilter = filter === "All" || a.createdBy === filter;
-    const matchSearch = a.name.toLowerCase().includes(search.toLowerCase());
-    return matchFilter && matchSearch;
-  });
+  useEffect(() => {
+    const fetchActivities = async () => {
+      setIsLoading(true);
+      try {
+        const url = new URL("http://10.10.12.60:8015/api/v1/admin/activities");
+        url.searchParams.append("page", currentPage.toString());
+        url.searchParams.append("limit", limit.toString());
+
+        const response = await fetch(url.toString(), {
+          headers: {
+            Authorization: `Bearer ${accessToken}`,
+          },
+        });
+
+        const result = await response.json();
+        if (result.status === "success") {
+          setActivities(result.data.items);
+          setTotalPages(Math.ceil(result.data.total / limit));
+        } else {
+          toast.error(result.message || "Failed to fetch activities");
+        }
+      } catch (error) {
+        console.error("Fetch activities error:", error);
+        toast.error("An error occurred while fetching activities");
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    if (accessToken) {
+      fetchActivities();
+    }
+  }, [accessToken, currentPage, limit]);
 
   const handleDeleteClick = (activity: Activity) => {
     setSelectedActivity(activity);
     setIsDeleteModalOpen(true);
   };
 
-  const handleConfirmDelete = () => {
-    if (selectedActivity) {
-      console.log(`Deleting activity: ${selectedActivity.name}`);
-      // In a real app, you would call an API and update local state
+  const handleConfirmDelete = async () => {
+    if (!selectedActivity || !accessToken) return;
+
+    try {
+      const response = await fetch(`http://10.10.12.60:8015/api/v1/admin/activities/${selectedActivity.id}`, {
+        method: "DELETE",
+        headers: {
+          Authorization: `Bearer ${accessToken}`,
+        },
+      });
+
+      const result = await response.json();
+      if (response.ok && result.status === "success") {
+        toast.success("Activity deleted successfully");
+        // Remove from local state
+        setActivities((prev) => prev.filter((a) => a.id !== selectedActivity.id));
+        setIsDeleteModalOpen(false);
+      } else {
+        toast.error(result.message || "Failed to delete activity");
+      }
+    } catch (error) {
+      console.error("Delete activity error:", error);
+      toast.error("An error occurred while deleting the activity");
     }
   };
+
+  const filteredActivities = activities.filter((a) =>
+    a.name.toLowerCase().includes(search.toLowerCase())
+  );
 
   return (
     <TooltipProvider>
       <div className="bg-white rounded-2xl border border-gray-100 overflow-hidden">
         {/* Toolbar */}
         <div className="flex items-center gap-3 px-5 py-4 border-b border-gray-100">
-          {/* Filter Dropdown */}
-          <DropdownMenu>
-            <DropdownMenuTrigger asChild>
-              <Button
-                variant="outline"
-                className="rounded-full h-11 px-4 text-sm font-medium gap-1.5 border-gray-200 shrink-0"
-              >
-                {filter === "All" ? "All" : filter}
-                <ChevronDown className="w-3.5 h-3.5 text-gray-500" />
-              </Button>
-            </DropdownMenuTrigger>
-            <DropdownMenuContent align="start" className="w-36">
-              {(["All", "Admin", "Provider", "User"] as FilterOption[]).map(
-                (opt) => (
-                  <DropdownMenuItem
-                    key={opt}
-                    onClick={() => setFilter(opt)}
-                    className={filter === opt ? "bg-muted font-medium" : ""}
-                  >
-                    {opt}
-                  </DropdownMenuItem>
-                ),
-              )}
-            </DropdownMenuContent>
-          </DropdownMenu>
-
           {/* Search */}
           <div className="relative flex-1">
             <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
             <Input
-              placeholder="Search user"
+              placeholder="Search activities"
               value={search}
               onChange={(e) => setSearch(e.target.value)}
               className="pl-9 h-11 rounded-full border-gray-200 text-sm focus-visible:ring-0 focus-visible:border-gray-300"
@@ -245,7 +148,12 @@ export default function ActivityPage() {
         </div>
 
         {/* Table */}
-        <div className="overflow-x-auto">
+        <div className="overflow-x-auto min-h-[400px] relative">
+          {isLoading && (
+            <div className="absolute inset-0 bg-white/50 backdrop-blur-[1px] z-10 flex items-center justify-center">
+              <Loader2 className="w-8 h-8 text-brand-400 animate-spin" />
+            </div>
+          )}
           <Table>
             <TableHeader>
               <TableRow className="hover:bg-transparent border-gray-100">
@@ -271,18 +179,17 @@ export default function ActivityPage() {
             </TableHeader>
 
             <TableBody>
-              {filtered.map((activity) => (
+              {filteredActivities.map((activity) => (
                 <TableRow
                   key={activity.id}
                   className="border-gray-50 hover:bg-gray-50/60"
                 >
-                  {/* Name with image */}
                   <TableCell className="py-3 px-4">
                     <div className="flex items-center gap-3">
                       <img
-                        src={activity.image}
+                        src={activity.image_url || "/assets/placeholder.png"}
                         alt={activity.name}
-                        className="w-10 h-10 rounded-lg object-cover shrink-0"
+                        className="w-10 h-10 rounded-lg object-cover shrink-0 bg-gray-100"
                       />
                       <span className="text-sm font-medium text-gray-800 leading-tight">
                         {activity.name}
@@ -291,7 +198,7 @@ export default function ActivityPage() {
                   </TableCell>
 
                   <TableCell className="text-sm text-gray-500 py-3">
-                    {activity.createdBy}
+                    {activity.created_by}
                   </TableCell>
 
                   <TableCell className="text-sm text-gray-500 py-3">
@@ -303,7 +210,7 @@ export default function ActivityPage() {
                   </TableCell>
 
                   <TableCell className="text-sm text-gray-500 py-3">
-                    {activity.fee}
+                    ${activity.fee.toFixed(2)}
                   </TableCell>
 
                   <TableCell className="py-3">
@@ -314,7 +221,10 @@ export default function ActivityPage() {
                             variant="ghost"
                             size="icon"
                             className="h-8 w-8 text-gray-400 hover:text-gray-600 hover:bg-gray-100"
-                            onClick={() => setIsModalOpen(true)}
+                            onClick={() => {
+                              setSelectedActivityId(activity.id);
+                              setIsModalOpen(true);
+                            }}
                           >
                             <Eye className="w-4 h-4" />
                           </Button>
@@ -339,13 +249,30 @@ export default function ActivityPage() {
                   </TableCell>
                 </TableRow>
               ))}
+              {!isLoading && filteredActivities.length === 0 && (
+                <TableRow>
+                  <TableCell colSpan={6} className="text-center py-10 text-gray-500">
+                    No activities found
+                  </TableCell>
+                </TableRow>
+              )}
             </TableBody>
           </Table>
+        </div>
+        
+        {/* Pagination */}
+        <div className="px-5 pb-5">
+          <Pagination
+            currentPage={currentPage}
+            totalPages={totalPages}
+            onPageChange={setCurrentPage}
+          />
         </div>
       </div>
       <ActivityDetailsModal
         isOpen={isModalOpen}
         onOpenChange={setIsModalOpen}
+        activityId={selectedActivityId}
       />
       <DeleteActivityModal
         isOpen={isDeleteModalOpen}

@@ -7,6 +7,7 @@ import {
   CalendarDays,
   Gift,
   LayoutGrid,
+  Tag,
 } from "lucide-react";
 import {
   Sidebar,
@@ -34,7 +35,7 @@ const navItems = [
   { title: "Gift", url: "/dashboard/gifts", icon: Gift },
   { title: "Category", url: "/dashboard/category", icon: LayoutGrid },
   { title: "Sub-Category", url: "/dashboard/sub-category", icon: LayoutGrid },
-  // { title: "Tag", url: "/dashboard/tags", icon: Tag },
+  { title: "Tag", url: "/dashboard/tags", icon: Tag },
   { title: "Settings", url: "/dashboard/settings", icon: Settings },
 ];
 

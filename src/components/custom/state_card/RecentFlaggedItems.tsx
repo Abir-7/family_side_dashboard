@@ -15,7 +15,7 @@ export function RecentFlaggedItems({ items = [] }: { items?: any[] }) {
     title: item.name,
     type: (item.item_type || "Post") as any,
     reason: item.reason || "Flagged for review",
-    time: item.time || "Recently",
+    time: item.time_ago || "Recently",
   }));
 
   return (

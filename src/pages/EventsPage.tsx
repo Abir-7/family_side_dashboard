@@ -1,12 +1,6 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
-import {
-  Eye,
-  Trash2,
-  Search,
-  Plus,
-  ChevronDown,
-} from "lucide-react";
+import { Eye, Trash2, Search, Plus, Loader2 } from "lucide-react";
 import {
   Table,
   TableBody,
@@ -18,180 +12,119 @@ import {
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
-import {
   Tooltip,
   TooltipContent,
   TooltipProvider,
   TooltipTrigger,
 } from "@/components/ui/tooltip";
+
 import { EventDetailsModal } from "@/components/custom/modal/EventDetailsModal";
 import { DeleteEventModal } from "@/components/custom/modal/DeleteEventModal";
+import { Pagination } from "@/components/custom/pagination";
+import { useAuth } from "@/lib/auth/useAuth";
+import { toast } from "sonner";
 
 interface Event {
   id: number;
-  image: string;
-  title: string;
-  createdBy: string;
+  name: string;
+  image_url: string | null;
+  created_by: string;
   category: string;
   location: string;
-  fee: string;
-  date: string;
-  time: string;
-  tag: "Today" | "Tomorrow" | "Soon";
-  description?: string;
-  website?: string;
-  whatsapp?: string;
-  distance?: string;
-  tags?: string[];
+  fee: number;
 }
-
-const MOCK_EVENTS: Event[] = [
-  {
-    id: 1,
-    image:
-      "https://images.unsplash.com/photo-1599058917765-a780eda07a3e?w=80&h=80&fit=crop",
-    title: "Family Yoga Day",
-    createdBy: "Admin",
-    category: "Health",
-    location: "Central Park, NY",
-    fee: "$20",
-    date: "16 May 2026",
-    time: "11:00 PM",
-    tag: "Today",
-    description:
-      "Join us for a relaxing morning of yoga and mindfulness at Central Park. This event is open to all skill levels and ages. Please bring your own mat and water bottle.",
-    website: "www.familyevents.com",
-    whatsapp: "09839922",
-    distance: "2.5 km",
-    tags: ["Health", "Yoga", "Family", "Outdoor", "Wellness"],
-  },
-  {
-    id: 2,
-    image:
-      "https://images.unsplash.com/photo-1517457373958-b7bdd4587205?w=80&h=80&fit=crop",
-    title: "Kids Coding Workshop",
-    createdBy: "Provider",
-    category: "Education",
-    location: "Tech Hub, SF",
-    fee: "$45",
-    date: "17 May 2026",
-    time: "10:00 AM",
-    tag: "Tomorrow",
-    description:
-      "A fun, hands-on workshop for kids to learn the basics of coding using Scratch and Python.",
-    website: "www.kidscoding.com",
-    whatsapp: "09839923",
-    distance: "5.0 km",
-    tags: ["Education", "Coding", "Technology", "Workshop"],
-  },
-  {
-    id: 3,
-    image:
-      "https://images.unsplash.com/photo-1492684223066-81342ee5ff30?w=80&h=80&fit=crop",
-    title: "Community Picnic",
-    createdBy: "User",
-    category: "Social",
-    location: "Riverside Park",
-    fee: "Free",
-    date: "20 May 2026",
-    time: "12:00 PM",
-    tag: "Soon",
-    description:
-      "Bring your favorite dish and join your neighbors for a day of food, music, and games at Riverside Park.",
-    website: "www.communitypicnic.com",
-    whatsapp: "09839924",
-    distance: "1.2 km",
-    tags: ["Social", "Community", "Food", "Outdoor"],
-  },
-  {
-    id: 4,
-    image:
-      "https://images.unsplash.com/photo-1505373877841-8d25f7d46678?w=80&h=80&fit=crop",
-    title: "Art in the Park",
-    createdBy: "Admin",
-    category: "Art",
-    location: "Downtown Plaza",
-    fee: "$10",
-    date: "22 May 2026",
-    time: "02:00 PM",
-    tag: "Soon",
-    description:
-      "Explore local art and participate in interactive art sessions for all ages.",
-    website: "www.artinthepark.com",
-    whatsapp: "09839925",
-    distance: "3.8 km",
-    tags: ["Art", "Culture", "Family", "Outdoor"],
-  },
-];
-
-type FilterOption = "Admin" | "User" | "Provider" | "All";
 
 export default function EventsPage() {
   const navigate = useNavigate();
-  const [filter, setFilter] = useState<FilterOption>("All");
+  const { accessToken } = useAuth();
+  
+  const [events, setEvents] = useState<Event[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
   const [search, setSearch] = useState("");
+  const [currentPage, setCurrentPage] = useState(1);
+  const [totalPages, setTotalPages] = useState(1);
+  const [limit] = useState(10);
+  
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
-  const [selectedEvent, setSelectedEvent] = useState<Event | null>(null);
+  const [selectedEventId, setSelectedEventId] = useState<number | null>(null);
+  const [selectedEventName, setSelectedEventName] = useState("");
 
-  const filtered = MOCK_EVENTS.filter((e) => {
-    const matchFilter = filter === "All" || e.createdBy === filter;
-    const matchSearch = e.title.toLowerCase().includes(search.toLowerCase());
-    return matchFilter && matchSearch;
-  });
+  useEffect(() => {
+    const fetchEvents = async () => {
+      setIsLoading(true);
+      try {
+        const url = new URL("http://10.10.12.60:8015/api/v1/admin/events");
+        url.searchParams.append("page", currentPage.toString());
+        url.searchParams.append("limit", limit.toString());
 
-  const handleViewDetails = (event: Event) => {
-    setSelectedEvent(event);
-    setIsModalOpen(true);
-  };
+        const response = await fetch(url.toString(), {
+          headers: {
+            Authorization: `Bearer ${accessToken}`,
+          },
+        });
+
+        const result = await response.json();
+        if (result.status === "success") {
+          setEvents(result.data.items);
+          setTotalPages(Math.ceil(result.data.total / limit));
+        } else {
+          toast.error(result.message || "Failed to fetch events");
+        }
+      } catch (error) {
+        console.error("Fetch events error:", error);
+        toast.error("An error occurred while fetching events");
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    if (accessToken) {
+      fetchEvents();
+    }
+  }, [accessToken, currentPage, limit]);
 
   const handleDeleteClick = (event: Event) => {
-    setSelectedEvent(event);
+    setSelectedEventId(event.id);
+    setSelectedEventName(event.name);
     setIsDeleteModalOpen(true);
   };
 
-  const handleConfirmDelete = () => {
-    if (selectedEvent) {
-      console.log(`Deleting event: ${selectedEvent.title}`);
+  const handleConfirmDelete = async () => {
+    if (!selectedEventId || !accessToken) return;
+
+    try {
+      const response = await fetch(`http://10.10.12.60:8015/api/v1/admin/events/${selectedEventId}`, {
+        method: "DELETE",
+        headers: {
+          Authorization: `Bearer ${accessToken}`,
+        },
+      });
+
+      const result = await response.json();
+      if (response.ok && result.status === "success") {
+        toast.success("Event deleted successfully");
+        // Remove from local state
+        setEvents((prev) => prev.filter((e) => e.id !== selectedEventId));
+        setIsDeleteModalOpen(false);
+      } else {
+        toast.error(result.message || "Failed to delete event");
+      }
+    } catch (error) {
+      console.error("Delete event error:", error);
+      toast.error("An error occurred while deleting the event");
     }
   };
+
+  const filteredEvents = events.filter((e) =>
+    e.name.toLowerCase().includes(search.toLowerCase())
+  );
 
   return (
     <TooltipProvider>
       <div className="bg-white rounded-2xl border border-gray-100 overflow-hidden">
         {/* Toolbar */}
         <div className="flex items-center gap-3 px-5 py-4 border-b border-gray-100">
-          {/* Filter Dropdown */}
-          <DropdownMenu>
-            <DropdownMenuTrigger asChild>
-              <Button
-                variant="outline"
-                className="rounded-full h-11 px-4 text-sm font-medium gap-1.5 border-gray-200 shrink-0"
-              >
-                {filter === "All" ? "All" : filter}
-                <ChevronDown className="w-3.5 h-3.5 text-gray-500" />
-              </Button>
-            </DropdownMenuTrigger>
-            <DropdownMenuContent align="start" className="w-36">
-              {(["All", "Admin", "Provider", "User"] as FilterOption[]).map(
-                (opt) => (
-                  <DropdownMenuItem
-                    key={opt}
-                    onClick={() => setFilter(opt)}
-                    className={filter === opt ? "bg-muted font-medium" : ""}
-                  >
-                    {opt}
-                  </DropdownMenuItem>
-                ),
-              )}
-            </DropdownMenuContent>
-          </DropdownMenu>
-
           {/* Search */}
           <div className="relative flex-1">
             <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
@@ -214,11 +147,16 @@ export default function EventsPage() {
         </div>
 
         {/* Table */}
-        <div className="overflow-x-auto">
+        <div className="overflow-x-auto min-h-[400px] relative">
+          {isLoading && (
+            <div className="absolute inset-0 bg-white/50 backdrop-blur-[1px] z-10 flex items-center justify-center">
+              <Loader2 className="w-8 h-8 text-brand-400 animate-spin" />
+            </div>
+          )}
           <Table>
             <TableHeader>
               <TableRow className="hover:bg-transparent border-gray-100">
-                <TableHead className="text-gray-400 text-xs px-5 font-medium w-75">
+                <TableHead className="text-gray-400 text-xs font-medium w-75 px-5">
                   Name
                 </TableHead>
                 <TableHead className="text-gray-400 text-xs font-medium w-30">
@@ -240,7 +178,7 @@ export default function EventsPage() {
             </TableHeader>
 
             <TableBody>
-              {filtered.map((event) => (
+              {filteredEvents.map((event) => (
                 <TableRow
                   key={event.id}
                   className="border-gray-50 hover:bg-gray-50/60"
@@ -248,18 +186,18 @@ export default function EventsPage() {
                   <TableCell className="py-3 px-4">
                     <div className="flex items-center gap-3">
                       <img
-                        src={event.image}
-                        alt={event.title}
-                        className="w-10 h-10 rounded-lg object-cover shrink-0"
+                        src={event.image_url || "/assets/placeholder.png"}
+                        alt={event.name}
+                        className="w-10 h-10 rounded-lg object-cover shrink-0 bg-gray-100"
                       />
                       <span className="text-sm font-medium text-gray-800 leading-tight">
-                        {event.title}
+                        {event.name}
                       </span>
                     </div>
                   </TableCell>
 
                   <TableCell className="text-sm text-gray-500 py-3">
-                    {event.createdBy}
+                    {event.created_by}
                   </TableCell>
 
                   <TableCell className="text-sm text-gray-500 py-3">
@@ -271,7 +209,7 @@ export default function EventsPage() {
                   </TableCell>
 
                   <TableCell className="text-sm text-gray-500 py-3">
-                    {event.fee}
+                    ${event.fee.toFixed(2)}
                   </TableCell>
 
                   <TableCell className="py-3">
@@ -282,7 +220,10 @@ export default function EventsPage() {
                             variant="ghost"
                             size="icon"
                             className="h-8 w-8 text-gray-400 hover:text-gray-600 hover:bg-gray-100"
-                            onClick={() => handleViewDetails(event)}
+                            onClick={() => {
+                              setSelectedEventId(event.id);
+                              setIsModalOpen(true);
+                            }}
                           >
                             <Eye className="w-4 h-4" />
                           </Button>
@@ -307,19 +248,35 @@ export default function EventsPage() {
                   </TableCell>
                 </TableRow>
               ))}
+              {!isLoading && filteredEvents.length === 0 && (
+                <TableRow>
+                  <TableCell colSpan={6} className="text-center py-10 text-gray-500">
+                    No events found
+                  </TableCell>
+                </TableRow>
+              )}
             </TableBody>
           </Table>
+        </div>
+        
+        {/* Pagination */}
+        <div className="px-5 pb-5">
+          <Pagination
+            currentPage={currentPage}
+            totalPages={totalPages}
+            onPageChange={setCurrentPage}
+          />
         </div>
       </div>
       <EventDetailsModal
         isOpen={isModalOpen}
         onOpenChange={setIsModalOpen}
-        event={selectedEvent || undefined}
+        eventId={selectedEventId}
       />
       <DeleteEventModal
         isOpen={isDeleteModalOpen}
         onOpenChange={setIsDeleteModalOpen}
-        eventName={selectedEvent?.title || ""}
+        eventName={selectedEventName}
         onConfirm={handleConfirmDelete}
       />
     </TooltipProvider>

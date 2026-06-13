@@ -34,6 +34,8 @@ const renderCustomLabel = ({
   outerRadius,
   value,
 }: any) => {
+  if (value === 0) return null;
+
   const RADIAN = Math.PI / 180;
   const radius = innerRadius + (outerRadius - innerRadius) * 0.5;
   const x = cx + radius * Math.cos(-midAngle * RADIAN);
@@ -96,7 +98,7 @@ export function ItemsByStatusChart({
         <ResponsiveContainer width="100%" height="100%">
           <PieChart>
             <Pie
-              data={data}
+              data={data.filter((item) => item.value > 0)}
               cx="50%"
               cy="50%"
               innerRadius="45%"
@@ -108,9 +110,11 @@ export function ItemsByStatusChart({
               startAngle={90}
               endAngle={-270}
             >
-              {data.map((entry, index) => (
-                <Cell key={`cell-${index}`} fill={entry.color} stroke="none" />
-              ))}
+              {data
+                .filter((item) => item.value > 0)
+                .map((entry, index) => (
+                  <Cell key={`cell-${index}`} fill={entry.color} stroke="none" />
+                ))}
             </Pie>
           </PieChart>
         </ResponsiveContainer>

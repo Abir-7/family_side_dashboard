@@ -1,5 +1,5 @@
-import { useState } from "react";
-import { Eye, Ban, ChevronDown } from "lucide-react";
+import { useState, useEffect } from "react";
+import { Eye, Ban, ChevronDown, Loader2 } from "lucide-react";
 import {
   Table,
   TableBody,
@@ -24,223 +24,146 @@ import {
 } from "@/components/ui/tooltip";
 import { UserDetailsModal } from "@/components/custom/modal/UserDetailsModal";
 import { BlockUserModal } from "@/components/custom/modal/BlockUserModal";
-
-type Subscription = "Free" | "Premium" | "Smart";
-type Status = "Active" | "Suspend";
+import { useAuth } from "@/lib/auth/useAuth";
+import { toast } from "sonner";
+import { Pagination } from "@/components/custom/pagination";
 
 interface User {
   id: number;
   name: string;
   email: string;
-  userType: string;
+  user_type: string;
   location: string;
-  joinDate: string;
-  subscription: Subscription;
-  status: Status;
+  join_date: string;
+  subscription: string;
+  status: string;
 }
 
-const MOCK_USERS: User[] = [
-  {
-    id: 1,
-    name: "Olivia Rhye",
-    email: "olivia@untitledui.com",
-    userType: "User",
-    location: "New York, UAS",
-    joinDate: "05/04/2024",
-    subscription: "Free",
-    status: "Active",
-  },
-  {
-    id: 2,
-    name: "Phoenix Baker",
-    email: "phoenix@untitledui.com",
-    userType: "User",
-    location: "London, UK",
-    joinDate: "05/04/2024",
-    subscription: "Premium",
-    status: "Suspend",
-  },
-  {
-    id: 3,
-    name: "Lana Steiner",
-    email: "lana@untitledui.com",
-    userType: "User",
-    location: "Berlin, Germany",
-    joinDate: "05/04/2024",
-    subscription: "Smart",
-    status: "Active",
-  },
-  {
-    id: 4,
-    name: "Demi Wilkinson",
-    email: "demi@untitledui.com",
-    userType: "User",
-    location: "Paris, France",
-    joinDate: "06/04/2024",
-    subscription: "Premium",
-    status: "Active",
-  },
-  {
-    id: 5,
-    name: "Candice Wu",
-    email: "candice@untitledui.com",
-    userType: "User",
-    location: "Sydney, Australia",
-    joinDate: "06/04/2024",
-    subscription: "Free",
-    status: "Active",
-  },
-  {
-    id: 6,
-    name: "Natali Craig",
-    email: "natali@untitledui.com",
-    userType: "User",
-    location: "Toronto, Canada",
-    joinDate: "07/04/2024",
-    subscription: "Smart",
-    status: "Active",
-  },
-  {
-    id: 7,
-    name: "Drew Cano",
-    email: "drew@untitledui.com",
-    userType: "User",
-    location: "Tokyo, Japan",
-    joinDate: "07/04/2024",
-    subscription: "Smart",
-    status: "Active",
-  },
-  {
-    id: 8,
-    name: "Orlando Diggs",
-    email: "orlando@untitledui.com",
-    userType: "User",
-    location: "Madrid, Spain",
-    joinDate: "08/04/2024",
-    subscription: "Premium",
-    status: "Active",
-  },
-  {
-    id: 9,
-    name: "Andi Lane",
-    email: "andi@untitledui.com",
-    userType: "User",
-    location: "Rome, Italy",
-    joinDate: "08/04/2024",
-    subscription: "Smart",
-    status: "Active",
-  },
-  {
-    id: 10,
-    name: "Kate Morrison",
-    email: "kate@untitledui.com",
-    userType: "User",
-    location: "Dubai, UAE",
-    joinDate: "09/04/2024",
-    subscription: "Premium",
-    status: "Active",
-  },
-  {
-    id: 11,
-    name: "Koray Okumus",
-    email: "koray@untitledui.com",
-    userType: "User",
-    location: "Istanbul, Turkey",
-    joinDate: "09/04/2024",
-    subscription: "Free",
-    status: "Active",
-  },
-  {
-    id: 12,
-    name: "Ava Wright",
-    email: "ava@untitledui.com",
-    userType: "User",
-    location: "Singapore",
-    joinDate: "10/04/2024",
-    subscription: "Smart",
-    status: "Active",
-  },
-  {
-    id: 13,
-    name: "Noah Miller",
-    email: "noah@untitledui.com",
-    userType: "User",
-    location: "Amsterdam, Netherlands",
-    joinDate: "10/04/2024",
-    subscription: "Premium",
-    status: "Suspend",
-  },
-  {
-    id: 14,
-    name: "Emma Davis",
-    email: "emma@untitledui.com",
-    userType: "User",
-    location: "Seoul, South Korea",
-    joinDate: "11/04/2024",
-    subscription: "Free",
-    status: "Active",
-  },
-  {
-    id: 15,
-    name: "Liam Johnson",
-    email: "liam@untitledui.com",
-    userType: "User",
-    location: "Stockholm, Sweden",
-    joinDate: "11/04/2024",
-    subscription: "Smart",
-    status: "Active",
-  },
-];
-
-const subscriptionClass: Record<Subscription, string> = {
-  Free: "bg-purple-100 text-purple-500 hover:bg-purple-100 border-0 rounded-full font-medium",
+const subscriptionClass: Record<string, string> = {
+  Free: "bg-purple-100 text-purple-500 hover:bg-purple-100 border-0 rounded-full font-medium text-[10px] px-2 py-0",
   Premium:
-    "bg-amber-100  text-amber-500  hover:bg-amber-100  border-0 rounded-full font-medium",
+    "bg-amber-100  text-amber-500  hover:bg-amber-100  border-0 rounded-full font-medium text-[10px] px-2 py-0",
   Smart:
-    "bg-pink-100   text-pink-500   hover:bg-pink-100   border-0 rounded-full font-medium",
+    "bg-pink-100   text-pink-500   hover:bg-pink-100   border-0 rounded-full font-medium text-[10px] px-2 py-0",
 };
 
-const statusClass: Record<Status, string> = {
+const statusClass: Record<string, string> = {
   Active:
-    "bg-green-100 text-green-600 hover:bg-green-100 border-0 rounded-full font-medium",
+    "bg-green-100 text-green-600 hover:bg-green-100 border-0 rounded-full font-medium text-[10px] px-2 py-0",
   Suspend:
-    "bg-red-100   text-red-500   hover:bg-red-100   border-0 rounded-full font-medium",
+    "bg-red-100   text-red-500   hover:bg-red-100   border-0 rounded-full font-medium text-[10px] px-2 py-0",
+  Blocked:
+    "bg-red-100   text-red-500   hover:bg-red-100   border-0 rounded-full font-medium text-[10px] px-2 py-0",
 };
 
-type FilterOption = "All" | Subscription;
+type FilterOption = "All" | "Free" | "Premium" | "Smart";
 
 export default function UsersPage() {
+  const { accessToken } = useAuth();
   const [filter, setFilter] = useState<FilterOption>("All");
-  const [, setSelectedUser] = useState<User | null>(null);
+  const [users, setUsers] = useState<User[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
+  const [totalUsers, setTotalUsers] = useState(0);
+  const [currentPage, setCurrentPage] = useState(1);
+  const [limit] = useState(10);
+  const [totalPages, setTotalPages] = useState(1);
+
+  const [selectedUserId, setSelectedUserId] = useState<number | null>(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isBlockModalOpen, setIsBlockModalOpen] = useState(false);
   const [selectedUserForBlock, setSelectedUserForBlock] = useState<User | null>(
     null,
   );
 
-  const filtered =
-    filter === "All"
-      ? MOCK_USERS
-      : MOCK_USERS.filter((u) => u.subscription === filter);
+  useEffect(() => {
+    const fetchUsers = async () => {
+      setIsLoading(true);
+      try {
+        const url = new URL("http://10.10.12.60:8015/api/v1/admin/users");
+        url.searchParams.append("page", currentPage.toString());
+        url.searchParams.append("limit", limit.toString());
+        if (filter !== "All") {
+          url.searchParams.append("subscription", filter);
+        }
+
+        const response = await fetch(url.toString(), {
+          headers: {
+            Authorization: `Bearer ${accessToken}`,
+          },
+        });
+
+        const result = await response.json();
+        if (result.status === "success") {
+          setUsers(result.data.users);
+          setTotalUsers(result.data.total);
+          setTotalPages(Math.ceil(result.data.total / limit));
+        } else {
+          toast.error(result.message || "Failed to fetch users");
+        }
+      } catch (error) {
+        console.error("Fetch users error:", error);
+        toast.error("An error occurred while fetching users");
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    if (accessToken) {
+      fetchUsers();
+    }
+  }, [accessToken, currentPage, limit, filter]);
 
   const handleViewUser = (user: User) => {
-    setSelectedUser(user);
+    setSelectedUserId(user.id);
     setIsModalOpen(true);
   };
+
 
   const handleBlockClick = (user: User) => {
     setSelectedUserForBlock(user);
     setIsBlockModalOpen(true);
   };
 
-  const handleConfirmBlock = () => {
-    if (selectedUserForBlock) {
-      console.log(
-        `User ${selectedUserForBlock.name} is now ${
-          selectedUserForBlock.status === "Suspend" ? "Active" : "Suspend"
-        }`,
-      );
-      // In a real app, you would update the status via API or state
+  const handleConfirmBlock = async () => {
+    if (!selectedUserForBlock || !accessToken) return;
+
+    const isCurrentlyBlocked = selectedUserForBlock.status === "Blocked";
+    const actionParam = isCurrentlyBlocked ? "activate" : "block";
+    const actionDisplayName = isCurrentlyBlocked ? "unblock" : "block";
+
+    try {
+      const response = await fetch(`http://10.10.12.60:8015/api/v1/admin/users/${selectedUserForBlock.id}/action`, {
+        method: "PATCH",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${accessToken}`,
+        },
+        body: JSON.stringify({ action: actionParam }),
+      });
+
+      const result = await response.json();
+      if (response.ok && result.status === "success") {
+        toast.success(`User ${actionDisplayName}ed successfully`);
+        
+        // Force a re-fetch of the user list. 
+        // We'll use a functional state update to trigger a re-render/re-fetch.
+        // A better approach is to have a dedicated trigger state, but this should work for now.
+        // Alternatively, we can just update the local users array directly if we want instant feedback.
+        setUsers(prevUsers => 
+          prevUsers.map(u => 
+            u.id === selectedUserForBlock.id 
+              ? { ...u, status: isCurrentlyBlocked ? "Active" : "Blocked" } 
+              : u
+          )
+        );
+        
+        setIsBlockModalOpen(false);
+      } else {
+        toast.error(result.message || `Failed to ${actionDisplayName} user`);
+      }
+    } catch (error) {
+      console.error(`${actionDisplayName} error:`, error);
+      toast.error(`An error occurred while ${actionDisplayName}ing the user`);
     }
   };
 
@@ -264,7 +187,10 @@ export default function UsersPage() {
                 (opt) => (
                   <DropdownMenuItem
                     key={opt}
-                    onClick={() => setFilter(opt)}
+                    onClick={() => {
+                      setFilter(opt);
+                      setCurrentPage(1);
+                    }}
                     className={filter === opt ? "bg-muted font-medium" : ""}
                   >
                     {opt === "All" ? "All Users" : opt}
@@ -275,46 +201,49 @@ export default function UsersPage() {
           </DropdownMenu>
 
           <span className="text-sm font-semibold text-brand-400">
-            {(12426).toLocaleString()} Users
+            {totalUsers.toLocaleString()} Users
           </span>
         </div>
 
         {/* Table */}
-        <div className="overflow-x-auto">
+        <div className="overflow-x-auto min-h-[400px] relative">
+          {isLoading && (
+            <div className="absolute inset-0 bg-white/50 backdrop-blur-[1px] z-10 flex items-center justify-center">
+              <Loader2 className="w-8 h-8 text-brand-400 animate-spin" />
+            </div>
+          )}
           <Table>
             <TableHeader>
               <TableRow className="hover:bg-transparent border-gray-100">
-                <TableHead className="text-gray-400 text-xs font-medium w-35 px-5">
+                <TableHead className="text-gray-400 text-xs font-medium px-5">
                   Name
                 </TableHead>
-                <TableHead className="text-gray-400 text-xs font-medium w-42.5">
+                <TableHead className="text-gray-400 text-xs font-medium">
                   Email address
                 </TableHead>
-                <TableHead className="text-gray-400 text-xs font-medium w-30">
-                  <span className="inline-flex items-center gap-1 cursor-pointer select-none">
-                    User Type <ChevronDown className="w-3 h-3" />
-                  </span>
+                <TableHead className="text-gray-400 text-xs font-medium">
+                  User Type
                 </TableHead>
-                <TableHead className="text-gray-400 text-xs font-medium w-35">
+                <TableHead className="text-gray-400 text-xs font-medium">
                   Location
                 </TableHead>
-                <TableHead className="text-gray-400 text-xs font-medium w-27.5">
+                <TableHead className="text-gray-400 text-xs font-medium">
                   Join Date
                 </TableHead>
-                <TableHead className="text-gray-400 text-xs font-medium w-30">
-                  Subscribtion
+                <TableHead className="text-gray-400 text-xs font-medium">
+                  Subscription
                 </TableHead>
-                <TableHead className="text-gray-400 text-xs font-medium w-25">
+                <TableHead className="text-gray-400 text-xs font-medium">
                   Status
                 </TableHead>
-                <TableHead className="text-gray-400 text-xs font-medium w-20">
+                <TableHead className="text-gray-400 text-xs font-medium">
                   Action
                 </TableHead>
               </TableRow>
             </TableHeader>
 
             <TableBody>
-              {filtered.map((user) => (
+              {users.map((user) => (
                 <TableRow
                   key={user.id}
                   className="border-gray-50 hover:bg-gray-50/60"
@@ -325,22 +254,22 @@ export default function UsersPage() {
                   <TableCell className="text-sm text-gray-400 py-4">
                     {user.email}
                   </TableCell>
-                  <TableCell className="text-sm text-gray-500 text-center py-4">
-                    {user.userType}
-                  </TableCell>
                   <TableCell className="text-sm text-gray-500 py-4">
+                    {user.user_type}
+                  </TableCell>
+                  <TableCell className="text-sm text-gray-500 py-4 max-w-[200px] truncate">
                     {user.location}
                   </TableCell>
                   <TableCell className="text-sm text-gray-500 py-4">
-                    {user.joinDate}
+                    {user.join_date}
                   </TableCell>
                   <TableCell className="py-4">
-                    <Badge className={subscriptionClass[user.subscription]}>
+                    <Badge className={subscriptionClass[user.subscription] || subscriptionClass.Free}>
                       {user.subscription}
                     </Badge>
                   </TableCell>
                   <TableCell className="py-4">
-                    <Badge className={statusClass[user.status]}>
+                    <Badge className={statusClass[user.status] || statusClass.Active}>
                       {user.status}
                     </Badge>
                   </TableCell>
@@ -366,7 +295,7 @@ export default function UsersPage() {
                             variant="ghost"
                             size="icon"
                             className={`h-7 w-7 hover:bg-gray-100 ${
-                              user.status === "Suspend"
+                              user.status === "Blocked"
                                 ? "text-red-400 hover:text-red-600"
                                 : "text-gray-400 hover:text-gray-600"
                             }`}
@@ -376,26 +305,46 @@ export default function UsersPage() {
                           </Button>
                         </TooltipTrigger>
                         <TooltipContent side="top">
-                          {user.status === "Suspend" ? "Unsuspend" : "Suspend"}
+                          {user.status === "Blocked" ? "Unblock" : "Block"}
                         </TooltipContent>
                       </Tooltip>
                     </div>
                   </TableCell>
                 </TableRow>
               ))}
+              {!isLoading && users.length === 0 && (
+                <TableRow>
+                  <TableCell colSpan={8} className="text-center py-10 text-gray-500">
+                    No users found
+                  </TableCell>
+                </TableRow>
+              )}
             </TableBody>
           </Table>
         </div>
 
+        {/* Pagination */}
+        <div className="px-5 pb-5">
+          <Pagination
+            currentPage={currentPage}
+            totalPages={totalPages}
+            onPageChange={setCurrentPage}
+          />
+        </div>
+
         {/* User Detail Modal */}
-        <UserDetailsModal isOpen={isModalOpen} onOpenChange={setIsModalOpen} />
+        <UserDetailsModal 
+          isOpen={isModalOpen} 
+          onOpenChange={setIsModalOpen} 
+          userId={selectedUserId}
+        />
 
         {/* Block User Modal */}
         <BlockUserModal
           isOpen={isBlockModalOpen}
           onOpenChange={setIsBlockModalOpen}
           userName={selectedUserForBlock?.name || ""}
-          isSuspended={selectedUserForBlock?.status === "Suspend"}
+          isSuspended={selectedUserForBlock?.status === "Blocked"}
           onConfirm={handleConfirmBlock}
         />
       </div>

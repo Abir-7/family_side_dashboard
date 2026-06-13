@@ -1,6 +1,6 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
-import { Eye, Trash2, Search, Plus, MapPin, Tag } from "lucide-react";
+import { Eye, Trash2, Search, Plus, MapPin, Tag, Loader2 } from "lucide-react";
 import {
   Table,
   TableBody,
@@ -17,156 +17,68 @@ import {
   TooltipProvider,
   TooltipTrigger,
 } from "@/components/ui/tooltip";
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
-import { ChevronDown } from "lucide-react";
+import { Pagination } from "@/components/custom/pagination";
+import { useAuth } from "@/lib/auth/useAuth";
+import { toast } from "sonner";
 import { GiftDetailModal } from "@/components/custom/modal/GiftDetailsModal";
 
 interface Gift {
   id: number;
-  image: string;
+  image_url: string | null;
   name: string;
-  createdBy: string;
+  created_by: string;
   category: string;
   location: string;
-  fee: string;
+  fee: number;
 }
-
-const MOCK_GIFTS: Gift[] = [
-  {
-    id: 1,
-    image:
-      "https://images.unsplash.com/photo-1599058917765-a780eda07a3e?w=80&h=80&fit=crop",
-    name: "Little Stars Pediatric Clinic",
-    createdBy: "Provider",
-    category: "Doctor",
-    location: "New work, UAS",
-    fee: "$00",
-  },
-  {
-    id: 2,
-    image:
-      "https://images.unsplash.com/photo-1517457373958-b7bdd4587205?w=80&h=80&fit=crop",
-    name: "Little Stars Pediatric Clinic",
-    createdBy: "User",
-    category: "Playgrounds",
-    location: "New work, UAS",
-    fee: "$00",
-  },
-  {
-    id: 3,
-    image:
-      "https://images.unsplash.com/photo-1492684223066-81342ee5ff30?w=80&h=80&fit=crop",
-    name: "Little Stars Pediatric Clinic",
-    createdBy: "Admin",
-    category: "Playgrounds",
-    location: "New work, UAS",
-    fee: "$00",
-  },
-  {
-    id: 4,
-    image:
-      "https://images.unsplash.com/photo-1505373877841-8d25f7d46678?w=80&h=80&fit=crop",
-    name: "Little Stars Pediatric Clinic",
-    createdBy: "Provider",
-    category: "Playgrounds",
-    location: "New work, UAS",
-    fee: "$00",
-  },
-  {
-    id: 5,
-    image:
-      "https://images.unsplash.com/photo-1599058917765-a780eda07a3e?w=80&h=80&fit=crop",
-    name: "Little Stars Pediatric Clinic",
-    createdBy: "Admin",
-    category: "Playgrounds",
-    location: "New work, UAS",
-    fee: "$00",
-  },
-  {
-    id: 6,
-    image:
-      "https://images.unsplash.com/photo-1517457373958-b7bdd4587205?w=80&h=80&fit=crop",
-    name: "Little Stars Pediatric Clinic",
-    createdBy: "Provider",
-    category: "Playgrounds",
-    location: "New work, UAS",
-    fee: "$00",
-  },
-  {
-    id: 7,
-    image:
-      "https://images.unsplash.com/photo-1492684223066-81342ee5ff30?w=80&h=80&fit=crop",
-    name: "Little Stars Pediatric Clinic",
-    createdBy: "User",
-    category: "Playgrounds",
-    location: "New work, UAS",
-    fee: "$00",
-  },
-  {
-    id: 8,
-    image:
-      "https://images.unsplash.com/photo-1505373877841-8d25f7d46678?w=80&h=80&fit=crop",
-    name: "Little Stars Pediatric Clinic",
-    createdBy: "User",
-    category: "Playgrounds",
-    location: "New work, UAS",
-    fee: "$00",
-  },
-  {
-    id: 9,
-    image:
-      "https://images.unsplash.com/photo-1599058917765-a780eda07a3e?w=80&h=80&fit=crop",
-    name: "Little Stars Pediatric Clinic",
-    createdBy: "User",
-    category: "Playgrounds",
-    location: "New work, UAS",
-    fee: "$00",
-  },
-  {
-    id: 10,
-    image:
-      "https://images.unsplash.com/photo-1517457373958-b7bdd4587205?w=80&h=80&fit=crop",
-    name: "Little Stars Pediatric Clinic",
-    createdBy: "User",
-    category: "Playgrounds",
-    location: "New work, UAS",
-    fee: "$00",
-  },
-  {
-    id: 11,
-    image:
-      "https://images.unsplash.com/photo-1492684223066-81342ee5ff30?w=80&h=80&fit=crop",
-    name: "Little Stars Pediatric Clinic",
-    createdBy: "User",
-    category: "Playgrounds",
-    location: "New work, UAS",
-    fee: "$00",
-  },
-  {
-    id: 12,
-    image:
-      "https://images.unsplash.com/photo-1505373877841-8d25f7d46678?w=80&h=80&fit=crop",
-    name: "Little Stars Pediatric Clinic",
-    createdBy: "User",
-    category: "Playgrounds",
-    location: "New work, UAS",
-    fee: "$00",
-  },
-];
 
 export default function GiftsPage() {
   const navigate = useNavigate();
-  const [gifts, setGifts] = useState<Gift[]>(MOCK_GIFTS);
+  const { accessToken } = useAuth();
+  
+  const [gifts, setGifts] = useState<Gift[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
   const [search, setSearch] = useState("");
-  const [role, setRole] = useState("Admin");
+  const [currentPage, setCurrentPage] = useState(1);
+  const [totalPages, setTotalPages] = useState(1);
+  const [limit] = useState(10);
 
   const [isDetailsModalOpen, setIsDetailsModalOpen] = useState(false);
-  const [selectedGift, setSelectedGift] = useState<Gift | null>(null);
+  const [selectedGiftId, setSelectedGiftId] = useState<number | null>(null);
+
+  useEffect(() => {
+    const fetchGifts = async () => {
+      setIsLoading(true);
+      try {
+        const url = new URL("http://10.10.12.60:8015/api/v1/admin/gifts");
+        url.searchParams.append("page", currentPage.toString());
+        url.searchParams.append("limit", limit.toString());
+
+        const response = await fetch(url.toString(), {
+          headers: {
+            Authorization: `Bearer ${accessToken}`,
+          },
+        });
+
+        const result = await response.json();
+        if (result.status === "success") {
+          setGifts(result.data.items);
+          setTotalPages(Math.ceil(result.data.total / limit));
+        } else {
+          toast.error(result.message || "Failed to fetch gifts");
+        }
+      } catch (error) {
+        console.error("Fetch gifts error:", error);
+        toast.error("An error occurred while fetching gifts");
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    if (accessToken) {
+      fetchGifts();
+    }
+  }, [accessToken, currentPage, limit]);
 
   const filtered = gifts.filter(
     (g) =>
@@ -175,12 +87,31 @@ export default function GiftsPage() {
       g.location.toLowerCase().includes(search.toLowerCase()),
   );
 
-  const handleDelete = (id: number) => {
-    setGifts((prev) => prev.filter((g) => g.id !== id));
+  const handleDelete = async (id: number) => {
+    try {
+      const response = await fetch(`http://10.10.12.60:8015/api/v1/admin/gifts/${id}`, {
+        method: "DELETE",
+        headers: {
+          Authorization: `Bearer ${accessToken}`,
+        },
+      });
+
+      const result = await response.json();
+      if (response.ok && result.status === "success") {
+        toast.success("Gift deleted successfully");
+        // Remove from local state
+        setGifts((prev) => prev.filter((g) => g.id !== id));
+      } else {
+        toast.error(result.message || "Failed to delete gift");
+      }
+    } catch (error) {
+      console.error("Delete gift error:", error);
+      toast.error("An error occurred while deleting the gift");
+    }
   };
 
   const handleView = (gift: Gift) => {
-    setSelectedGift(gift);
+    setSelectedGiftId(gift.id);
     setIsDetailsModalOpen(true);
   };
 
@@ -189,26 +120,6 @@ export default function GiftsPage() {
       <div className="bg-white rounded-2xl border border-gray-100 overflow-hidden">
         {/* Toolbar */}
         <div className="flex items-center gap-3 px-5 py-4 border-b border-gray-100">
-          {/* Role dropdown */}
-          <DropdownMenu>
-            <DropdownMenuTrigger asChild>
-              <Button
-                variant="outline"
-                className="h-11 px-4 text-sm font-medium text-gray-800 border border-gray-200 rounded-full gap-1.5 bg-white hover:bg-gray-50 shadow-none shrink-0"
-              >
-                {role}
-                <ChevronDown className="w-3.5 h-3.5 text-gray-500" />
-              </Button>
-            </DropdownMenuTrigger>
-            <DropdownMenuContent align="start">
-              {["Admin", "Provider", "User"].map((r) => (
-                <DropdownMenuItem key={r} onClick={() => setRole(r)}>
-                  {r}
-                </DropdownMenuItem>
-              ))}
-            </DropdownMenuContent>
-          </DropdownMenu>
-
           {/* Search */}
           <div className="relative flex-1">
             <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
@@ -231,7 +142,12 @@ export default function GiftsPage() {
         </div>
 
         {/* Table */}
-        <div className="overflow-x-auto">
+        <div className="overflow-x-auto min-h-[400px] relative">
+          {isLoading && (
+            <div className="absolute inset-0 bg-white/50 backdrop-blur-[1px] z-10 flex items-center justify-center">
+              <Loader2 className="w-8 h-8 text-brand-400 animate-spin" />
+            </div>
+          )}
           <Table>
             <TableHeader>
               <TableRow className="hover:bg-transparent border-gray-100">
@@ -257,7 +173,7 @@ export default function GiftsPage() {
             </TableHeader>
 
             <TableBody>
-              {filtered.length === 0 ? (
+              {filtered.length === 0 && !isLoading ? (
                 <TableRow>
                   <TableCell
                     colSpan={6}
@@ -276,9 +192,9 @@ export default function GiftsPage() {
                     <TableCell className="py-3 px-4">
                       <div className="flex items-center gap-3">
                         <img
-                          src={gift.image}
+                          src={gift.image_url || "/assets/placeholder.png"}
                           alt={gift.name}
-                          className="w-10 h-10 rounded-lg object-cover shrink-0"
+                          className="w-10 h-10 rounded-lg object-cover shrink-0 bg-gray-100"
                         />
                         <span className="text-sm font-medium text-gray-800 leading-tight">
                           {gift.name}
@@ -288,7 +204,7 @@ export default function GiftsPage() {
 
                     {/* Created By */}
                     <TableCell className="py-3 text-sm text-gray-500">
-                      {gift.createdBy}
+                      {gift.created_by}
                     </TableCell>
 
                     {/* Category */}
@@ -309,7 +225,7 @@ export default function GiftsPage() {
 
                     {/* Fee */}
                     <TableCell className="py-3 text-sm text-gray-500">
-                      {gift.fee}
+                      ${gift.fee.toFixed(2)}
                     </TableCell>
 
                     {/* Actions */}
@@ -350,18 +266,21 @@ export default function GiftsPage() {
             </TableBody>
           </Table>
         </div>
-
-        {selectedGift && (
-          <GiftDetailModal
-            isOpen={isDetailsModalOpen}
-            onOpenChange={setIsDetailsModalOpen}
-            gift={{
-              name: selectedGift.name,
-              location: selectedGift.location,
-              price: selectedGift.fee,
-            }}
+        
+        {/* Pagination */}
+        <div className="px-5 pb-5">
+          <Pagination
+            currentPage={currentPage}
+            totalPages={totalPages}
+            onPageChange={setCurrentPage}
           />
-        )}
+        </div>
+
+        <GiftDetailModal
+          isOpen={isDetailsModalOpen}
+          onOpenChange={setIsDetailsModalOpen}
+          giftId={selectedGiftId}
+        />
       </div>
     </TooltipProvider>
   );

@@ -18,7 +18,7 @@ import GiftsPage from "./pages/GiftsPage";
 import CreateGiftPage from "./pages/CreateGiftPage";
 import CategoryPage from "./pages/CategoryPage";
 import SubCategoryPage from "./pages/SubCategoryPage";
-// import TagsPage from "./pages/TagsPage";
+import TagsPage from "./pages/TagsPage";
 import SettingsPage from "./pages/SettingsPage";
 
 function ProtectedRoute({ children }: { children: ReactNode }) {
@@ -50,7 +50,7 @@ export default function App() {
           <Route path="gifts/create" element={<CreateGiftPage />} />
           <Route path="category" element={<CategoryPage />} />
           <Route path="sub-category" element={<SubCategoryPage />} />
-          {/* <Route path="tags" element={<TagsPage />} /> */}
+          <Route path="tags" element={<TagsPage />} />
           <Route path="settings" element={<SettingsPage />} />
           <Route path="activity" element={<ActivityPage />} />
           <Route path="activity/create" element={<CreateActivityPage />} />

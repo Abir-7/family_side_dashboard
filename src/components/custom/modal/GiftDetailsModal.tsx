@@ -1,4 +1,5 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
+import { Badge } from "@/components/ui/badge";
 import { Dialog, DialogContent } from "@/components/ui/dialog";
 import {
   Globe,
@@ -8,27 +9,33 @@ import {
   CheckCircle2,
   Building2,
   Clock,
+  Loader2,
+  ExternalLink,
 } from "lucide-react";
+import { useAuth } from "@/lib/auth/useAuth";
+import { toast } from "sonner";
+
+interface GiftDetail {
+  id: number;
+  name: string;
+  image_url: string | null;
+  description: string;
+  website: string | null;
+  location: string;
+  created_by: string;
+  status: string;
+  date_added: string;
+  whatsapp: string | null;
+  date: string;
+  time: string;
+  tags: string[];
+  includes: string[];
+}
 
 interface GiftDetailModalProps {
   isOpen: boolean;
   onOpenChange: (open: boolean) => void;
-  gift?: {
-    name?: string;
-    distance?: string;
-    description?: string;
-    website?: string;
-    location?: string;
-    price?: string;
-    date?: string;
-    whatsapp?: string;
-    offeredBy?: string;
-    time?: string;
-    heroImage?: string;
-    includes?: string[];
-  };
-  onBlock?: () => void;
-  onCancel?: () => void;
+  giftId: number | null;
 }
 
 const InfoCell = ({
@@ -36,11 +43,13 @@ const InfoCell = ({
   label,
   value,
   valueClassName,
+  isLink = false,
 }: {
   icon: React.ElementType;
   label: string;
   value: string;
   valueClassName?: string;
+  isLink?: boolean;
 }) => (
   <div className="bg-gray-50 rounded-xl p-3 border border-gray-100 flex items-start gap-2.5">
     <div className="h-8 w-8 rounded-lg bg-white border border-gray-100 flex items-center justify-center shrink-0 shadow-sm">
@@ -48,11 +57,22 @@ const InfoCell = ({
     </div>
     <div>
       <p className="text-[10px] text-gray-500 mb-0.5">{label}</p>
-      <p
-        className={`text-[12px] font-semibold text-gray-800 leading-tight ${valueClassName ?? ""}`}
-      >
-        {value}
-      </p>
+      {isLink && value ? (
+        <a
+          href={value}
+          target="_blank"
+          rel="noopener noreferrer"
+          className="text-[12px] font-semibold text-brand-500 leading-tight flex items-center gap-1 hover:underline"
+        >
+          View Link <ExternalLink className="w-3 h-3" />
+        </a>
+      ) : (
+        <p
+          className={`text-[12px] font-semibold text-gray-800 leading-tight ${valueClassName ?? ""}`}
+        >
+          {value || "N/A"}
+        </p>
+      )}
     </div>
   </div>
 );
@@ -60,30 +80,43 @@ const InfoCell = ({
 export function GiftDetailModal({
   isOpen,
   onOpenChange,
-  gift = {},
-  onBlock,
-  onCancel,
+  giftId,
 }: GiftDetailModalProps) {
+  const { accessToken } = useAuth();
+  const [data, setData] = useState<GiftDetail | null>(null);
+  const [isLoading, setIsLoading] = useState(false);
   const [expanded, setExpanded] = useState(false);
 
-  const {
-    name = "Birthday Gift Set",
-    distance = "1.7 km",
-    description = "A perfectly curated birthday gift set for kids, featuring educational toys and fun art supplies. Ideal for ages 3–8 years. Each item is carefully selected to encourage creativity, learning, and imaginative play.",
-    website = "www.giftshop.com",
-    date = "16 April 2026",
-    offeredBy = "IPSUM",
-    time = "10:00 AM to 06:00 PM",
-    heroImage = "https://images.unsplash.com/photo-1549465220-1a8b9238cd48?w=600&h=300&fit=crop",
-    includes = [
-      "Gift wrapping included",
-      "Personalised message card",
-      "Free delivery over $50",
-    ],
-  } = gift;
+  useEffect(() => {
+    const fetchDetails = async () => {
+      if (!giftId || !accessToken) return;
+      setIsLoading(true);
+      try {
+        const response = await fetch(`http://10.10.12.60:8015/api/v1/admin/gifts/${giftId}`, {
+          headers: {
+            Authorization: `Bearer ${accessToken}`,
+          },
+        });
+        const result = await response.json();
+        if (result.status === "success") {
+          setData(result.data);
+        } else {
+          toast.error(result.message || "Failed to fetch gift details");
+        }
+      } catch (error) {
+        console.error("Fetch gift details error:", error);
+        toast.error("An error occurred while fetching gift details");
+      } finally {
+        setIsLoading(false);
+      }
+    };
 
-  const shortDesc = description.slice(0, 130);
-  const isLong = description.length > 130;
+    if (isOpen && giftId) {
+      fetchDetails();
+    }
+  }, [isOpen, giftId, accessToken]);
+
+  if (!isOpen) return null;
 
   return (
     <Dialog open={isOpen} onOpenChange={onOpenChange}>
@@ -91,102 +124,79 @@ export function GiftDetailModal({
         showCloseButton={false}
         className="sm:max-w-xl p-2 gap-0 overflow-hidden rounded-3xl border-0 shadow-2xl"
       >
-        {/* Hero */}
-        <div className="relative h-44 overflow-hidden bg-brand-50">
-          {heroImage ? (
-            <img
-              src={heroImage}
-              alt={name}
-              className="w-full h-full object-cover rounded-2xl"
-            />
-          ) : (
-            <div className="w-full h-full flex items-center justify-center rounded-2xl">
-              <Gift className="w-16 h-16 text-brand-200" />
+        {isLoading ? (
+          <div className="flex items-center justify-center p-20">
+            <Loader2 className="w-8 h-8 text-brand-400 animate-spin" />
+          </div>
+        ) : data ? (
+          <>
+            {/* Hero */}
+            <div className="relative h-44 overflow-hidden bg-brand-50 rounded-2xl">
+              <img
+                src={data.image_url || "/assets/placeholder.png"}
+                alt={data.name}
+                className="w-full h-full object-cover"
+              />
+              <span className="absolute top-3 right-3 bg-brand-500 text-white text-[11px] font-semibold px-3 py-1 rounded-full shadow">
+                Gift
+              </span>
             </div>
-          )}
-          <span className="absolute top-3 right-3 bg-brand-500 text-white text-[11px] font-semibold px-3 py-1 rounded-full shadow">
-            Gift
-          </span>
-        </div>
 
-        {/* Body */}
-        <div className="px-5 pt-4 pb-5 space-y-4 bg-white overflow-y-auto max-h-[70vh]">
-          {/* Title + distance */}
-          <div className="flex items-start justify-between gap-2">
-            <h2 className="text-[18px] font-bold text-gray-900 leading-snug">
-              {name}
-            </h2>
-            <span className="flex items-center gap-1 text-[11px] text-gray-500 whitespace-nowrap mt-1 shrink-0">
-              <MapPin className="w-3 h-3" />
-              {distance}
-            </span>
-          </div>
+            {/* Body */}
+            <div className="px-5 pt-4 pb-5 space-y-4 bg-white overflow-y-auto max-h-[70vh]">
+              {/* Title row */}
+              <h2 className="text-[18px] font-bold text-gray-900 leading-snug">
+                {data.name}
+              </h2>
 
-          {/* Description */}
-          <div>
-            <p className="text-[13px] font-semibold text-gray-900 mb-1.5">
-              Description
-            </p>
-            <p className="text-[12px] text-gray-500 leading-relaxed">
-              {expanded || !isLong ? description : `${shortDesc}...`}
-              {isLong && (
-                <button
-                  onClick={() => setExpanded(!expanded)}
-                  className="text-brand-400 font-medium text-[12px] hover:underline ml-1"
-                >
-                  {expanded ? "Read less" : "Read more"}
-                </button>
-              )}
-            </p>
-          </div>
+              {/* Description */}
+              <div>
+                <p className="text-[13px] font-semibold text-gray-900 mb-1.5">
+                  Description
+                </p>
+                <p className="text-[12px] text-gray-500 leading-relaxed">
+                  {expanded || data.description.length <= 130 ? data.description : `${data.description.slice(0, 130)}...`}
+                  {data.description.length > 130 && (
+                    <button
+                      onClick={() => setExpanded(!expanded)}
+                      className="text-brand-400 font-medium text-[12px] hover:underline ml-1"
+                    >
+                      {expanded ? "Read less" : "Read more"}
+                    </button>
+                  )}
+                </p>
+              </div>
 
-          {/* Includes */}
-          <div>
-            <p className="text-[13px] font-semibold text-gray-900 mb-2">
-              Includes
-            </p>
-            <div className="space-y-2">
-              {includes.map((item, i) => (
-                <div key={i} className="flex items-center gap-2.5">
-                  <CheckCircle2
-                    className="w-5 h-5 shrink-0"
-                    style={{ color: "white", fill: "#22c55e" }}
-                  />
-                  <span className="text-[12.5px] text-gray-700">{item}</span>
+              {/* Includes */}
+              {data.includes && data.includes.length > 0 && (
+                <div>
+                  <p className="text-[13px] font-semibold text-gray-900 mb-2">
+                    Includes
+                  </p>
+                  <div className="space-y-2">
+                    {data.includes.map((item, i) => (
+                      <div key={i} className="flex items-center gap-2.5">
+                        <CheckCircle2
+                          className="w-5 h-5 shrink-0"
+                          style={{ color: "white", fill: "#22c55e" }}
+                        />
+                        <span className="text-[12.5px] text-gray-700">{item}</span>
+                      </div>
+                    ))}
+                  </div>
                 </div>
-              ))}
+              )}
+
+              {/* Info Grid */}
+              <div className="grid grid-cols-2 gap-2">
+                <InfoCell icon={Globe} label="Website" value={data.website || ""} isLink />
+                <InfoCell icon={MapPin} label="Location" value={data.location} />
+                <InfoCell icon={Calendar} label="Date Added" value={data.date_added} />
+                <InfoCell icon={Building2} label="Created by" value={data.created_by} valueClassName="italic" />
+              </div>
             </div>
-          </div>
-
-          {/* Info Grid */}
-          <div className="grid grid-cols-2 gap-2">
-            <InfoCell icon={Globe} label="Website" value={website} />
-            <InfoCell icon={Calendar} label="Date" value={date} />
-            <InfoCell
-              icon={Building2}
-              label="Offered by"
-              value={offeredBy}
-              valueClassName="font-black italic tracking-tight"
-            />
-            <InfoCell icon={Clock} label="Time" value={time} />
-          </div>
-
-          {/* Footer */}
-          <div className="grid grid-cols-2 gap-3 pt-1">
-            <button
-              onClick={onBlock}
-              className="py-3.5 rounded-2xl border border-gray-200 text-[13px] font-semibold text-gray-700 hover:bg-gray-50 transition-colors"
-            >
-              Block
-            </button>
-            <button
-              onClick={onCancel ?? (() => onOpenChange(false))}
-              className="py-3.5 rounded-2xl bg-brand-400 text-[13px] font-semibold text-white hover:bg-brand-500 transition-colors shadow-sm"
-            >
-              Cancel
-            </button>
-          </div>
-        </div>
+          </>
+        ) : null}
       </DialogContent>
     </Dialog>
   );
