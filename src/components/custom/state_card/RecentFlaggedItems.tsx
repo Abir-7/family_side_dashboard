@@ -3,58 +3,20 @@ import { useState } from "react";
 import { Eye } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { RecentFlaggedItemsModal } from "@/components/custom/modal/RecentFlaggedItemsModal";
+import { RecentFlaggedItemsModal, type FlaggedItem } from "@/components/custom/modal/RecentFlaggedItemsModal";
 
-interface FlaggedItem {
-  id: number;
-  image: string;
-  title: string;
-  type: "Event" | "Activity" | "Post";
-  reason: string;
-  time: string;
-}
-
-const FLAGGED_ITEMS: FlaggedItem[] = [
-  {
-    id: 1,
-    image:
-      "https://images.unsplash.com/photo-1599058917765-a780eda07a3e?w=80&h=80&fit=crop",
-    title: "Family Yoga Day",
-    type: "Event",
-    reason: "Inappropriate content",
-    time: "1hr ago",
-  },
-  {
-    id: 2,
-    image:
-      "https://images.unsplash.com/photo-1599058917765-a780eda07a3e?w=80&h=80&fit=crop",
-    title: "Family Yoga Day",
-    type: "Event",
-    reason: "Inappropriate content",
-    time: "1hr ago",
-  },
-  {
-    id: 3,
-    image:
-      "https://images.unsplash.com/photo-1599058917765-a780eda07a3e?w=80&h=80&fit=crop",
-    title: "Family Yoga Day",
-    type: "Event",
-    reason: "Inappropriate content",
-    time: "1hr ago",
-  },
-  {
-    id: 4,
-    image:
-      "https://images.unsplash.com/photo-1599058917765-a780eda07a3e?w=80&h=80&fit=crop",
-    title: "Family Yoga Day",
-    type: "Event",
-    reason: "Inappropriate content",
-    time: "1hr ago",
-  },
-];
-
-export function RecentFlaggedItems() {
+export function RecentFlaggedItems({ items = [] }: { items?: any[] }) {
   const [isModalOpen, setIsModalOpen] = useState(false);
+
+  // Map API data to component structure if necessary
+  const processedItems: FlaggedItem[] = items.map(item => ({
+    id: item.id,
+    image: item.image_url || "https://images.unsplash.com/photo-1599058917765-a780eda07a3e?w=80&h=80&fit=crop",
+    title: item.name,
+    type: (item.item_type || "Post") as any,
+    reason: item.reason || "Flagged for review",
+    time: item.time || "Recently",
+  }));
 
   return (
     <>
@@ -74,7 +36,7 @@ export function RecentFlaggedItems() {
 
         {/* Items */}
         <div className="flex flex-col gap-3">
-          {FLAGGED_ITEMS.slice(0, 3).map((item) => (
+          {processedItems.slice(0, 3).map((item) => (
             <div key={item.id} className="flex items-center gap-3">
               {/* Thumbnail */}
               <img
@@ -109,12 +71,15 @@ export function RecentFlaggedItems() {
               </div>
             </div>
           ))}
+          {processedItems.length === 0 && (
+            <p className="text-sm text-gray-400 text-center py-4">No flagged items</p>
+          )}
         </div>
       </div>
       <RecentFlaggedItemsModal
         isOpen={isModalOpen}
         onOpenChange={setIsModalOpen}
-        items={FLAGGED_ITEMS}
+        items={processedItems}
       />
     </>
   );

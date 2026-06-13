@@ -1,3 +1,4 @@
+import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import * as z from "zod";
 import { toast } from "sonner";
@@ -7,10 +8,10 @@ import { FormInput } from "@/components/forms/FormInput";
 import bgImg from "../../assets/bg.png";
 
 const loginSchema = z.object({
-  username: z
+  email: z
     .string()
-    .min(1, "Username is required")
-    .min(3, "Username must be at least 3 characters"),
+    .min(1, "Email is required")
+    .email("Invalid email address"),
   password: z
     .string()
     .min(1, "Password is required")
@@ -22,14 +23,47 @@ type LoginFormValues = z.infer<typeof loginSchema>;
 export default function LoginPage() {
   const { login } = useAuth();
   const navigate = useNavigate();
+  const [isLoading, setIsLoading] = useState(false);
 
-  const onSubmit = (data: LoginFormValues) => {
-    if (data.username === "admin" && data.password === "admin") {
-      login("admin");
-      toast.success("Login successful!");
-      navigate("/dashboard");
-    } else {
-      toast.error("Invalid credentials");
+  const onSubmit = async (data: LoginFormValues) => {
+    setIsLoading(true);
+    try {
+      const response = await fetch("http://10.10.12.60:8015/api/v1/auth/admin/login", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(data),
+      });
+
+      const result = await response.json();
+
+      if (response.ok && result.status === "success") {
+        const { access_token, refresh_token, ...userData } = result.data;
+        
+        login({
+          accessToken: access_token,
+          refreshToken: refresh_token,
+          user: {
+            id: userData.user_id,
+            name: userData.name,
+            email: userData.email,
+            userType: userData.user_type,
+            isEmailVerified: userData.is_email_verified,
+            onboardingCompleted: userData.onboarding_completed,
+          },
+        });
+
+        toast.success(result.message || "Login successful!");
+        navigate("/dashboard");
+      } else {
+        toast.error(result.message || "Invalid credentials");
+      }
+    } catch (error) {
+      toast.error("Something went wrong. Please try again.");
+      console.error("Login error:", error);
+    } finally {
+      setIsLoading(false);
     }
   };
 
@@ -50,6 +84,10 @@ export default function LoginPage() {
           font-family: 'DM Sans', sans-serif;
           letter-spacing: 0.3px;
           transition: background 0.2s, transform 0.1s;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          gap: 8px;
         }
         .login-btn:hover { background: #d14d56; }
         .login-btn:active { transform: scale(0.98); }
@@ -133,14 +171,14 @@ export default function LoginPage() {
           <FormWrapper
             schema={loginSchema}
             onSubmit={onSubmit}
-            defaultValues={{ username: "admin", password: "admin" }}
+            defaultValues={{ email: "", password: "" }}
             style={{ display: "flex", flexDirection: "column", gap: "1rem" }}
           >
             <FormInput
-              name="username"
-              label="Username"
-              placeholder="admin"
-              autoComplete="username"
+              name="email"
+              label="Email Address"
+              placeholder="admin@gmail.com"
+              autoComplete="email"
             />
 
             <FormInput
@@ -209,8 +247,8 @@ export default function LoginPage() {
             </label>
 
             {/* Submit */}
-            <button type="submit" className="login-btn">
-              Login
+            <button type="submit" className="login-btn" disabled={isLoading}>
+              {isLoading ? "Logging in..." : "Login"}
             </button>
           </FormWrapper>
 

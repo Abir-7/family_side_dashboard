@@ -3,7 +3,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/u
 import { Eye } from "lucide-react";
 import { Button } from "@/components/ui/button";
 
-interface FlaggedItem {
+export interface FlaggedItem {
   id: number;
   image: string;
   title: string;

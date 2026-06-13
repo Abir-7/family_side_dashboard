@@ -12,45 +12,6 @@ interface UpcomingEvent {
   tag: "Today" | "Tomorrow" | "Soon";
 }
 
-const UPCOMING_EVENTS: UpcomingEvent[] = [
-  {
-    id: 1,
-    image:
-      "https://images.unsplash.com/photo-1599058917765-a780eda07a3e?w=80&h=80&fit=crop",
-    title: "Family Yoga Day",
-    date: "16 May 2026",
-    time: "11:00 PM",
-    tag: "Today",
-  },
-  {
-    id: 2,
-    image:
-      "https://images.unsplash.com/photo-1599058917765-a780eda07a3e?w=80&h=80&fit=crop",
-    title: "Family Yoga Day",
-    date: "16 May 2026",
-    time: "11:00 PM",
-    tag: "Today",
-  },
-  {
-    id: 3,
-    image:
-      "https://images.unsplash.com/photo-1599058917765-a780eda07a3e?w=80&h=80&fit=crop",
-    title: "Family Yoga Day",
-    date: "16 May 2026",
-    time: "11:00 PM",
-    tag: "Today",
-  },
-  {
-    id: 4,
-    image:
-      "https://images.unsplash.com/photo-1599058917765-a780eda07a3e?w=80&h=80&fit=crop",
-    title: "Family Yoga Day",
-    date: "16 May 2026",
-    time: "11:00 PM",
-    tag: "Today",
-  },
-];
-
 const tagClass: Record<UpcomingEvent["tag"], string> = {
   Today: "bg-brand-100 text-brand-400 hover:bg-brand-100 border-0 rounded-full",
   Tomorrow:
@@ -58,7 +19,26 @@ const tagClass: Record<UpcomingEvent["tag"], string> = {
   Soon: "bg-gray-100 text-gray-500 hover:bg-gray-100 border-0 rounded-full",
 };
 
-export function UpcomingEvents() {
+export function UpcomingEvents({ items = [] }: { items?: any[] }) {
+  const processedEvents: UpcomingEvent[] = items.map(item => {
+    // Simple tag logic (can be improved)
+    let tag: "Today" | "Tomorrow" | "Soon" = "Soon";
+    const eventDate = new Date(item.date);
+    const today = new Date();
+    if (eventDate.toDateString() === today.toDateString()) {
+      tag = "Today";
+    }
+
+    return {
+      id: item.id,
+      image: item.image_url || "https://images.unsplash.com/photo-1599058917765-a780eda07a3e?w=80&h=80&fit=crop",
+      title: item.name,
+      date: item.date,
+      time: item.time,
+      tag: tag
+    };
+  });
+
   return (
     <div className="bg-white rounded-2xl border border-gray-200 p-5 flex flex-col gap-4">
       {/* Header */}
@@ -76,7 +56,7 @@ export function UpcomingEvents() {
 
       {/* Events */}
       <div className="flex flex-col gap-3">
-        {UPCOMING_EVENTS.map((event) => (
+        {processedEvents.map((event) => (
           <div key={event.id} className="flex items-center gap-3">
             {/* Thumbnail */}
             <img
@@ -106,6 +86,9 @@ export function UpcomingEvents() {
             </Badge>
           </div>
         ))}
+        {processedEvents.length === 0 && (
+          <p className="text-sm text-gray-400 text-center py-4">No upcoming events</p>
+        )}
       </div>
     </div>
   );

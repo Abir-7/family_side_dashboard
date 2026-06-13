@@ -2,44 +2,20 @@
 import { useState } from "react";
 import { ChevronRight, Clock } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
-import { ToDoTodayModal } from "@/components/custom/modal/ToDoTodayModal";
+import { ToDoTodayModal, type TodoItem } from "@/components/custom/modal/ToDoTodayModal";
 
-interface TodoItem {
-  id: number;
-  count: number;
-  title: string;
-  subtitle: string;
-}
-
-const TODO_ITEMS: TodoItem[] = [
-  {
-    id: 1,
-    count: 12,
-    title: "Pending approvals",
-    subtitle: "Actives & Events",
-  },
-  {
-    id: 2,
-    count: 12,
-    title: "Pending approvals",
-    subtitle: "Actives & Events",
-  },
-  {
-    id: 3,
-    count: 12,
-    title: "Pending approvals",
-    subtitle: "Actives & Events",
-  },
-  {
-    id: 4,
-    count: 12,
-    title: "Pending approvals",
-    subtitle: "Actives & Events",
-  },
-];
-
-export function ToDoToday() {
+export function ToDoToday({ items = [] }: { items?: any[] }) {
   const [isModalOpen, setIsModalOpen] = useState(false);
+
+  const processedItems: TodoItem[] = items.map(item => ({
+    id: item.id,
+    count: 1, // API gives a list of items, so each row is 1 item in this context? 
+    // Wait, the API response shows: "pending_todo": [{"id": 12, "name": "Little Stars Play Center New", "item_type": "Activity"}]
+    // The UI expected a summary: {count: 12, title: "Pending approvals", subtitle: "Actives & Events"}
+    // If the API gives individual items, I should probably show them.
+    title: item.name,
+    subtitle: item.item_type,
+  }));
 
   return (
     <>
@@ -49,7 +25,7 @@ export function ToDoToday() {
           <div className="flex items-center gap-2">
             <h2 className="text-base font-semibold text-gray-900">To do today</h2>
             <Badge className="bg-brand-400 text-white hover:bg-brand-400 border-0 rounded-full text-xs px-2 py-0 font-semibold h-5 min-w-5 flex items-center justify-center">
-              20
+              {items.length}
             </Badge>
           </div>
           <button
@@ -62,7 +38,7 @@ export function ToDoToday() {
 
         {/* Items */}
         <div className="flex flex-col divide-y divide-gray-50">
-          {TODO_ITEMS.slice(0, 3).map((item) => (
+          {processedItems.slice(0, 3).map((item) => (
             <button
               key={item.id}
               className="flex items-center gap-4 py-3.5 hover:bg-gray-50/60 transition-colors -mx-1 px-1 rounded-xl"
@@ -89,12 +65,15 @@ export function ToDoToday() {
               <ChevronRight className="w-4 h-4 text-gray-300 shrink-0" />
             </button>
           ))}
+          {items.length === 0 && (
+            <p className="text-sm text-gray-400 text-center py-4">No pending tasks</p>
+          )}
         </div>
       </div>
       <ToDoTodayModal
         isOpen={isModalOpen}
         onOpenChange={setIsModalOpen}
-        items={TODO_ITEMS}
+        items={processedItems as any}
       />
     </>
   );
