@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Search, Pencil, Trash2, Ban } from "lucide-react";
+import { Search, Loader2 } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Pagination } from "@/components/custom/pagination";
 import {
@@ -10,26 +10,16 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { CreateSubCategoryModal } from "@/components/custom/modal/create_sub_category";
-import { UpdateSubCategoryModal } from "@/components/custom/modal/update_sub_category";
-import { ConfirmationModal } from "@/components/custom/modal/confirmation_modal";
+import { useGetCategoriesQuery, useGetSubCategoriesQuery } from "@/lib/redux/apis/categoryApi";
 
 interface SubCategory {
   id: number;
   name: string;
-  category: string; // The category it belongs to
-  logo: string;
-  active: boolean;
+  category_id: number;
+  category_name: string;
+  image_url: string | null;
+  is_active: boolean;
 }
-
-const ALL_SUBCATEGORIES: SubCategory[] = Array.from({ length: 80 }, (_, i) => ({
-  id: i + 1,
-  name: "Sub-Category Name",
-  category: ["Doctor", "Nursery", "Playground", "Sports"][i % 4],
-  logo: `https://api.dicebear.com/7.x/shapes/svg?seed=${i + 1}`,
-  active: true,
-}));
-
-const PAGE_SIZE = 28;
 
 function SubCategoryCard({
   subCategory,
@@ -46,45 +36,36 @@ function SubCategoryCard({
     <div className="flex items-center gap-3 px-3 py-2.5 rounded-2xl border border-gray-200 bg-white hover:border-gray-300 transition-colors">
       <div className="w-9 h-9 rounded-xl overflow-hidden shrink-0 bg-brand-50 border border-gray-100 flex items-center justify-center">
         <img
-          src={subCategory.logo}
+          src={subCategory.image_url || "/assets/placeholder.png"}
           alt={subCategory.name}
           className="w-full h-full object-cover"
-          onError={(e) => {
-            (e.currentTarget as HTMLImageElement).style.display = "none";
-          }}
         />
       </div>
 
       <div className="flex-1 truncate">
         <p className="text-sm text-gray-700 font-medium truncate">{subCategory.name}</p>
-        <p className="text-xs text-gray-400 truncate">{subCategory.category}</p>
+        <p className="text-xs text-gray-400 truncate">{subCategory.category_name || "N/A"}</p>
       </div>
 
       <div className="flex items-center gap-0.5 shrink-0">
         <button
           onClick={() => onToggleStatus(subCategory.id)}
-          title={subCategory.active ? "Set Inactive" : "Set Active"}
           className={`p-1.5 rounded-lg transition-colors ${
-            !subCategory.active
+            !subCategory.is_active
               ? "text-red-500 bg-red-50 hover:bg-red-100"
               : "text-gray-400 hover:text-red-500 hover:bg-red-50"
           }`}
         >
-          <Ban className="w-3.5 h-3.5" strokeWidth={1.8} />
         </button>
         <button
           onClick={() => onDelete(subCategory.id)}
-          title="Delete"
           className="p-1.5 rounded-lg text-gray-400 hover:text-red-500 hover:bg-red-50 transition-colors"
         >
-          <Trash2 className="w-3.5 h-3.5" strokeWidth={1.8} />
         </button>
         <button
           onClick={() => onEdit(subCategory.id)}
-          title="Edit"
           className="p-1.5 rounded-lg text-gray-400 hover:text-blue-500 hover:bg-blue-50 transition-colors"
         >
-          <Pencil className="w-3.5 h-3.5" strokeWidth={1.8} />
         </button>
       </div>
     </div>
@@ -92,63 +73,28 @@ function SubCategoryCard({
 }
 
 export default function SubCategoryPage() {
-  const [subCategories, setSubCategories] = useState<SubCategory[]>(ALL_SUBCATEGORIES);
   const [search, setSearch] = useState("");
-  const [filterCategory, setFilterCategory] = useState("all");
+  const [filterCategory, setFilterCategory] = useState<number | null>(null);
   const [currentPage, setCurrentPage] = useState(1);
+  const limit = 28;
 
-  const [selectedSubCategoryId, setSelectedSubCategoryId] = useState<number | null>(null);
-  const [isUpdateModalOpen, setIsUpdateModalOpen] = useState(false);
-  const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
-  const [isStatusModalOpen, setIsStatusModalOpen] = useState(false);
-
-  const filtered = subCategories.filter((c) => {
-    const matchesSearch = c.name.toLowerCase().includes(search.toLowerCase());
-    const matchesCategory = filterCategory === "all" || c.category === filterCategory;
-    return matchesSearch && matchesCategory;
-  });
-
-  const totalPages = Math.ceil(filtered.length / PAGE_SIZE);
-  const paginated = filtered.slice(
-    (currentPage - 1) * PAGE_SIZE,
-    currentPage * PAGE_SIZE,
+  const { data: categoriesData } = useGetCategoriesQuery({ page: 1, limit: 100 });
+  const { data: subCategoriesData, isLoading } = useGetSubCategoriesQuery(
+    { category_id: filterCategory || 0, page: currentPage, limit },
+    { skip: !filterCategory }
   );
 
-  const selectedSubCategory = subCategories.find((c) => c.id === selectedSubCategoryId);
+  const subCategories = subCategoriesData?.data?.items || [];
+  const totalPages = subCategoriesData ? Math.ceil(subCategoriesData.data.total / limit) : 1;
 
   const handleSearch = (val: string) => {
     setSearch(val);
     setCurrentPage(1);
   };
 
-  const handleStatusChange = (id: number) => {
-    setSelectedSubCategoryId(id);
-    setIsStatusModalOpen(true);
-  };
-
-  const confirmStatusChange = () => {
-    if (selectedSubCategoryId) {
-      setSubCategories((prev) =>
-        prev.map((c) => (c.id === selectedSubCategoryId ? { ...c, active: !c.active } : c)),
-      );
-    }
-  };
-
-  const handleDelete = (id: number) => {
-    setSelectedSubCategoryId(id);
-    setIsDeleteModalOpen(true);
-  };
-
-  const confirmDelete = () => {
-    if (selectedSubCategoryId) {
-      setSubCategories((prev) => prev.filter((c) => c.id !== selectedSubCategoryId));
-    }
-  };
-
-  const handleEdit = (id: number) => {
-    setSelectedSubCategoryId(id);
-    setIsUpdateModalOpen(true);
-  };
+  const filtered = subCategories.filter((c: any) =>
+    c.name.toLowerCase().includes(search.toLowerCase())
+  );
 
   return (
     <div className="bg-white rounded-2xl border border-gray-100 p-5 min-h-[600px] flex flex-col">
@@ -163,77 +109,55 @@ export default function SubCategoryPage() {
                     className="pl-9 h-11 rounded-full border-gray-200 text-sm focus-visible:ring-0 focus-visible:border-gray-300"
                 />
             </div>
-            <Select value={filterCategory} onValueChange={(v) => { setFilterCategory(v); setCurrentPage(1); }}>
+            <Select onValueChange={(v) => { setFilterCategory(Number(v)); setCurrentPage(1); }}>
                 <SelectTrigger className="!h-11 w-40 rounded-full border-gray-200 text-sm text-gray-600">
                     <SelectValue placeholder="Category" />
                 </SelectTrigger>
                 <SelectContent>
-                    <SelectItem value="all">All Categories</SelectItem>
-                    <SelectItem value="Doctor">Doctor</SelectItem>
-                    <SelectItem value="Nursery">Nursery</SelectItem>
-                    <SelectItem value="Playground">Playground</SelectItem>
-                    <SelectItem value="Sports">Sports</SelectItem>
+                    {categoriesData?.data?.items?.map((cat: any) => (
+                        <SelectItem key={cat.id} value={cat.id.toString()}>{cat.name}</SelectItem>
+                    ))}
                 </SelectContent>
             </Select>
         </div>
         <CreateSubCategoryModal />
       </div>
 
-      <div className="flex-1">
-        {paginated.length === 0 ? (
+      <div className="flex-1 relative min-h-[300px]">
+        {isLoading && (
+            <div className="absolute inset-0 bg-white/50 backdrop-blur-[1px] z-10 flex items-center justify-center">
+              <Loader2 className="w-8 h-8 text-brand-400 animate-spin" />
+            </div>
+        )}
+        {!filterCategory ? (
+            <div className="flex items-center justify-center h-64 text-gray-400 text-sm">
+                Please select a category to view sub-categories.
+            </div>
+        ) : filtered.length === 0 ? (
           <div className="flex items-center justify-center h-64 text-gray-400 text-sm">
             No sub-categories found.
           </div>
         ) : (
           <div className="grid grid-cols-4 gap-3">
-            {paginated.map((cat) => (
+            {filtered.map((cat: any) => (
               <SubCategoryCard
                 key={cat.id}
                 subCategory={cat}
-                onToggleStatus={handleStatusChange}
-                onDelete={handleDelete}
-                onEdit={handleEdit}
+                onToggleStatus={() => {}}
+                onDelete={() => {}}
+                onEdit={() => {}}
               />
             ))}
           </div>
         )}
       </div>
 
-      <Pagination
-        currentPage={currentPage}
-        totalPages={totalPages}
-        onPageChange={setCurrentPage}
-      />
-
-      {selectedSubCategory && (
-        <>
-          <UpdateSubCategoryModal
-            isOpen={isUpdateModalOpen}
-            onOpenChange={setIsUpdateModalOpen}
-            initialData={{ 
-              name: selectedSubCategory.name,
-              category: selectedSubCategory.category 
-            }}
-          />
-          <ConfirmationModal
-            isOpen={isDeleteModalOpen}
-            onOpenChange={setIsDeleteModalOpen}
-            title="Delete Sub-Category"
-            description={`Are you sure you want to delete ${selectedSubCategory.name}? This action cannot be undone.`}
-            onConfirm={confirmDelete}
-            confirmLabel="Delete"
-            variant="destructive"
-          />
-          <ConfirmationModal
-            isOpen={isStatusModalOpen}
-            onOpenChange={setIsStatusModalOpen}
-            title={selectedSubCategory.active ? "Set Inactive" : "Set Active"}
-            description={`Are you sure you want to set ${selectedSubCategory.name} to ${selectedSubCategory.active ? "inactive" : "active"}?`}
-            onConfirm={confirmStatusChange}
-            confirmLabel={selectedSubCategory.active ? "Set Inactive" : "Set Active"}
-            variant={selectedSubCategory.active ? "destructive" : "default"}
-          />
-        </>
+      {filterCategory && (
+        <Pagination
+          currentPage={currentPage}
+          totalPages={totalPages}
+          onPageChange={setCurrentPage}
+        />
       )}
     </div>
   );

@@ -1,7 +1,7 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import {
   AreaChart,
   Area,
@@ -11,9 +11,8 @@ import {
   Tooltip,
   ResponsiveContainer,
 } from "recharts";
-import { ChevronDown } from "lucide-react";
-import { useAuth } from "@/lib/auth/useAuth";
-import { toast } from "sonner";
+import { ChevronDown, Loader2 } from "lucide-react";
+import { useGetDashboardChartDataQuery } from "@/lib/redux/apis/dashboardApi";
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 type Tab = "activities" | "events" | "users" | "gifts";
@@ -45,45 +44,14 @@ const CustomTooltip = ({ active, payload, label }: any) => {
 
 // ─── Component ────────────────────────────────────────────────────────────────
 export default function ActivityOverview() {
-  const { accessToken } = useAuth();
   const [activeTab, setActiveTab] = useState<Tab>("activities");
   const [period, setPeriod] = useState<Period>("2026");
   const [showPeriodMenu, setShowPeriodMenu] = useState(false);
-  const [chartData, setChartData] = useState<any[]>([]);
-  const [isLoading, setIsLoading] = useState(false);
 
-  useEffect(() => {
-    const fetchChartData = async () => {
-      setIsLoading(true);
-      try {
-        const response = await fetch(
-          `http://10.10.12.60:8015/api/v1/admin/dashboard/chart?tab=${activeTab}&timeframe=${period}`,
-          {
-            headers: {
-              Authorization: `Bearer ${accessToken}`,
-            },
-          }
-        );
-        const result = await response.json();
-        if (result.status === "success") {
-          setChartData(result.data.points);
-        } else {
-          toast.error(result.message || "Failed to load chart data");
-        }
-      } catch (error) {
-        console.error("Chart error:", error);
-        toast.error("An error occurred while fetching chart data");
-      } finally {
-        setIsLoading(false);
-      }
-    };
+  const { data, isLoading } = useGetDashboardChartDataQuery({ tab: activeTab, timeframe: period });
 
-    if (accessToken) {
-      fetchChartData();
-    }
-  }, [accessToken, activeTab, period]);
-
-  const data = chartData.map((point) => ({
+  const chartData = data?.data?.points || [];
+  const chartMappedData = chartData.map((point: any) => ({
     month: point.label,
     value: point.value,
   }));
@@ -150,12 +118,12 @@ export default function ActivityOverview() {
       <div className="flex-1 relative">
         {isLoading && (
           <div className="absolute inset-0 flex items-center justify-center bg-white/50 z-10">
-            <span className="text-sm text-gray-500">Loading chart...</span>
+            <Loader2 className="w-8 h-8 text-brand-400 animate-spin" />
           </div>
         )}
         <ResponsiveContainer width="100%" height={260}>
           <AreaChart
-            data={data}
+            data={chartMappedData}
             margin={{ top: 10, right: 10, left: -20, bottom: 0 }}
           >
             <defs>

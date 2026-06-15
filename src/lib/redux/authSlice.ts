@@ -14,22 +14,31 @@ interface AuthState {
   } | null;
 }
 
+const storedToken = localStorage.getItem("accessToken");
+const storedRefreshToken = localStorage.getItem("refreshToken");
+const storedUser = localStorage.getItem("user")
+  ? JSON.parse(localStorage.getItem("user")!)
+  : null;
+
 const initialState: AuthState = {
-  isAuthenticated: false,
-  accessToken: null,
-  refreshToken: null,
-  user: null,
+  isAuthenticated: !!storedToken,
+  accessToken: storedToken,
+  refreshToken: storedRefreshToken,
+  user: storedUser,
 };
 
 const authSlice = createSlice({
   name: "auth",
   initialState,
   reducers: {
-    login: (state, action: PayloadAction<{ 
-      accessToken: string; 
-      refreshToken: string;
-      user: AuthState["user"];
-    }>) => {
+    login: (
+      state,
+      action: PayloadAction<{
+        accessToken: string;
+        refreshToken: string;
+        user: AuthState["user"];
+      }>,
+    ) => {
       state.isAuthenticated = true;
       state.accessToken = action.payload.accessToken;
       state.refreshToken = action.payload.refreshToken;

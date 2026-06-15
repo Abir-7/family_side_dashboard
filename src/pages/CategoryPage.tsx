@@ -1,25 +1,25 @@
+/* eslint-disable @typescript-eslint/no-unused-vars */
 import { useState } from "react";
-import { Search, Pencil, Trash2, Ban } from "lucide-react";
+import { Search, Pencil, Trash2, Ban, Plus, Loader2 } from "lucide-react";
 import { Input } from "@/components/ui/input";
+import { Button } from "@/components/ui/button";
 
 import { Pagination } from "@/components/custom/pagination";
 import { CreateCategoryModal } from "@/components/custom/modal/create_category";
 import { UpdateCategoryModal } from "@/components/custom/modal/update_category";
 import { ConfirmationModal } from "@/components/custom/modal/confirmation_modal";
+import {
+  useGetCategoriesQuery,
+  useToggleCategoryStatusMutation,
+} from "@/lib/redux/apis/categoryApi";
+import { toast } from "sonner";
 
 interface Category {
   id: number;
   name: string;
-  logo: string;
-  active: boolean;
+  image_url: string | null;
+  is_active: boolean;
 }
-
-const ALL_CATEGORIES: Category[] = Array.from({ length: 80 }, (_, i) => ({
-  id: i + 1,
-  name: `Category ${i + 1}`,
-  logo: `https://api.dicebear.com/7.x/shapes/svg?seed=${i + 1}`,
-  active: true,
-}));
 
 const PAGE_SIZE = 28;
 
@@ -38,7 +38,7 @@ function CategoryCard({
     <div className="flex items-center gap-3 px-3 py-2.5 rounded-2xl border border-gray-200 bg-white hover:border-gray-300 transition-colors">
       <div className="w-9 h-9 rounded-xl overflow-hidden shrink-0 bg-brand-50 border border-gray-100 flex items-center justify-center">
         <img
-          src={category.logo}
+          src={category.image_url || "/assets/placeholder.png"}
           alt={category.name}
           className="w-full h-full object-cover"
           onError={(e) => {
@@ -54,9 +54,9 @@ function CategoryCard({
       <div className="flex items-center gap-0.5 shrink-0">
         <button
           onClick={() => onToggleStatus(category.id)}
-          title={category.active ? "Set Inactive" : "Set Active"}
+          title={category.is_active ? "Set Inactive" : "Set Active"}
           className={`p-1.5 rounded-lg transition-colors ${
-            !category.active
+            !category.is_active
               ? "text-red-500 bg-red-50 hover:bg-red-100"
               : "text-gray-400 hover:text-red-500 hover:bg-red-50"
           }`}
@@ -85,23 +85,34 @@ function CategoryCard({
 }
 
 export default function CategoryPage() {
-  const [categories, setCategories] = useState<Category[]>(ALL_CATEGORIES);
   const [search, setSearch] = useState("");
   const [currentPage, setCurrentPage] = useState(1);
-  
-  const [selectedCategoryId, setSelectedCategoryId] = useState<number | null>(null);
+  const limit = PAGE_SIZE;
+
+  const {
+    data: categoriesResponse,
+    isLoading,
+    refetch,
+  } = useGetCategoriesQuery({
+    page: currentPage,
+    limit,
+  });
+  const [toggleCategoryStatus] = useToggleCategoryStatusMutation();
+
+  const [selectedCategoryId, setSelectedCategoryId] = useState<number | null>(
+    null,
+  );
   const [isUpdateModalOpen, setIsUpdateModalOpen] = useState(false);
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
   const [isStatusModalOpen, setIsStatusModalOpen] = useState(false);
+  const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
+
+  const categories: Category[] = categoriesResponse?.data?.items || [];
+  const totalItems = categoriesResponse?.data?.total || 0;
+  const totalPages = Math.ceil(totalItems / limit);
 
   const filtered = categories.filter((c) =>
     c.name.toLowerCase().includes(search.toLowerCase()),
-  );
-
-  const totalPages = Math.ceil(filtered.length / PAGE_SIZE);
-  const paginated = filtered.slice(
-    (currentPage - 1) * PAGE_SIZE,
-    currentPage * PAGE_SIZE,
   );
 
   const selectedCategory = categories.find((c) => c.id === selectedCategoryId);
@@ -111,16 +122,20 @@ export default function CategoryPage() {
     setCurrentPage(1);
   };
 
-  const handleStatusChange = (id: number) => {
+  const handleStatusToggleRequest = (id: number) => {
     setSelectedCategoryId(id);
     setIsStatusModalOpen(true);
   };
 
-  const confirmStatusChange = () => {
+  const confirmStatusChange = async () => {
     if (selectedCategoryId) {
-      setCategories((prev) =>
-        prev.map((c) => (c.id === selectedCategoryId ? { ...c, active: !c.active } : c)),
-      );
+      try {
+        await toggleCategoryStatus(selectedCategoryId).unwrap();
+        toast.success("Category status updated successfully");
+        setIsStatusModalOpen(false);
+      } catch (error) {
+        toast.error("Failed to update category status");
+      }
     }
   };
 
@@ -130,9 +145,9 @@ export default function CategoryPage() {
   };
 
   const confirmDelete = () => {
-    if (selectedCategoryId) {
-      setCategories((prev) => prev.filter((c) => c.id !== selectedCategoryId));
-    }
+    // Implement delete mutation when available in API
+    console.log("Delete category", selectedCategoryId);
+    setIsDeleteModalOpen(false);
   };
 
   const handleEdit = (id: number) => {
@@ -141,7 +156,13 @@ export default function CategoryPage() {
   };
 
   return (
-    <div className="bg-white rounded-2xl border border-gray-100 p-5 min-h-[600px] flex flex-col">
+    <div className="bg-white rounded-2xl border border-gray-100 p-5 min-h-[600px] flex flex-col relative">
+      {isLoading && (
+        <div className="absolute inset-0 bg-white/50 backdrop-blur-[1px] z-20 flex items-center justify-center rounded-2xl">
+          <Loader2 className="w-10 h-10 text-brand-400 animate-spin" />
+        </div>
+      )}
+
       <div className="flex items-center justify-between mb-5">
         <div className="relative w-64">
           <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400 pointer-events-none" />
@@ -152,21 +173,26 @@ export default function CategoryPage() {
             className="pl-9 h-11 rounded-full border-gray-200 text-sm focus-visible:ring-0 focus-visible:border-gray-300"
           />
         </div>
-        <CreateCategoryModal />
+        <Button
+          className="gap-2 rounded-full"
+          onClick={() => setIsCreateModalOpen(true)}
+        >
+          <Plus className="w-4 h-4" /> Add New Category
+        </Button>
       </div>
 
       <div className="flex-1">
-        {paginated.length === 0 ? (
+        {filtered.length === 0 && !isLoading ? (
           <div className="flex items-center justify-center h-64 text-gray-400 text-sm">
             No categories found.
           </div>
         ) : (
-          <div className="grid grid-cols-4 gap-3">
-            {paginated.map((cat) => (
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-3">
+            {filtered.map((cat) => (
               <CategoryCard
                 key={cat.id}
                 category={cat}
-                onToggleStatus={handleStatusChange}
+                onToggleStatus={handleStatusToggleRequest}
                 onDelete={handleDelete}
                 onEdit={handleEdit}
               />
@@ -175,10 +201,18 @@ export default function CategoryPage() {
         )}
       </div>
 
-      <Pagination
-        currentPage={currentPage}
-        totalPages={totalPages}
-        onPageChange={setCurrentPage}
+      <div className="mt-6">
+        <Pagination
+          currentPage={currentPage}
+          totalPages={totalPages}
+          onPageChange={setCurrentPage}
+        />
+      </div>
+
+      <CreateCategoryModal
+        isOpen={isCreateModalOpen}
+        onOpenChange={setIsCreateModalOpen}
+        onSuccess={refetch}
       />
 
       {selectedCategory && (
@@ -200,11 +234,13 @@ export default function CategoryPage() {
           <ConfirmationModal
             isOpen={isStatusModalOpen}
             onOpenChange={setIsStatusModalOpen}
-            title={selectedCategory.active ? "Set Inactive" : "Set Active"}
-            description={`Are you sure you want to set ${selectedCategory.name} to ${selectedCategory.active ? "inactive" : "active"}?`}
+            title={selectedCategory.is_active ? "Set Inactive" : "Set Active"}
+            description={`Are you sure you want to set ${selectedCategory.name} to ${selectedCategory.is_active ? "inactive" : "active"}?`}
             onConfirm={confirmStatusChange}
-            confirmLabel={selectedCategory.active ? "Set Inactive" : "Set Active"}
-            variant={selectedCategory.active ? "destructive" : "default"}
+            confirmLabel={
+              selectedCategory.is_active ? "Set Inactive" : "Set Active"
+            }
+            variant={selectedCategory.is_active ? "destructive" : "default"}
           />
         </>
       )}

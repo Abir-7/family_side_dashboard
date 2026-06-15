@@ -1,18 +1,18 @@
 import { Button } from "@/components/ui/button";
 import {
   Dialog,
-  DialogClose,
   DialogContent,
   DialogFooter,
   DialogHeader,
   DialogTitle,
-  DialogTrigger,
 } from "@/components/ui/dialog";
 import { FormWrapper } from "@/components/forms/FormWrapper";
 import { FormInput } from "@/components/forms/FormInput";
 import { FormImageUpload } from "@/components/forms/FormImageUpload";
-import { Plus } from "lucide-react";
+import { Loader2 } from "lucide-react";
 import { z } from "zod";
+import { toast } from "sonner";
+import { useCreateCategoryMutation } from "@/lib/redux/apis/categoryApi";
 
 const categorySchema = z.object({
   name: z.string().min(1, "Name is required"),
@@ -21,19 +21,35 @@ const categorySchema = z.object({
 
 type CategoryFormValues = z.infer<typeof categorySchema>;
 
-export function CreateCategoryModal() {
-  const onSubmit = (data: CategoryFormValues) => {
-    console.log("Create Category:", data);
+interface CreateCategoryModalProps {
+  isOpen: boolean;
+  onOpenChange: (open: boolean) => void;
+  onSuccess: () => void;
+}
+
+export function CreateCategoryModal({ isOpen, onOpenChange, onSuccess }: CreateCategoryModalProps) {
+  const [createCategory, { isLoading }] = useCreateCategoryMutation();
+
+  const onSubmit = async (data: CategoryFormValues) => {
+    const formData = new FormData();
+    formData.append("name", data.name);
+    if (data.images.length > 0) {
+      formData.append("image", data.images[0]); // Updated to 'image' as requested
+    }
+
+    try {
+      await createCategory(formData).unwrap();
+      toast.success("Category created successfully");
+      onSuccess();
+      onOpenChange(false);
+    } catch (error) {
+      console.error("Create category error:", error);
+      toast.error("An error occurred while creating the category");
+    }
   };
 
   return (
-    <Dialog>
-      <DialogTrigger asChild>
-        <Button className="h-11 px-4 rounded-full bg-brand-400 hover:bg-brand-500 text-white text-sm font-semibold gap-1.5 shadow-none">
-          Create category
-          <Plus className="w-4 h-4" />
-        </Button>
-      </DialogTrigger>
+    <Dialog open={isOpen} onOpenChange={onOpenChange}>
       <DialogContent className="sm:max-w-sm">
         <DialogHeader>
           <DialogTitle>Create Category</DialogTitle>
@@ -54,12 +70,13 @@ export function CreateCategoryModal() {
           <FormImageUpload name="images" label="Category Logo" />
 
           <DialogFooter className="pt-4">
-            <DialogClose asChild>
-              <Button type="button" variant="outline" className="rounded-full">
-                Cancel
-              </Button>
-            </DialogClose>
-            <Button type="submit" className="rounded-full">Create</Button>
+            <Button type="button" variant="outline" className="rounded-full" onClick={() => onOpenChange(false)}>
+              Cancel
+            </Button>
+            <Button type="submit" className="rounded-full" disabled={isLoading}>
+              {isLoading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+              Create
+            </Button>
           </DialogFooter>
         </FormWrapper>
       </DialogContent>

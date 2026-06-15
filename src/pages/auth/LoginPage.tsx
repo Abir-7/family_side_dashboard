@@ -1,10 +1,10 @@
-import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import * as z from "zod";
 import { toast } from "sonner";
 import { useAuth } from "../../lib/auth/useAuth";
 import { FormWrapper } from "@/components/forms/FormWrapper";
 import { FormInput } from "@/components/forms/FormInput";
+import { useLoginMutation } from "@/lib/redux/apis/authApi";
 import bgImg from "../../assets/bg.png";
 
 const loginSchema = z.object({
@@ -23,22 +23,13 @@ type LoginFormValues = z.infer<typeof loginSchema>;
 export default function LoginPage() {
   const { login } = useAuth();
   const navigate = useNavigate();
-  const [isLoading, setIsLoading] = useState(false);
+  const [loginMutation, { isLoading }] = useLoginMutation();
 
   const onSubmit = async (data: LoginFormValues) => {
-    setIsLoading(true);
     try {
-      const response = await fetch("http://10.10.12.60:8015/api/v1/auth/admin/login", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify(data),
-      });
+      const result = await loginMutation(data).unwrap();
 
-      const result = await response.json();
-
-      if (response.ok && result.status === "success") {
+      if (result.status === "success") {
         const { access_token, refresh_token, ...userData } = result.data;
         
         login({
@@ -59,11 +50,9 @@ export default function LoginPage() {
       } else {
         toast.error(result.message || "Invalid credentials");
       }
-    } catch (error) {
-      toast.error("Something went wrong. Please try again.");
+    } catch (error: any) {
+      toast.error(error.data?.message || "Something went wrong. Please try again.");
       console.error("Login error:", error);
-    } finally {
-      setIsLoading(false);
     }
   };
 

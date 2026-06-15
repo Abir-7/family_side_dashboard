@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { Eye, Trash2, Search, Plus, Loader2 } from "lucide-react";
 import {
@@ -21,102 +21,46 @@ import {
 import { EventDetailsModal } from "@/components/custom/modal/EventDetailsModal";
 import { DeleteEventModal } from "@/components/custom/modal/DeleteEventModal";
 import { Pagination } from "@/components/custom/pagination";
-import { useAuth } from "@/lib/auth/useAuth";
 import { toast } from "sonner";
-
-interface Event {
-  id: number;
-  name: string;
-  image_url: string | null;
-  created_by: string;
-  category: string;
-  location: string;
-  fee: number;
-}
+import { useGetEventsQuery, useDeleteEventMutation } from "@/lib/redux/apis/eventApi";
 
 export default function EventsPage() {
   const navigate = useNavigate();
-  const { accessToken } = useAuth();
   
-  const [events, setEvents] = useState<Event[]>([]);
-  const [isLoading, setIsLoading] = useState(true);
-  const [search, setSearch] = useState("");
   const [currentPage, setCurrentPage] = useState(1);
-  const [totalPages, setTotalPages] = useState(1);
+  const [search, setSearch] = useState("");
   const [limit] = useState(10);
   
+  const { data, isLoading } = useGetEventsQuery({ page: currentPage, limit });
+  const [deleteEvent] = useDeleteEventMutation();
+
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
   const [selectedEventId, setSelectedEventId] = useState<number | null>(null);
   const [selectedEventName, setSelectedEventName] = useState("");
 
-  useEffect(() => {
-    const fetchEvents = async () => {
-      setIsLoading(true);
-      try {
-        const url = new URL("http://10.10.12.60:8015/api/v1/admin/events");
-        url.searchParams.append("page", currentPage.toString());
-        url.searchParams.append("limit", limit.toString());
-
-        const response = await fetch(url.toString(), {
-          headers: {
-            Authorization: `Bearer ${accessToken}`,
-          },
-        });
-
-        const result = await response.json();
-        if (result.status === "success") {
-          setEvents(result.data.items);
-          setTotalPages(Math.ceil(result.data.total / limit));
-        } else {
-          toast.error(result.message || "Failed to fetch events");
-        }
-      } catch (error) {
-        console.error("Fetch events error:", error);
-        toast.error("An error occurred while fetching events");
-      } finally {
-        setIsLoading(false);
-      }
-    };
-
-    if (accessToken) {
-      fetchEvents();
-    }
-  }, [accessToken, currentPage, limit]);
-
-  const handleDeleteClick = (event: Event) => {
+  const handleDeleteClick = (event: any) => {
     setSelectedEventId(event.id);
     setSelectedEventName(event.name);
     setIsDeleteModalOpen(true);
   };
 
   const handleConfirmDelete = async () => {
-    if (!selectedEventId || !accessToken) return;
+    if (!selectedEventId) return;
 
     try {
-      const response = await fetch(`http://10.10.12.60:8015/api/v1/admin/events/${selectedEventId}`, {
-        method: "DELETE",
-        headers: {
-          Authorization: `Bearer ${accessToken}`,
-        },
-      });
-
-      const result = await response.json();
-      if (response.ok && result.status === "success") {
-        toast.success("Event deleted successfully");
-        // Remove from local state
-        setEvents((prev) => prev.filter((e) => e.id !== selectedEventId));
-        setIsDeleteModalOpen(false);
-      } else {
-        toast.error(result.message || "Failed to delete event");
-      }
+      await deleteEvent(selectedEventId).unwrap();
+      toast.success("Event deleted successfully");
+      setIsDeleteModalOpen(false);
     } catch (error) {
       console.error("Delete event error:", error);
       toast.error("An error occurred while deleting the event");
     }
   };
 
-  const filteredEvents = events.filter((e) =>
+  const events = data?.data?.items || [];
+  const totalPages = data ? Math.ceil(data.data.total / limit) : 1;
+  const filteredEvents = events.filter((e: any) =>
     e.name.toLowerCase().includes(search.toLowerCase())
   );
 
@@ -156,33 +100,18 @@ export default function EventsPage() {
           <Table>
             <TableHeader>
               <TableRow className="hover:bg-transparent border-gray-100">
-                <TableHead className="text-gray-400 text-xs font-medium w-75 px-5">
-                  Name
-                </TableHead>
-                <TableHead className="text-gray-400 text-xs font-medium w-30">
-                  Created by
-                </TableHead>
-                <TableHead className="text-gray-400 text-xs font-medium w-32.5">
-                  Category
-                </TableHead>
-                <TableHead className="text-gray-400 text-xs font-medium w-37.5">
-                  Location
-                </TableHead>
-                <TableHead className="text-gray-400 text-xs font-medium w-20">
-                  Fee
-                </TableHead>
-                <TableHead className="text-gray-400 text-xs font-medium w-20 text-center">
-                  Action
-                </TableHead>
+                <TableHead className="text-gray-400 text-xs font-medium w-75 px-5">Name</TableHead>
+                <TableHead className="text-gray-400 text-xs font-medium w-30">Created by</TableHead>
+                <TableHead className="text-gray-400 text-xs font-medium w-32.5">Category</TableHead>
+                <TableHead className="text-gray-400 text-xs font-medium w-37.5">Location</TableHead>
+                <TableHead className="text-gray-400 text-xs font-medium w-20">Fee</TableHead>
+                <TableHead className="text-gray-400 text-xs font-medium w-20 text-center">Action</TableHead>
               </TableRow>
             </TableHeader>
 
             <TableBody>
-              {filteredEvents.map((event) => (
-                <TableRow
-                  key={event.id}
-                  className="border-gray-50 hover:bg-gray-50/60"
-                >
+              {filteredEvents.map((event: any) => (
+                <TableRow key={event.id} className="border-gray-50 hover:bg-gray-50/60">
                   <TableCell className="py-3 px-4">
                     <div className="flex items-center gap-3">
                       <img
@@ -196,21 +125,10 @@ export default function EventsPage() {
                     </div>
                   </TableCell>
 
-                  <TableCell className="text-sm text-gray-500 py-3">
-                    {event.created_by}
-                  </TableCell>
-
-                  <TableCell className="text-sm text-gray-500 py-3">
-                    {event.category}
-                  </TableCell>
-
-                  <TableCell className="text-sm text-gray-500 py-3">
-                    {event.location}
-                  </TableCell>
-
-                  <TableCell className="text-sm text-gray-500 py-3">
-                    ${event.fee.toFixed(2)}
-                  </TableCell>
+                  <TableCell className="text-sm text-gray-500 py-3">{event.created_by}</TableCell>
+                  <TableCell className="text-sm text-gray-500 py-3">{event.category}</TableCell>
+                  <TableCell className="text-sm text-gray-500 py-3">{event.location}</TableCell>
+                  <TableCell className="text-sm text-gray-500 py-3">${event.fee.toFixed(2)}</TableCell>
 
                   <TableCell className="py-3">
                     <div className="flex items-center justify-center gap-1">
