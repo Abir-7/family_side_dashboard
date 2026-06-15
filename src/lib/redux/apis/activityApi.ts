@@ -18,7 +18,15 @@ export const activityApi = apiSlice.injectEndpoints({
       }),
       invalidatesTags: ["Activity"],
     }),
+    createActivity: builder.mutation<any, FormData>({
+      query: (formData) => ({
+        url: `admin/activities`,
+        method: "POST",
+        body: formData,
+      }),
+      invalidatesTags: ["Activity"],
+    }),
   }),
 });
 
-export const { useGetActivitiesQuery, useGetActivityDetailsQuery, useDeleteActivityMutation } = activityApi;
+export const { useGetActivitiesQuery, useGetActivityDetailsQuery, useDeleteActivityMutation, useCreateActivityMutation } = activityApi;

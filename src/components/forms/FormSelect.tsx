@@ -21,6 +21,7 @@ interface FormSelectProps {
   error?: string;
   containerClassName?: string;
   disabled?: boolean;
+  onChange?: (val: string) => void;
 }
 
 export function FormSelect({
@@ -31,6 +32,7 @@ export function FormSelect({
   error,
   containerClassName,
   disabled,
+  onChange,
 }: FormSelectProps) {
   const {
     control,
@@ -59,7 +61,10 @@ export function FormSelect({
         render={({ field }) => (
           <Select
             value={field.value}
-            onValueChange={field.onChange}
+            onValueChange={(val) => {
+                field.onChange(val);
+                if (onChange) onChange(val);
+            }}
             disabled={disabled}
           >
             <SelectTrigger

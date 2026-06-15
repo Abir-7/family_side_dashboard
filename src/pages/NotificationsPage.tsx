@@ -1,16 +1,21 @@
 "use client";
 
+import { Calendar, ShoppingBag, Gift, X, Eye, Loader2, Check } from "lucide-react";
+import { useGetNotificationsQuery, useRejectNotificationMutation, useApproveNotificationMutation } from "@/lib/redux/apis/notificationApi";
+import { NotificationDetailModal } from "@/components/custom/modal/NotificationDetailModal";
 import { useState } from "react";
-import { Calendar, ShoppingBag, Gift, X, Eye } from "lucide-react";
+import { toast } from "sonner";
 
 type NotificationType = "event" | "activity" | "gift";
 
-interface Notification {
+interface NotificationItem {
   id: number;
-  type: NotificationType;
   title: string;
-  time: string;
-  message: string;
+  subtitle: string;
+  item_type: NotificationType;
+  item_id: number;
+  is_read: boolean;
+  time_label: string;
 }
 
 const iconMap: Record<
@@ -34,61 +39,18 @@ const iconMap: Record<
   },
 };
 
-const initialNotifications: Notification[] = [
-  {
-    id: 1,
-    type: "event",
-    title: "New Event Added",
-    time: "Tuesday 2:00 PM",
-    message: "John Doe want to Join",
-  },
-  {
-    id: 2,
-    type: "activity",
-    title: "New Activity Added",
-    time: "Tuesday 2:00 PM",
-    message: "John Doe want to Join",
-  },
-  {
-    id: 3,
-    type: "gift",
-    title: "New Gift Added",
-    time: "Tuesday 2:00 PM",
-    message: "John Doe want to Join",
-  },
-  {
-    id: 4,
-    type: "event",
-    title: "New Event Added",
-    time: "Tuesday 2:00 PM",
-    message: "John Doe want to Join",
-  },
-  {
-    id: 5,
-    type: "event",
-    title: "New Event Added",
-    time: "Tuesday 2:00 PM",
-    message: "John Doe want to Join",
-  },
-  {
-    id: 6,
-    type: "event",
-    title: "New Event Added",
-    time: "Tuesday 2:00 PM",
-    message: "John Doe want to Join",
-  },
-];
-
 function NotificationCard({
   notification,
   onView,
+  onApprove,
   onReject,
 }: {
-  notification: Notification;
+  notification: NotificationItem;
   onView: (id: number) => void;
+  onApprove: (id: number) => void;
   onReject: (id: number) => void;
 }) {
-  const { icon: Icon, bg, color } = iconMap[notification.type];
+  const { icon: Icon, bg, color } = iconMap[notification.item_type] || iconMap.event;
 
   return (
     <div className="flex items-center justify-between rounded-xl border border-gray-200 bg-white px-5 py-4 shadow-sm transition-all duration-200 hover:shadow-md">
@@ -102,18 +64,25 @@ function NotificationCard({
           <p className="text-sm font-semibold text-gray-900">
             {notification.title}
           </p>
-          <p className="text-xs text-gray-400 mt-0.5">{notification.time}</p>
-          <p className="text-xs text-gray-500 mt-0.5">{notification.message}</p>
+          <p className="text-xs text-gray-400 mt-0.5">{notification.time_label}</p>
+          <p className="text-xs text-gray-500 mt-0.5">{notification.subtitle}</p>
         </div>
       </div>
 
       <div className="flex items-center gap-2 flex-shrink-0 ml-4">
         <button
           onClick={() => onView(notification.id)}
-          className="flex items-center gap-1.5 rounded-lg border border-green-500 px-4 py-1.5 text-xs font-medium text-green-600 transition-colors hover:bg-green-50 active:scale-95"
+          className="flex items-center gap-1.5 rounded-lg border border-gray-200 px-4 py-1.5 text-xs font-medium text-gray-600 transition-colors hover:bg-gray-50 active:scale-95"
         >
           <Eye className="h-3.5 w-3.5" />
           View
+        </button>
+        <button
+          onClick={() => onApprove(notification.id)}
+          className="flex items-center gap-1.5 rounded-lg border border-brand-400 px-4 py-1.5 text-xs font-medium text-brand-600 transition-colors hover:bg-brand-50 active:scale-95"
+        >
+          <Check className="h-3.5 w-3.5" />
+          Approve
         </button>
         <button
           onClick={() => onReject(notification.id)}
@@ -128,28 +97,49 @@ function NotificationCard({
 }
 
 export default function NotificationsPage() {
-  const [notifications, setNotifications] =
-    useState<Notification[]>(initialNotifications);
-  const [dismissing, setDismissing] = useState<Set<number>>(new Set());
+  const [currentPage] = useState(1);
+  const [limit] = useState(10);
+  const { data, isLoading, refetch } = useGetNotificationsQuery({ page: currentPage, limit });
+  const [approveNotification] = useApproveNotificationMutation();
+  const [rejectNotification] = useRejectNotificationMutation();
+  const [isDetailModalOpen, setIsDetailModalOpen] = useState(false);
+  const [selectedNotificationId, setSelectedNotificationId] = useState<number | null>(null);
 
-  const remove = (id: number) => {
-    setDismissing((prev) => new Set(prev).add(id));
-    setTimeout(() => {
-      setNotifications((prev) => prev.filter((n) => n.id !== id));
-      setDismissing((prev) => {
-        const next = new Set(prev);
-        next.delete(id);
-        return next;
-      });
-    }, 300);
+  const notifications: NotificationItem[] = data?.data?.notifications || [];
+
+  const handleView = (id: number) => {
+    setSelectedNotificationId(id);
+    setIsDetailModalOpen(true);
   };
 
-  const handleView = (id: number) => remove(id);
-  const handleReject = (id: number) => remove(id);
+  const handleApprove = async (id: number) => {
+    try {
+        await approveNotification(id).unwrap();
+        toast.success("Notification approved successfully");
+        refetch();
+    } catch (error: any) {
+        toast.error(error.data?.message || "Failed to approve notification");
+    }
+  };
+  
+  const handleReject = async (id: number) => {
+    try {
+        await rejectNotification(id).unwrap();
+        toast.success("Notification rejected successfully");
+        refetch();
+    } catch (error: any) {
+        toast.error(error.data?.message || "Failed to reject notification");
+    }
+  };
 
   return (
-    <div className="space-y-4 p-6">
-      {notifications.length === 0 ? (
+    <div className="space-y-4 p-6 relative min-h-[400px]">
+      {isLoading && (
+        <div className="absolute inset-0 bg-white/50 backdrop-blur-[1px] z-10 flex items-center justify-center">
+            <Loader2 className="w-8 h-8 text-brand-400 animate-spin" />
+        </div>
+      )}
+      {notifications.length === 0 && !isLoading ? (
         <div className="rounded-xl border border-gray-200 bg-white p-10 text-center shadow-sm">
           <div className="mx-auto mb-3 flex h-12 w-12 items-center justify-center rounded-full bg-gray-100">
             <Calendar className="h-6 w-6 text-gray-400" />
@@ -161,25 +151,22 @@ export default function NotificationsPage() {
       ) : (
         <div className="space-y-3">
           {notifications.map((notification) => (
-            <div
+            <NotificationCard
               key={notification.id}
-              className="transition-all duration-300"
-              style={{
-                opacity: dismissing.has(notification.id) ? 0 : 1,
-                transform: dismissing.has(notification.id)
-                  ? "translateX(16px)"
-                  : "translateX(0)",
-              }}
-            >
-              <NotificationCard
-                notification={notification}
-                onView={handleView}
-                onReject={handleReject}
-              />
-            </div>
+              notification={notification}
+              onView={handleView}
+              onApprove={handleApprove}
+              onReject={handleReject}
+            />
           ))}
         </div>
       )}
+      
+      <NotificationDetailModal
+        isOpen={isDetailModalOpen}
+        onOpenChange={setIsDetailModalOpen}
+        notificationId={selectedNotificationId}
+      />
     </div>
   );
 }

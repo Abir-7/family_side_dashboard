@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { Dialog, DialogContent } from "@/components/ui/dialog";
 import {
   Globe,
@@ -9,25 +9,7 @@ import {
   Loader2,
   ExternalLink,
 } from "lucide-react";
-import { useAuth } from "@/lib/auth/useAuth";
-import { toast } from "sonner";
-
-interface GiftDetail {
-  id: number;
-  name: string;
-  image_url: string | null;
-  description: string;
-  website: string | null;
-  location: string;
-  created_by: string;
-  status: string;
-  date_added: string;
-  whatsapp: string | null;
-  date: string;
-  time: string;
-  tags: string[];
-  includes: string[];
-}
+import { useGetGiftDetailsQuery } from "@/lib/redux/apis/giftApi";
 
 interface GiftDetailModalProps {
   isOpen: boolean;
@@ -79,41 +61,9 @@ export function GiftDetailModal({
   onOpenChange,
   giftId,
 }: GiftDetailModalProps) {
-  const { accessToken } = useAuth();
-  const [data, setData] = useState<GiftDetail | null>(null);
-  const [isLoading, setIsLoading] = useState(false);
+  const { data: response, isLoading } = useGetGiftDetailsQuery(giftId!, { skip: !isOpen || !giftId });
+  const data = response?.data;
   const [expanded, setExpanded] = useState(false);
-
-  useEffect(() => {
-    const fetchDetails = async () => {
-      if (!giftId || !accessToken) return;
-      setIsLoading(true);
-      try {
-        const response = await fetch(`http://10.10.12.60:8015/api/v1/admin/gifts/${giftId}`, {
-          headers: {
-            Authorization: `Bearer ${accessToken}`,
-          },
-        });
-        const result = await response.json();
-        if (result.status === "success") {
-          setData(result.data);
-        } else {
-          toast.error(result.message || "Failed to fetch gift details");
-        }
-      } catch (error) {
-        console.error("Fetch gift details error:", error);
-        toast.error("An error occurred while fetching gift details");
-      } finally {
-        setIsLoading(false);
-      }
-    };
-
-    if (isOpen && giftId) {
-      fetchDetails();
-    }
-  }, [isOpen, giftId, accessToken]);
-
-  if (!isOpen) return null;
 
   return (
     <Dialog open={isOpen} onOpenChange={onOpenChange}>
@@ -147,22 +97,24 @@ export function GiftDetailModal({
               </h2>
 
               {/* Description */}
-              <div>
-                <p className="text-[13px] font-semibold text-gray-900 mb-1.5">
-                  Description
-                </p>
-                <p className="text-[12px] text-gray-500 leading-relaxed">
-                  {expanded || data.description.length <= 130 ? data.description : `${data.description.slice(0, 130)}...`}
-                  {data.description.length > 130 && (
-                    <button
-                      onClick={() => setExpanded(!expanded)}
-                      className="text-brand-400 font-medium text-[12px] hover:underline ml-1"
-                    >
-                      {expanded ? "Read less" : "Read more"}
-                    </button>
-                  )}
-                </p>
-              </div>
+              {data.description && (
+                <div>
+                  <p className="text-[13px] font-semibold text-gray-900 mb-1.5">
+                    Description
+                  </p>
+                  <p className="text-[12px] text-gray-500 leading-relaxed">
+                    {expanded || data.description.length <= 130 ? data.description : `${data.description.slice(0, 130)}...`}
+                    {data.description.length > 130 && (
+                      <button
+                        onClick={() => setExpanded(!expanded)}
+                        className="text-brand-400 font-medium text-[12px] hover:underline ml-1"
+                      >
+                        {expanded ? "Read less" : "Read more"}
+                      </button>
+                    )}
+                  </p>
+                </div>
+              )}
 
               {/* Includes */}
               {data.includes && data.includes.length > 0 && (
@@ -171,7 +123,7 @@ export function GiftDetailModal({
                     Includes
                   </p>
                   <div className="space-y-2">
-                    {data.includes.map((item, i) => (
+                    {data.includes.map((item: string, i: number) => (
                       <div key={i} className="flex items-center gap-2.5">
                         <CheckCircle2
                           className="w-5 h-5 shrink-0"
@@ -187,9 +139,9 @@ export function GiftDetailModal({
               {/* Info Grid */}
               <div className="grid grid-cols-2 gap-2">
                 <InfoCell icon={Globe} label="Website" value={data.website || ""} isLink />
-                <InfoCell icon={MapPin} label="Location" value={data.location} />
-                <InfoCell icon={Calendar} label="Date Added" value={data.date_added} />
-                <InfoCell icon={Building2} label="Created by" value={data.created_by} valueClassName="italic" />
+                <InfoCell icon={MapPin} label="Location" value={data.location || ""} />
+                <InfoCell icon={Calendar} label="Date Added" value={data.date_added || ""} />
+                <InfoCell icon={Building2} label="Created by" value={data.created_by || ""} valueClassName="italic" />
               </div>
             </div>
           </>

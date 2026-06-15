@@ -17,7 +17,8 @@ export function FormPillGroup({
   multiple = true,
   error,
   containerClassName,
-}: FormPillGroupProps) {
+  disabledText = "Select a category first",
+}: FormPillGroupProps & { disabledText?: string }) {
   const {
     control,
     formState: { errors },
@@ -43,6 +44,10 @@ export function FormPillGroup({
         name={name}
         control={control}
         render={({ field: { value, onChange } }) => {
+          if (options.length === 0) {
+              return <p className="text-sm text-gray-400">{disabledText}</p>;
+          }
+
           const currentValues = value ?? [];
 
           const toggle = (opt: string) => {

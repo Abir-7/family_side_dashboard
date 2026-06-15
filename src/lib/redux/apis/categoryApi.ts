@@ -11,6 +11,11 @@ export const categoryApi = apiSlice.injectEndpoints({
       query: () => `admin/categories/all`,
       providesTags: ["Category"],
     }),
+    getAllSubCategories: builder.query<any, number>({
+      query: (category_id) => `admin/sub-categories/${category_id}`,
+      providesTags: ["Category"],
+    }),
+
     getSubCategories: builder.query<any, { category_id: number; page: number; limit: number }>({
       query: ({ category_id, page, limit }) => 
         `admin/sub-categories?category_id=${category_id}&page=${page}&limit=${limit}`,
@@ -69,6 +74,7 @@ export const {
   useGetCategoriesQuery,
   useGetAllCategoriesQuery,
   useGetSubCategoriesQuery,
+  useGetAllSubCategoriesQuery,
   useCreateCategoryMutation, 
   useCreateSubCategoryMutation,
   useUpdateCategoryMutation,

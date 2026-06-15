@@ -17,7 +17,15 @@ export const giftApi = apiSlice.injectEndpoints({
       }),
       invalidatesTags: ["Gift"],
     }),
+    createGift: builder.mutation<any, FormData>({
+      query: (formData) => ({
+        url: `admin/gifts`,
+        method: "POST",
+        body: formData,
+      }),
+      invalidatesTags: ["Gift"],
+    }),
   }),
 });
 
-export const { useGetGiftsQuery, useGetGiftDetailsQuery, useDeleteGiftMutation } = giftApi;
+export const { useGetGiftsQuery, useGetGiftDetailsQuery, useDeleteGiftMutation, useCreateGiftMutation } = giftApi;

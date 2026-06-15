@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { Eye, Trash2, Search, Plus, MapPin, Tag, Loader2 } from "lucide-react";
 import {
@@ -18,9 +18,10 @@ import {
   TooltipTrigger,
 } from "@/components/ui/tooltip";
 import { Pagination } from "@/components/custom/pagination";
-import { useAuth } from "@/lib/auth/useAuth";
 import { toast } from "sonner";
 import { GiftDetailModal } from "@/components/custom/modal/GiftDetailsModal";
+import { DeleteGiftModal } from "@/components/custom/modal/DeleteGiftModal";
+import { useGetGiftsQuery, useDeleteGiftMutation } from "@/lib/redux/apis/giftApi";
 
 interface Gift {
   id: number;
@@ -34,51 +35,21 @@ interface Gift {
 
 export default function GiftsPage() {
   const navigate = useNavigate();
-  const { accessToken } = useAuth();
   
-  const [gifts, setGifts] = useState<Gift[]>([]);
-  const [isLoading, setIsLoading] = useState(true);
   const [search, setSearch] = useState("");
   const [currentPage, setCurrentPage] = useState(1);
-  const [totalPages, setTotalPages] = useState(1);
   const [limit] = useState(10);
+  
+  const { data, isLoading, refetch } = useGetGiftsQuery({ page: currentPage, limit });
+  const [deleteGift] = useDeleteGiftMutation();
 
   const [isDetailsModalOpen, setIsDetailsModalOpen] = useState(false);
+  const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
   const [selectedGiftId, setSelectedGiftId] = useState<number | null>(null);
+  const [selectedGiftName, setSelectedGiftName] = useState("");
 
-  useEffect(() => {
-    const fetchGifts = async () => {
-      setIsLoading(true);
-      try {
-        const url = new URL("http://10.10.12.60:8015/api/v1/admin/gifts");
-        url.searchParams.append("page", currentPage.toString());
-        url.searchParams.append("limit", limit.toString());
-
-        const response = await fetch(url.toString(), {
-          headers: {
-            Authorization: `Bearer ${accessToken}`,
-          },
-        });
-
-        const result = await response.json();
-        if (result.status === "success") {
-          setGifts(result.data.items);
-          setTotalPages(Math.ceil(result.data.total / limit));
-        } else {
-          toast.error(result.message || "Failed to fetch gifts");
-        }
-      } catch (error) {
-        console.error("Fetch gifts error:", error);
-        toast.error("An error occurred while fetching gifts");
-      } finally {
-        setIsLoading(false);
-      }
-    };
-
-    if (accessToken) {
-      fetchGifts();
-    }
-  }, [accessToken, currentPage, limit]);
+  const gifts: Gift[] = data?.data?.items || [];
+  const totalPages = data ? Math.ceil(data.data.total / limit) : 1;
 
   const filtered = gifts.filter(
     (g) =>
@@ -87,26 +58,21 @@ export default function GiftsPage() {
       g.location.toLowerCase().includes(search.toLowerCase()),
   );
 
-  const handleDelete = async (id: number) => {
-    try {
-      const response = await fetch(`http://10.10.12.60:8015/api/v1/admin/gifts/${id}`, {
-        method: "DELETE",
-        headers: {
-          Authorization: `Bearer ${accessToken}`,
-        },
-      });
+  const handleDeleteClick = (gift: Gift) => {
+    setSelectedGiftId(gift.id);
+    setSelectedGiftName(gift.name);
+    setIsDeleteModalOpen(true);
+  };
 
-      const result = await response.json();
-      if (response.ok && result.status === "success") {
-        toast.success("Gift deleted successfully");
-        // Remove from local state
-        setGifts((prev) => prev.filter((g) => g.id !== id));
-      } else {
-        toast.error(result.message || "Failed to delete gift");
-      }
-    } catch (error) {
-      console.error("Delete gift error:", error);
-      toast.error("An error occurred while deleting the gift");
+  const handleDelete = async () => {
+    if (selectedGiftId) {
+        try {
+            await deleteGift(selectedGiftId).unwrap();
+            toast.success("Gift deleted successfully");
+            refetch();
+        } catch (error: any) {
+            toast.error(error.data?.message || "Failed to delete gift");
+        }
     }
   };
 
@@ -251,7 +217,7 @@ export default function GiftsPage() {
                               variant="ghost"
                               size="icon"
                               className="h-8 w-8 text-brand-400 hover:text-brand-600 hover:bg-brand-50"
-                              onClick={() => handleDelete(gift.id)}
+                              onClick={() => handleDeleteClick(gift)}
                             >
                               <Trash2 className="w-4 h-4" />
                             </Button>
@@ -280,6 +246,12 @@ export default function GiftsPage() {
           isOpen={isDetailsModalOpen}
           onOpenChange={setIsDetailsModalOpen}
           giftId={selectedGiftId}
+        />
+        <DeleteGiftModal
+          isOpen={isDeleteModalOpen}
+          onOpenChange={setIsDeleteModalOpen}
+          giftName={selectedGiftName}
+          onConfirm={handleDelete}
         />
       </div>
     </TooltipProvider>

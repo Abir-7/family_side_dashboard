@@ -18,7 +18,15 @@ export const eventApi = apiSlice.injectEndpoints({
       }),
       invalidatesTags: ["Event"],
     }),
+    createEvent: builder.mutation<any, FormData>({
+      query: (formData) => ({
+        url: `admin/events`,
+        method: "POST",
+        body: formData,
+      }),
+      invalidatesTags: ["Event"],
+    }),
   }),
 });
 
-export const { useGetEventsQuery, useGetEventDetailsQuery, useDeleteEventMutation } = eventApi;
+export const { useGetEventsQuery, useGetEventDetailsQuery, useDeleteEventMutation, useCreateEventMutation } = eventApi;

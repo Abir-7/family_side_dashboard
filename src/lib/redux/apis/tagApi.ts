@@ -7,6 +7,10 @@ export const tagApi = apiSlice.injectEndpoints({
       query: ({ page, limit }) => `admin/tags?page=${page}&limit=${limit}`,
       providesTags: ["Tag"],
     }),
+    getAllTags: builder.query<any, void>({
+      query: () => `admin/tags/all`,
+      providesTags: ["Tag"],
+    }),
     createTag: builder.mutation<any, FormData>({
       query: (formData) => ({
         url: `admin/tags`,
@@ -35,6 +39,7 @@ export const tagApi = apiSlice.injectEndpoints({
 
 export const { 
   useGetTagsQuery,
+  useGetAllTagsQuery,
   useCreateTagMutation,
   useUpdateTagMutation,
   useToggleTagStatusMutation
