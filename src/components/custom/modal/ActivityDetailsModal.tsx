@@ -102,44 +102,50 @@ export function ActivityDetailsModal({
               {data.name}
             </h2>
 
-            <div>
-              <p className="text-[11px] font-semibold text-gray-800 mb-1">
-                Description
-              </p>
-              <p className="text-[11px] text-gray-500 leading-relaxed">
-                {isExpanded
-                  ? data.description
-                  : `${data.description.slice(0, 120)}...`}{" "}
-                <button
-                  onClick={() => setIsExpanded(!isExpanded)}
-                  className="text-brand-500 hover:text-brand-600 font-medium transition-colors"
-                >
-                  {isExpanded ? "Read less" : "Read more"}
-                </button>
-              </p>
-            </div>
+            {data.description && (
+                <div>
+                  <p className="text-[11px] font-semibold text-gray-800 mb-1">
+                    Description
+                  </p>
+                  <p className="text-[11px] text-gray-500 leading-relaxed">
+                    {isExpanded
+                      ? data.description
+                      : `${data.description.slice(0, 120)}${data.description.length > 120 ? '...' : ''}`}{" "}
+                    {data.description.length > 120 && (
+                        <button
+                          onClick={() => setIsExpanded(!isExpanded)}
+                          className="text-brand-500 hover:text-brand-600 font-medium transition-colors"
+                        >
+                          {isExpanded ? "Read less" : "Read more"}
+                        </button>
+                    )}
+                  </p>
+                </div>
+            )}
 
             <div className="grid grid-cols-2 gap-2">
               <InfoCell icon={Globe} label="Website" value={data.website || ""} isLink />
-              <InfoCell icon={Home} label="Location" value={data.location} />
-              <InfoCell icon={PenLine} label="Created by" value={data.created_by} />
+              <InfoCell icon={Home} label="Location" value={data.location || ""} />
+              <InfoCell icon={PenLine} label="Created by" value={data.created_by || ""} />
               <InfoCell
                 icon={Home}
                 label="Status"
-                value={data.status}
+                value={data.status || "N/A"}
                 valueClass="!text-green-600"
               />
-              <InfoCell icon={Calendar} label="Date Added" value={data.date_added} />
+              <InfoCell icon={Calendar} label="Date Added" value={data.date_added || ""} />
               <InfoCell icon={MessageCircle} label="Whatsapp" value={data.whatsapp || ""} isLink />
             </div>
             
              {/* Time */}
+             {(data.opening_days || data.opening_hours) && (
               <div className="bg-gray-50 rounded-xl px-3 py-2.5 flex items-center gap-2">
                 <Clock className="w-4 h-4 text-gray-500 shrink-0" />
                 <p className="text-[11px] font-medium text-gray-800">
-                  {data.opening_days} - {data.opening_hours}
+                  {data.opening_days || ""} - {data.opening_hours || ""}
                 </p>
               </div>
+             )}
 
             {/* Tags */}
             {data.tags && data.tags.length > 0 && (

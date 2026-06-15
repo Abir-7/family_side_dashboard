@@ -20,6 +20,7 @@ interface FormSelectProps {
   options: SelectOption[];
   error?: string;
   containerClassName?: string;
+  disabled?: boolean;
 }
 
 export function FormSelect({
@@ -29,6 +30,7 @@ export function FormSelect({
   options,
   error,
   containerClassName,
+  disabled,
 }: FormSelectProps) {
   const {
     control,
@@ -58,6 +60,7 @@ export function FormSelect({
           <Select
             value={field.value}
             onValueChange={field.onChange}
+            disabled={disabled}
           >
             <SelectTrigger
               className={cn(

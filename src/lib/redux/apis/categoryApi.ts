@@ -7,6 +7,10 @@ export const categoryApi = apiSlice.injectEndpoints({
       query: ({ page, limit }) => `admin/categories?page=${page}&limit=${limit}`,
       providesTags: ["Category"],
     }),
+    getAllCategories: builder.query<any, void>({
+      query: () => `admin/categories/all`,
+      providesTags: ["Category"],
+    }),
     getSubCategories: builder.query<any, { category_id: number; page: number; limit: number }>({
       query: ({ category_id, page, limit }) => 
         `admin/sub-categories?category_id=${category_id}&page=${page}&limit=${limit}`,
@@ -28,10 +32,33 @@ export const categoryApi = apiSlice.injectEndpoints({
       }),
       invalidatesTags: ["Category"],
     }),
+    updateCategory: builder.mutation<any, { id: number; formData: FormData }>({
+      query: ({ id, formData }) => ({
+        url: `admin/categories/${id}`,
+        method: "PUT",
+        body: formData,
+      }),
+      invalidatesTags: ["Category"],
+    }),
     toggleCategoryStatus: builder.mutation<any, number>({
       query: (id) => ({
         url: `admin/categories/${id}/toggle`,
         method: "PATCH",
+      }),
+      invalidatesTags: ["Category"],
+    }),
+    toggleSubCategoryStatus: builder.mutation<any, number>({
+      query: (id) => ({
+        url: `admin/sub-categories/${id}/toggle`,
+        method: "PATCH",
+      }),
+      invalidatesTags: ["Category"],
+    }),
+    updateSubCategory: builder.mutation<any, { id: number; formData: FormData }>({
+      query: ({ id, formData }) => ({
+        url: `admin/sub-categories/${id}`,
+        method: "PUT",
+        body: formData,
       }),
       invalidatesTags: ["Category"],
     }),
@@ -40,8 +67,12 @@ export const categoryApi = apiSlice.injectEndpoints({
 
 export const { 
   useGetCategoriesQuery,
+  useGetAllCategoriesQuery,
   useGetSubCategoriesQuery,
   useCreateCategoryMutation, 
   useCreateSubCategoryMutation,
-  useToggleCategoryStatusMutation 
+  useUpdateCategoryMutation,
+  useUpdateSubCategoryMutation,
+  useToggleCategoryStatusMutation,
+  useToggleSubCategoryStatusMutation
 } = categoryApi;

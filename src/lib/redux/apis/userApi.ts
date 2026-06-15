@@ -22,7 +22,33 @@ export const userApi = apiSlice.injectEndpoints({
       }),
       invalidatesTags: (_result, _error, { id }) => [{ type: "User", id }],
     }),
+    getProfile: builder.query<any, void>({
+      query: () => `admin/settings/profile`,
+      providesTags: ["User"],
+    }),
+    updateProfile: builder.mutation<any, { name: string; phone_number: string }>({
+      query: (data) => ({
+        url: `admin/settings/profile`,
+        method: "PATCH",
+        body: data,
+      }),
+      invalidatesTags: ["User"],
+    }),
+    changePassword: builder.mutation<any, any>({
+      query: (data) => ({
+        url: `admin/settings/security`,
+        method: "PATCH",
+        body: data,
+      }),
+    }),
   }),
 });
 
-export const { useGetUsersQuery, useGetUserDetailsQuery, useBlockUserMutation } = userApi;
+export const { 
+  useGetUsersQuery, 
+  useGetUserDetailsQuery, 
+  useBlockUserMutation, 
+  useUpdateProfileMutation,
+  useGetProfileQuery,
+  useChangePasswordMutation
+} = userApi;

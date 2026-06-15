@@ -1,7 +1,6 @@
 import { Button } from "@/components/ui/button";
 import {
   Dialog,
-  DialogClose,
   DialogContent,
   DialogFooter,
   DialogHeader,
@@ -11,6 +10,9 @@ import { FormWrapper } from "@/components/forms/FormWrapper";
 import { FormInput } from "@/components/forms/FormInput";
 import { FormImageUpload } from "@/components/forms/FormImageUpload";
 import { z } from "zod";
+import { useUpdateCategoryMutation } from "@/lib/redux/apis/categoryApi";
+import { toast } from "sonner";
+import { Loader2 } from "lucide-react";
 
 const categorySchema = z.object({
   name: z.string().min(1, "Name is required"),
@@ -22,13 +24,28 @@ type CategoryFormValues = z.infer<typeof categorySchema>;
 interface UpdateCategoryModalProps {
   isOpen: boolean;
   onOpenChange: (open: boolean) => void;
+  categoryId: number;
   initialData: { name: string };
 }
 
-export function UpdateCategoryModal({ isOpen, onOpenChange, initialData }: UpdateCategoryModalProps) {
-  const onSubmit = (data: CategoryFormValues) => {
-    console.log("Update Category:", data);
-    onOpenChange(false);
+export function UpdateCategoryModal({ isOpen, onOpenChange, categoryId, initialData }: UpdateCategoryModalProps) {
+  const [updateCategory, { isLoading }] = useUpdateCategoryMutation();
+
+  const onSubmit = async (data: CategoryFormValues) => {
+    const formData = new FormData();
+    formData.append("name", data.name);
+    if (data.images && data.images.length > 0) {
+      formData.append("image", data.images[0]);
+    }
+
+    try {
+      await updateCategory({ id: categoryId, formData }).unwrap();
+      toast.success("Category updated successfully");
+      onOpenChange(false);
+    } catch (error: any) {
+      console.error("Update category error:", error);
+      toast.error(error.data?.message || "Failed to update category");
+    }
   };
 
   return (
@@ -50,15 +67,25 @@ export function UpdateCategoryModal({ isOpen, onOpenChange, initialData }: Updat
             placeholder="Enter category name"
           />
 
-          <FormImageUpload name="images" label="Category Logo" optional />
+          <FormImageUpload name="images" label="Category Logo" />
 
           <DialogFooter className="pt-4">
-            <DialogClose asChild>
-              <Button type="button" variant="outline" className="rounded-full">
+            <Button 
+                type="button" 
+                variant="outline" 
+                className="rounded-full"
+                onClick={() => onOpenChange(false)}
+            >
                 Cancel
-              </Button>
-            </DialogClose>
-            <Button type="submit" className="rounded-full">Update</Button>
+            </Button>
+            <Button 
+                type="submit" 
+                className="rounded-full" 
+                disabled={isLoading}
+            >
+              {isLoading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+              Update
+            </Button>
           </DialogFooter>
         </FormWrapper>
       </DialogContent>

@@ -26,15 +26,26 @@ export function FormWrapper<T extends FieldValues>({
   style,
   ...useFormProps
 }: FormWrapperProps<T>) {
+  console.log("FormWrapper - Has Schema:", !!schema);
+  
   const methods = useForm<T>({
     ...useFormProps,
     resolver: schema ? zodResolver(schema) : undefined,
   });
 
+  const handleSubmit = (data: T) => {
+    console.log("FormWrapper - handleSubmit triggered, Data:", data);
+    onSubmit(data);
+  };
+
+  const handleInvalid = (errors: any) => {
+    console.log("FormWrapper - Validation Errors:", errors);
+  };
+
   return (
     <FormProvider {...methods}>
       <form
-        onSubmit={methods.handleSubmit(onSubmit)}
+        onSubmit={methods.handleSubmit(handleSubmit, handleInvalid)}
         className={className}
         style={style}
         noValidate

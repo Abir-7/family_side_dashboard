@@ -5,6 +5,7 @@ import { Separator } from "@/components/ui/separator";
 import { Bell } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { useGetProfileQuery } from "@/lib/redux/apis/userApi";
 
 const PAGE_INFO: Record<string, { title: string; subtitle: string }> = {
   "/dashboard": { title: "Overview", subtitle: "Welcome back to your dashboard" },
@@ -25,6 +26,7 @@ const PAGE_INFO: Record<string, { title: string; subtitle: string }> = {
 export default function DashboardLayout() {
   const location = useLocation();
   const info = PAGE_INFO[location.pathname] || { title: "Dashboard", subtitle: "Management portal" };
+  const { data: profileResponse } = useGetProfileQuery();
 
   return (
     <SidebarProvider>
@@ -46,8 +48,8 @@ export default function DashboardLayout() {
               </Link>
             </Button>
             <Avatar className="size-8">
-              <AvatarImage src="https://github.com/shadcn.png" />
-              <AvatarFallback>S</AvatarFallback>
+              <AvatarImage src={profileResponse?.data?.image_url} />
+              <AvatarFallback>{profileResponse?.data?.name?.charAt(0) || "S"}</AvatarFallback>
             </Avatar>
           </div>
         </header>

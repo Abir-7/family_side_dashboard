@@ -1,9 +1,11 @@
 import { useState } from "react";
-import { Pencil } from "lucide-react";
+import { Pencil, Loader2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { FormWrapper } from "@/components/forms/FormWrapper";
 import { FormInput } from "@/components/forms/FormInput";
 import { z } from "zod";
+import { useUpdateProfileMutation, useGetProfileQuery, useChangePasswordMutation } from "@/lib/redux/apis/userApi";
+import { toast } from "sonner";
 
 const accountSchema = z.object({
   name: z.string().min(1, "Name is required"),
@@ -11,7 +13,17 @@ const accountSchema = z.object({
   phone: z.string().min(1, "Phone number is required"),
 });
 
+const passwordSchema = z.object({
+  currentPassword: z.string().min(1, "Required"),
+  newPassword: z.string().min(1, "Required"),
+  confirmPassword: z.string().min(1, "Required"),
+}).refine((data) => data.newPassword === data.confirmPassword, {
+  message: "Passwords don't match",
+  path: ["confirmPassword"],
+});
+
 type AccountFormData = z.infer<typeof accountSchema>;
+type PasswordFormData = z.infer<typeof passwordSchema>;
 
 // ─── Section Card ─────────────────────────────────────────────────────────────
 function SectionCard({
@@ -84,11 +96,13 @@ function FieldView({ label, value }: { label: string; value: string }) {
 
 // ─── Main Page ────────────────────────────────────────────────────────────────
 export default function SettingsPage() {
+  const { data: profileResponse, isLoading: isProfileLoading, refetch } = useGetProfileQuery();
+  const [updateProfile, { isLoading: isUpdating }] = useUpdateProfileMutation();
+  const [changePassword, { isLoading: isChangingPassword }] = useChangePasswordMutation();
+  
   // Account state
   const [editingAccount, setEditingAccount] = useState(false);
-  const [name, setName] = useState("Sarah");
-  const [email, setEmail] = useState("example@gmail.com");
-  const [phone, setPhone] = useState("000-0000-000");
+  const profile = profileResponse?.data;
 
   // Security state
   const [editingSecurity, setEditingSecurity] = useState(false);
@@ -103,23 +117,36 @@ export default function SettingsPage() {
           editing={editingAccount}
           onEdit={() => setEditingAccount(true)}
         >
-          {editingAccount ? (
+          {isProfileLoading ? (
+            <div className="flex justify-center p-4">
+                <Loader2 className="w-8 h-8 text-brand-400 animate-spin" />
+            </div>
+          ) : editingAccount ? (
             <FormWrapper<AccountFormData>
               schema={accountSchema}
-              onSubmit={(data) => {
-                setName(data.name);
-                setEmail(data.email);
-                setPhone(data.phone);
-                setEditingAccount(false);
+              onSubmit={async (data) => {
+                try {
+                    await updateProfile({ name: data.name, phone_number: data.phone }).unwrap();
+                    refetch();
+                    setEditingAccount(false);
+                    toast.success("Profile updated successfully");
+                } catch (error: any) {
+                    toast.error(error.data?.message || "Failed to update profile");
+                }
               }}
-              defaultValues={{ name, email, phone }}
+              defaultValues={{ 
+                name: profile?.name || "", 
+                email: profile?.email || "", 
+                phone: profile?.phone_number || "" 
+              }}
               className="space-y-4"
             >
-              <FormInput name="name" label="Name" placeholder="Sarah" />
+              <FormInput name="name" label="Name" placeholder="Name" />
               <FormInput
                 name="email"
                 label="Email Address"
                 placeholder="example@gmail.com"
+                disabled
               />
               <FormInput
                 name="phone"
@@ -137,16 +164,18 @@ export default function SettingsPage() {
                 <Button
                   type="submit"
                   className="h-11 px-5 bg-brand-400 hover:bg-brand-500 text-white text-sm font-semibold rounded-full shadow-none"
+                  disabled={isUpdating}
                 >
+                  {isUpdating && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
                   Save Changes
                 </Button>
               </div>
             </FormWrapper>
           ) : (
             <div>
-              <FieldView label="Name" value={name} />
-              <FieldView label="Email Address" value={email} />
-              <FieldView label="Phone Number" value={phone} />
+              <FieldView label="Name" value={profile?.name || ""} />
+              <FieldView label="Email Address" value={profile?.email || ""} />
+              <FieldView label="Phone Number" value={profile?.phone_number || ""} />
             </div>
           )}
         </SectionCard>
@@ -157,13 +186,21 @@ export default function SettingsPage() {
           onEdit={() => setEditingSecurity(true)}
         >
           {editingSecurity ? (
-            <FormWrapper
-              schema={z.object({
-                currentPassword: z.string().min(1, "Required"),
-                newPassword: z.string().min(1, "Required"),
-                confirmPassword: z.string().min(1, "Required"),
-              })}
-              onSubmit={() => setEditingSecurity(false)}
+            <FormWrapper<PasswordFormData>
+              mode="onChange"
+              schema={passwordSchema}
+              onSubmit={async (data) => {
+                try {
+                    await changePassword({ 
+                        current_password: data.currentPassword, 
+                        new_password: data.newPassword 
+                    }).unwrap();
+                    toast.success("Password updated successfully");
+                    setEditingSecurity(false);
+                } catch (error: any) {
+                    toast.error(error.data?.message || "Failed to update password");
+                }
+              }}
               className="space-y-4"
             >
               <FormInput
@@ -197,7 +234,9 @@ export default function SettingsPage() {
                 <Button
                   type="submit"
                   className="h-11 px-5 bg-brand-400 hover:bg-brand-500 text-white text-sm font-semibold rounded-full shadow-none"
+                  disabled={isChangingPassword}
                 >
+                  {isChangingPassword && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
                   Update Password
                 </Button>
               </div>

@@ -1,6 +1,6 @@
 /* eslint-disable @typescript-eslint/no-unused-vars */
 import { useState } from "react";
-import { Search, Pencil, Trash2, Ban, Plus, Loader2 } from "lucide-react";
+import { Search, Pencil, Ban, Plus, Loader2 } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 
@@ -26,12 +26,10 @@ const PAGE_SIZE = 28;
 function CategoryCard({
   category,
   onToggleStatus,
-  onDelete,
   onEdit,
 }: {
   category: Category;
   onToggleStatus: (id: number) => void;
-  onDelete: (id: number) => void;
   onEdit: (id: number) => void;
 }) {
   return (
@@ -65,14 +63,6 @@ function CategoryCard({
         </button>
 
         <button
-          onClick={() => onDelete(category.id)}
-          title="Delete"
-          className="p-1.5 rounded-lg text-gray-400 hover:text-red-500 hover:bg-red-50 transition-colors"
-        >
-          <Trash2 className="w-3.5 h-3.5" strokeWidth={1.8} />
-        </button>
-
-        <button
           onClick={() => onEdit(category.id)}
           title="Edit"
           className="p-1.5 rounded-lg text-gray-400 hover:text-blue-500 hover:bg-blue-50 transition-colors"
@@ -103,7 +93,6 @@ export default function CategoryPage() {
     null,
   );
   const [isUpdateModalOpen, setIsUpdateModalOpen] = useState(false);
-  const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
   const [isStatusModalOpen, setIsStatusModalOpen] = useState(false);
   const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
 
@@ -137,17 +126,6 @@ export default function CategoryPage() {
         toast.error("Failed to update category status");
       }
     }
-  };
-
-  const handleDelete = (id: number) => {
-    setSelectedCategoryId(id);
-    setIsDeleteModalOpen(true);
-  };
-
-  const confirmDelete = () => {
-    // Implement delete mutation when available in API
-    console.log("Delete category", selectedCategoryId);
-    setIsDeleteModalOpen(false);
   };
 
   const handleEdit = (id: number) => {
@@ -193,7 +171,6 @@ export default function CategoryPage() {
                 key={cat.id}
                 category={cat}
                 onToggleStatus={handleStatusToggleRequest}
-                onDelete={handleDelete}
                 onEdit={handleEdit}
               />
             ))}
@@ -220,16 +197,8 @@ export default function CategoryPage() {
           <UpdateCategoryModal
             isOpen={isUpdateModalOpen}
             onOpenChange={setIsUpdateModalOpen}
+            categoryId={selectedCategory.id}
             initialData={{ name: selectedCategory.name }}
-          />
-          <ConfirmationModal
-            isOpen={isDeleteModalOpen}
-            onOpenChange={setIsDeleteModalOpen}
-            title="Delete Category"
-            description={`Are you sure you want to delete ${selectedCategory.name}? This action cannot be undone.`}
-            onConfirm={confirmDelete}
-            confirmLabel="Delete"
-            variant="destructive"
           />
           <ConfirmationModal
             isOpen={isStatusModalOpen}

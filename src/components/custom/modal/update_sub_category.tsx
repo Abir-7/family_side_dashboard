@@ -11,37 +11,57 @@ import { FormWrapper } from "@/components/forms/FormWrapper";
 import { FormInput } from "@/components/forms/FormInput";
 import { FormSelect } from "@/components/forms/FormSelect";
 import { FormImageUpload } from "@/components/forms/FormImageUpload";
+import { Loader2 } from "lucide-react";
 import { z } from "zod";
+import { useGetAllCategoriesQuery, useUpdateSubCategoryMutation } from "@/lib/redux/apis/categoryApi";
+import { toast } from "sonner";
 
 const subCategorySchema = z.object({
   name: z.string().min(1, "Name is required"),
-  category: z.string().min(1, "Category is required"),
+  category_id: z.string().min(1, "Category is required"),
   images: z.array(z.instanceof(File)).optional(),
 });
 
 type SubCategoryFormValues = z.infer<typeof subCategorySchema>;
 
-const CATEGORY_OPTIONS = [
-  { label: "Doctor", value: "Doctor" },
-  { label: "Nursery", value: "Nursery" },
-  { label: "Playground", value: "Playground" },
-  { label: "Sports", value: "Sports" },
-];
-
 interface UpdateSubCategoryModalProps {
   isOpen: boolean;
   onOpenChange: (open: boolean) => void;
-  initialData: { name: string; category: string };
+  subCategoryId: number;
+  initialData: { name: string; category_id: string };
 }
 
 export function UpdateSubCategoryModal({
   isOpen,
   onOpenChange,
+  subCategoryId,
   initialData,
 }: UpdateSubCategoryModalProps) {
-  const onSubmit = (data: SubCategoryFormValues) => {
-    console.log("Update Sub-Category:", data);
-    onOpenChange(false);
+  const { data: categoriesResponse, isLoading: categoriesLoading } = useGetAllCategoriesQuery();
+  const [updateSubCategory, { isLoading: isUpdating }] = useUpdateSubCategoryMutation();
+
+  const categories = categoriesResponse?.data || [];
+  const CATEGORY_OPTIONS = categories.map((cat: any) => ({
+    label: cat.name,
+    value: cat.id.toString(),
+  }));
+
+  const onSubmit = async (data: SubCategoryFormValues) => {
+    const formData = new FormData();
+    formData.append("name", data.name);
+    formData.append("category_id", data.category_id);
+    if (data.images && data.images.length > 0) {
+      formData.append("image", data.images[0]);
+    }
+
+    try {
+      await updateSubCategory({ id: subCategoryId, formData }).unwrap();
+      toast.success("Sub-category updated successfully");
+      onOpenChange(false);
+    } catch (error: any) {
+      console.error("Update sub-category error:", error);
+      toast.error(error.data?.message || "Failed to update sub-category");
+    }
   };
 
   return (
@@ -64,10 +84,11 @@ export function UpdateSubCategoryModal({
           />
 
           <FormSelect
-            name="category"
+            name="category_id"
             label="Select Category"
-            placeholder="Select a category"
+            placeholder={categoriesLoading ? "Loading categories..." : "Select a category"}
             options={CATEGORY_OPTIONS}
+            disabled={categoriesLoading}
           />
 
           <FormImageUpload name="images" label="Sub-Category Logo" optional />
@@ -78,7 +99,10 @@ export function UpdateSubCategoryModal({
                 Cancel
               </Button>
             </DialogClose>
-            <Button type="submit" className="rounded-full">Update</Button>
+            <Button type="submit" className="rounded-full" disabled={isUpdating}>
+              {isUpdating && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+              Update
+            </Button>
           </DialogFooter>
         </FormWrapper>
       </DialogContent>

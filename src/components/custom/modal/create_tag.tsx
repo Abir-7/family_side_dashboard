@@ -1,3 +1,4 @@
+import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import {
   Dialog,
@@ -10,8 +11,10 @@ import {
 } from "@/components/ui/dialog";
 import { FormWrapper } from "@/components/forms/FormWrapper";
 import { FormInput } from "@/components/forms/FormInput";
-import { Plus } from "lucide-react";
+import { Plus, Loader2 } from "lucide-react";
 import { z } from "zod";
+import { useCreateTagMutation } from "@/lib/redux/apis/tagApi";
+import { toast } from "sonner";
 
 const tagSchema = z.object({
   name: z.string().min(1, "Name is required"),
@@ -20,12 +23,24 @@ const tagSchema = z.object({
 type TagFormValues = z.infer<typeof tagSchema>;
 
 export function CreateTagModal() {
-  const onSubmit = (data: TagFormValues) => {
-    console.log("Create Tag:", data);
+  const [open, setOpen] = useState(false);
+  const [createTag, { isLoading }] = useCreateTagMutation();
+
+  const onSubmit = async (data: TagFormValues) => {
+    const formData = new FormData();
+    formData.append("name", data.name);
+    
+    try {
+        await createTag(formData).unwrap();
+        toast.success("Tag created successfully");
+        setOpen(false);
+    } catch (error: any) {
+        toast.error(error.data?.message || "Failed to create tag");
+    }
   };
 
   return (
-    <Dialog>
+    <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger asChild>
         <Button className="h-11 px-4 rounded-full bg-brand-400 hover:bg-brand-500 text-white text-sm font-semibold gap-1.5 shadow-none">
           Create tag
@@ -55,7 +70,10 @@ export function CreateTagModal() {
                 Cancel
               </Button>
             </DialogClose>
-            <Button type="submit" className="rounded-full">Create</Button>
+            <Button type="submit" className="rounded-full" disabled={isLoading}>
+                {isLoading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+                Create
+            </Button>
           </DialogFooter>
         </FormWrapper>
       </DialogContent>

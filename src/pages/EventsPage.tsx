@@ -23,6 +23,7 @@ import { DeleteEventModal } from "@/components/custom/modal/DeleteEventModal";
 import { Pagination } from "@/components/custom/pagination";
 import { toast } from "sonner";
 import { useGetEventsQuery, useDeleteEventMutation } from "@/lib/redux/apis/eventApi";
+import type { Event } from "@/types/event";
 
 export default function EventsPage() {
   const navigate = useNavigate();
@@ -39,78 +40,72 @@ export default function EventsPage() {
   const [selectedEventId, setSelectedEventId] = useState<number | null>(null);
   const [selectedEventName, setSelectedEventName] = useState("");
 
-  const handleDeleteClick = (event: any) => {
+  const events = data?.data?.items || [];
+  const totalPages = data ? Math.ceil(data.data.total / limit) : 1;
+
+  const handleDeleteClick = (event: Event) => {
     setSelectedEventId(event.id);
     setSelectedEventName(event.name);
     setIsDeleteModalOpen(true);
   };
 
   const handleConfirmDelete = async () => {
-    if (!selectedEventId) return;
-
-    try {
-      await deleteEvent(selectedEventId).unwrap();
-      toast.success("Event deleted successfully");
-      setIsDeleteModalOpen(false);
-    } catch (error) {
-      console.error("Delete event error:", error);
-      toast.error("An error occurred while deleting the event");
+    if (selectedEventId) {
+        try {
+            await deleteEvent(selectedEventId).unwrap();
+            toast.success("Event deleted successfully");
+            setIsDeleteModalOpen(false);
+        } catch (error: any) {
+            toast.error(error.data?.message || "Failed to delete event");
+        }
     }
   };
 
-  const events = data?.data?.items || [];
-  const totalPages = data ? Math.ceil(data.data.total / limit) : 1;
-  const filteredEvents = events.filter((e: any) =>
+  const filteredEvents = events.filter((e: Event) =>
     e.name.toLowerCase().includes(search.toLowerCase())
   );
 
   return (
     <TooltipProvider>
-      <div className="bg-white rounded-2xl border border-gray-100 overflow-hidden">
-        {/* Toolbar */}
-        <div className="flex items-center gap-3 px-5 py-4 border-b border-gray-100">
-          {/* Search */}
-          <div className="relative flex-1">
-            <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
-            <Input
-              placeholder="Search events"
-              value={search}
-              onChange={(e) => setSearch(e.target.value)}
-              className="pl-9 h-11 rounded-full border-gray-200 text-sm focus-visible:ring-0 focus-visible:border-gray-300"
-            />
-          </div>
-
-          {/* Create Event Button */}
-          <Button
-            className="rounded-full h-11 px-4 text-sm font-semibold bg-brand-400 hover:bg-brand-500 text-white border-0 gap-1.5 shrink-0"
-            onClick={() => navigate("/dashboard/events/create")}
-          >
-            Create Event
-            <Plus className="w-4 h-4" />
-          </Button>
+      <div className="bg-white rounded-2xl border border-gray-100 min-h-[600px] flex flex-col relative">
+        <div className="flex items-center justify-between p-5">
+            <div className="relative w-64">
+                <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400 pointer-events-none" />
+                <Input
+                    placeholder="Search event"
+                    value={search}
+                    onChange={(e) => setSearch(e.target.value)}
+                    className="pl-9 h-11 rounded-full border-gray-200 text-sm focus-visible:ring-0 focus-visible:border-gray-300"
+                />
+            </div>
+            <Button
+              className="gap-2 rounded-full"
+              onClick={() => navigate("/dashboard/events/create")}
+            >
+              <Plus className="w-4 h-4" /> Add Event
+            </Button>
         </div>
 
-        {/* Table */}
-        <div className="overflow-x-auto min-h-[400px] relative">
-          {isLoading && (
+        {isLoading && (
             <div className="absolute inset-0 bg-white/50 backdrop-blur-[1px] z-10 flex items-center justify-center">
               <Loader2 className="w-8 h-8 text-brand-400 animate-spin" />
             </div>
-          )}
+        )}
+
+        <div className="flex-1 overflow-x-auto">
           <Table>
             <TableHeader>
-              <TableRow className="hover:bg-transparent border-gray-100">
-                <TableHead className="text-gray-400 text-xs font-medium w-75 px-5">Name</TableHead>
-                <TableHead className="text-gray-400 text-xs font-medium w-30">Created by</TableHead>
-                <TableHead className="text-gray-400 text-xs font-medium w-32.5">Category</TableHead>
-                <TableHead className="text-gray-400 text-xs font-medium w-37.5">Location</TableHead>
-                <TableHead className="text-gray-400 text-xs font-medium w-20">Fee</TableHead>
-                <TableHead className="text-gray-400 text-xs font-medium w-20 text-center">Action</TableHead>
+              <TableRow className="border-gray-100 hover:bg-transparent">
+                <TableHead className="font-semibold text-gray-600">Event</TableHead>
+                <TableHead className="font-semibold text-gray-600">Created By</TableHead>
+                <TableHead className="font-semibold text-gray-600">Category</TableHead>
+                <TableHead className="font-semibold text-gray-600">Location</TableHead>
+                <TableHead className="font-semibold text-gray-600">Fee</TableHead>
+                <TableHead className="font-semibold text-gray-600 text-center">Actions</TableHead>
               </TableRow>
             </TableHeader>
-
             <TableBody>
-              {filteredEvents.map((event: any) => (
+              {filteredEvents.map((event: Event) => (
                 <TableRow key={event.id} className="border-gray-50 hover:bg-gray-50/60">
                   <TableCell className="py-3 px-4">
                     <div className="flex items-center gap-3">

@@ -22,13 +22,20 @@ export function FormInput({
   const {
     register,
     formState: { errors },
+    getFieldState,
   } = useFormContext();
 
   const [showPassword, setShowPassword] = useState(false);
   const isPassword = type === "password";
   const inputType = isPassword ? (showPassword ? "text" : "password") : type;
 
-  const fieldError = error || (errors[name]?.message as string);
+  // Use getFieldState to get error information, which is more reliable
+  const fieldState = getFieldState(name);
+  const fieldError = error || (fieldState.error?.message as string);
+
+  console.log(`FormInput [${name}] - Raw Errors:`, errors);
+  console.log(`FormInput [${name}] - Field State:`, fieldState);
+  console.log(`FormInput [${name}] - Calculated FieldError:`, fieldError);
 
   return (
     <div
@@ -69,12 +76,6 @@ export function FormInput({
             fontFamily: "'DM Sans', sans-serif",
             transition: "border-color 0.2s",
           }}
-          onFocus={(e) =>
-            (e.target.style.borderColor = fieldError ? "#E55F68" : "#c0bfff")
-          }
-          onBlur={(e) =>
-            (e.target.style.borderColor = fieldError ? "#E55F68" : "#e0e0e0")
-          }
         />
         {isPassword && (
           <button
@@ -106,6 +107,8 @@ export function FormInput({
             color: "#E55F68",
             paddingLeft: "4px",
             margin: 0,
+            display: "block",
+            visibility: "visible",
           }}
         >
           {fieldError}

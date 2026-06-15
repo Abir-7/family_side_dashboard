@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Search, Loader2 } from "lucide-react";
+import { Search, Loader2, Ban, Pencil } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Pagination } from "@/components/custom/pagination";
 import {
@@ -10,7 +10,14 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { CreateSubCategoryModal } from "@/components/custom/modal/create_sub_category";
-import { useGetCategoriesQuery, useGetSubCategoriesQuery } from "@/lib/redux/apis/categoryApi";
+import { UpdateSubCategoryModal } from "@/components/custom/modal/update_sub_category";
+import { ConfirmationModal } from "@/components/custom/modal/confirmation_modal";
+import { 
+  useGetAllCategoriesQuery, 
+  useGetSubCategoriesQuery,
+  useToggleSubCategoryStatusMutation
+} from "@/lib/redux/apis/categoryApi";
+import { toast } from "sonner";
 
 interface SubCategory {
   id: number;
@@ -24,13 +31,11 @@ interface SubCategory {
 function SubCategoryCard({
   subCategory,
   onToggleStatus,
-  onDelete,
   onEdit,
 }: {
   subCategory: SubCategory;
   onToggleStatus: (id: number) => void;
-  onDelete: (id: number) => void;
-  onEdit: (id: number) => void;
+  onEdit: (subCategory: SubCategory) => void;
 }) {
   return (
     <div className="flex items-center gap-3 px-3 py-2.5 rounded-2xl border border-gray-200 bg-white hover:border-gray-300 transition-colors">
@@ -50,22 +55,21 @@ function SubCategoryCard({
       <div className="flex items-center gap-0.5 shrink-0">
         <button
           onClick={() => onToggleStatus(subCategory.id)}
+          title={subCategory.is_active ? "Set Inactive" : "Set Active"}
           className={`p-1.5 rounded-lg transition-colors ${
             !subCategory.is_active
               ? "text-red-500 bg-red-50 hover:bg-red-100"
               : "text-gray-400 hover:text-red-500 hover:bg-red-50"
           }`}
         >
+          <Ban className="w-3.5 h-3.5" strokeWidth={1.8} />
         </button>
         <button
-          onClick={() => onDelete(subCategory.id)}
-          className="p-1.5 rounded-lg text-gray-400 hover:text-red-500 hover:bg-red-50 transition-colors"
-        >
-        </button>
-        <button
-          onClick={() => onEdit(subCategory.id)}
+          onClick={() => onEdit(subCategory)}
+          title="Edit"
           className="p-1.5 rounded-lg text-gray-400 hover:text-blue-500 hover:bg-blue-50 transition-colors"
         >
+          <Pencil className="w-3.5 h-3.5" strokeWidth={1.8} />
         </button>
       </div>
     </div>
@@ -78,8 +82,14 @@ export default function SubCategoryPage() {
   const [currentPage, setCurrentPage] = useState(1);
   const limit = 28;
 
-  const { data: categoriesData } = useGetCategoriesQuery({ page: 1, limit: 100 });
-  const { data: subCategoriesData, isLoading } = useGetSubCategoriesQuery(
+  const [toggleSubCategoryStatus] = useToggleSubCategoryStatusMutation();
+  const [selectedSubCategoryId, setSelectedSubCategoryId] = useState<number | null>(null);
+  const [isStatusModalOpen, setIsStatusModalOpen] = useState(false);
+  const [isUpdateModalOpen, setIsUpdateModalOpen] = useState(false);
+  const [editingSubCategory, setEditingSubCategory] = useState<SubCategory | null>(null);
+
+  const { data: categoriesResponse } = useGetAllCategoriesQuery();
+  const { data: subCategoriesData, isLoading, refetch } = useGetSubCategoriesQuery(
     { category_id: filterCategory || 0, page: currentPage, limit },
     { skip: !filterCategory }
   );
@@ -87,9 +97,34 @@ export default function SubCategoryPage() {
   const subCategories = subCategoriesData?.data?.items || [];
   const totalPages = subCategoriesData ? Math.ceil(subCategoriesData.data.total / limit) : 1;
 
+  const selectedSubCategory = subCategories.find((s: SubCategory) => s.id === selectedSubCategoryId);
+
   const handleSearch = (val: string) => {
     setSearch(val);
     setCurrentPage(1);
+  };
+
+  const handleStatusToggleRequest = (id: number) => {
+    setSelectedSubCategoryId(id);
+    setIsStatusModalOpen(true);
+  };
+
+  const confirmStatusChange = async () => {
+    if (selectedSubCategoryId) {
+      try {
+        await toggleSubCategoryStatus(selectedSubCategoryId).unwrap();
+        toast.success("Sub-category status updated successfully");
+        setIsStatusModalOpen(false);
+        refetch();
+      } catch (error) {
+        toast.error("Failed to update sub-category status");
+      }
+    }
+  };
+
+  const handleEdit = (subCategory: SubCategory) => {
+    setEditingSubCategory(subCategory);
+    setIsUpdateModalOpen(true);
   };
 
   const filtered = subCategories.filter((c: any) =>
@@ -114,7 +149,7 @@ export default function SubCategoryPage() {
                     <SelectValue placeholder="Category" />
                 </SelectTrigger>
                 <SelectContent>
-                    {categoriesData?.data?.items?.map((cat: any) => (
+                    {categoriesResponse?.data?.map((cat: any) => (
                         <SelectItem key={cat.id} value={cat.id.toString()}>{cat.name}</SelectItem>
                     ))}
                 </SelectContent>
@@ -143,22 +178,45 @@ export default function SubCategoryPage() {
               <SubCategoryCard
                 key={cat.id}
                 subCategory={cat}
-                onToggleStatus={() => {}}
-                onDelete={() => {}}
-                onEdit={() => {}}
+                onToggleStatus={handleStatusToggleRequest}
+                onEdit={handleEdit}
               />
             ))}
           </div>
         )}
-      </div>
+        </div>
 
-      {filterCategory && (
+        {filterCategory && (
         <Pagination
           currentPage={currentPage}
           totalPages={totalPages}
           onPageChange={setCurrentPage}
         />
-      )}
-    </div>
-  );
-}
+        )}
+
+        {selectedSubCategory && (
+        <ConfirmationModal
+          isOpen={isStatusModalOpen}
+          onOpenChange={setIsStatusModalOpen}
+          title={selectedSubCategory.is_active ? "Set Inactive" : "Set Active"}
+          description={`Are you sure you want to set ${selectedSubCategory.name} to ${selectedSubCategory.is_active ? "inactive" : "active"}?`}
+          onConfirm={confirmStatusChange}
+          confirmLabel={selectedSubCategory.is_active ? "Set Inactive" : "Set Active"}
+          variant={selectedSubCategory.is_active ? "destructive" : "default"}
+        />
+        )}
+
+        {editingSubCategory && (
+          <UpdateSubCategoryModal
+            isOpen={isUpdateModalOpen}
+            onOpenChange={setIsUpdateModalOpen}
+            subCategoryId={editingSubCategory.id}
+            initialData={{ 
+              name: editingSubCategory.name, 
+              category_id: editingSubCategory.category_id.toString() 
+            }}
+          />
+        )}
+        </div>
+        );
+        }

@@ -14,7 +14,7 @@ import { FormSelect } from "@/components/forms/FormSelect";
 import { FormImageUpload } from "@/components/forms/FormImageUpload";
 import { Plus, Loader2 } from "lucide-react";
 import { z } from "zod";
-import { useGetCategoriesQuery, useCreateSubCategoryMutation } from "@/lib/redux/apis/categoryApi";
+import { useGetAllCategoriesQuery, useCreateSubCategoryMutation } from "@/lib/redux/apis/categoryApi";
 import { toast } from "sonner";
 
 const subCategorySchema = z.object({
@@ -27,10 +27,10 @@ type SubCategoryFormValues = z.infer<typeof subCategorySchema>;
 
 export function CreateSubCategoryModal() {
   const [isOpen, setIsOpen] = useState(false);
-  const { data: categoriesResponse, isLoading: categoriesLoading } = useGetCategoriesQuery({ page: 1, limit: 100 });
+  const { data: categoriesResponse, isLoading: categoriesLoading } = useGetAllCategoriesQuery();
   const [createSubCategory, { isLoading: isCreating }] = useCreateSubCategoryMutation();
 
-  const categories = categoriesResponse?.data?.items || [];
+  const categories = categoriesResponse?.data || [];
   const CATEGORY_OPTIONS = categories.map((cat: any) => ({
     label: cat.name,
     value: cat.id.toString(),

@@ -23,6 +23,7 @@ import { DeleteActivityModal } from "@/components/custom/modal/DeleteActivityMod
 import { Pagination } from "@/components/custom/pagination";
 import { toast } from "sonner";
 import { useGetActivitiesQuery, useDeleteActivityMutation } from "@/lib/redux/apis/activityApi";
+import type { Activity } from "@/types/activity";
 
 export default function ActivityPage() {
   const navigate = useNavigate();
@@ -39,78 +40,72 @@ export default function ActivityPage() {
   const [selectedActivityId, setSelectedActivityId] = useState<number | null>(null);
   const [selectedActivityName, setSelectedActivityName] = useState("");
 
-  const handleDeleteClick = (activity: any) => {
+  const activities = data?.data?.items || [];
+  const totalPages = data ? Math.ceil(data.data.total / limit) : 1;
+  
+  const handleDeleteClick = (activity: Activity) => {
     setSelectedActivityId(activity.id);
     setSelectedActivityName(activity.name);
     setIsDeleteModalOpen(true);
   };
 
   const handleConfirmDelete = async () => {
-    if (!selectedActivityId) return;
-
-    try {
-      await deleteActivity(selectedActivityId).unwrap();
-      toast.success("Activity deleted successfully");
-      setIsDeleteModalOpen(false);
-    } catch (error) {
-      console.error("Delete activity error:", error);
-      toast.error("An error occurred while deleting the activity");
+    if (selectedActivityId) {
+        try {
+            await deleteActivity(selectedActivityId).unwrap();
+            toast.success("Activity deleted successfully");
+            setIsDeleteModalOpen(false);
+        } catch (error: any) {
+            toast.error(error.data?.message || "Failed to delete activity");
+        }
     }
   };
 
-  const activities = data?.data?.items || [];
-  const totalPages = data ? Math.ceil(data.data.total / limit) : 1;
-  const filteredActivities = activities.filter((a: any) =>
+  const filteredActivities = activities.filter((a: Activity) =>
     a.name.toLowerCase().includes(search.toLowerCase())
   );
 
   return (
     <TooltipProvider>
-      <div className="bg-white rounded-2xl border border-gray-100 overflow-hidden">
-        {/* Toolbar */}
-        <div className="flex items-center gap-3 px-5 py-4 border-b border-gray-100">
-          {/* Search */}
-          <div className="relative flex-1">
-            <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
-            <Input
-              placeholder="Search activities"
-              value={search}
-              onChange={(e) => setSearch(e.target.value)}
-              className="pl-9 h-11 rounded-full border-gray-200 text-sm focus-visible:ring-0 focus-visible:border-gray-300"
-            />
-          </div>
-
-          {/* Create Activity Button */}
-          <Button
-            className="rounded-full h-11 px-4 text-sm font-semibold bg-brand-400 hover:bg-brand-500 text-white border-0 gap-1.5 shrink-0"
-            onClick={() => navigate("/dashboard/activity/create")}
-          >
-            Create activity
-            <Plus className="w-4 h-4" />
-          </Button>
+      <div className="bg-white rounded-2xl border border-gray-100 min-h-[600px] flex flex-col relative">
+        <div className="flex items-center justify-between p-5">
+            <div className="relative w-64">
+                <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400 pointer-events-none" />
+                <Input
+                    placeholder="Search activity"
+                    value={search}
+                    onChange={(e) => setSearch(e.target.value)}
+                    className="pl-9 h-11 rounded-full border-gray-200 text-sm focus-visible:ring-0 focus-visible:border-gray-300"
+                />
+            </div>
+            <Button
+              className="gap-2 rounded-full"
+              onClick={() => navigate("/dashboard/activity/create")}
+            >
+              <Plus className="w-4 h-4" /> Add Activity
+            </Button>
         </div>
 
-        {/* Table */}
-        <div className="overflow-x-auto min-h-[400px] relative">
-          {isLoading && (
+        {isLoading && (
             <div className="absolute inset-0 bg-white/50 backdrop-blur-[1px] z-10 flex items-center justify-center">
               <Loader2 className="w-8 h-8 text-brand-400 animate-spin" />
             </div>
-          )}
+        )}
+
+        <div className="flex-1 overflow-x-auto">
           <Table>
             <TableHeader>
-              <TableRow className="hover:bg-transparent border-gray-100">
-                <TableHead className="text-gray-400 text-xs font-medium w-75 px-5">Name</TableHead>
-                <TableHead className="text-gray-400 text-xs font-medium w-30">Create by</TableHead>
-                <TableHead className="text-gray-400 text-xs font-medium w-32.5">Category</TableHead>
-                <TableHead className="text-gray-400 text-xs font-medium w-37.5">Location</TableHead>
-                <TableHead className="text-gray-400 text-xs font-medium w-20">Fee</TableHead>
-                <TableHead className="text-gray-400 text-xs font-medium w-20 text-center">Action</TableHead>
+              <TableRow className="border-gray-100 hover:bg-transparent">
+                <TableHead className="font-semibold text-gray-600">Activity</TableHead>
+                <TableHead className="font-semibold text-gray-600">Created By</TableHead>
+                <TableHead className="font-semibold text-gray-600">Category</TableHead>
+                <TableHead className="font-semibold text-gray-600">Location</TableHead>
+                <TableHead className="font-semibold text-gray-600">Fee</TableHead>
+                <TableHead className="font-semibold text-gray-600 text-center">Actions</TableHead>
               </TableRow>
             </TableHeader>
-
             <TableBody>
-              {filteredActivities.map((activity: any) => (
+              {filteredActivities.map((activity: Activity) => (
                 <TableRow key={activity.id} className="border-gray-50 hover:bg-gray-50/60">
                   <TableCell className="py-3 px-4">
                     <div className="flex items-center gap-3">
