@@ -32,7 +32,7 @@ export default function ActivityPage() {
   const [search, setSearch] = useState("");
   const [limit] = useState(10);
   
-  const { data, isLoading } = useGetActivitiesQuery({ page: currentPage, limit });
+  const { data, isLoading } = useGetActivitiesQuery({ page: currentPage, limit, search: search || undefined });
   const [deleteActivity] = useDeleteActivityMutation();
   
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -60,10 +60,6 @@ export default function ActivityPage() {
         }
     }
   };
-
-  const filteredActivities = activities.filter((a: Activity) =>
-    a.name.toLowerCase().includes(search.toLowerCase())
-  );
 
   return (
     <TooltipProvider>
@@ -105,7 +101,7 @@ export default function ActivityPage() {
               </TableRow>
             </TableHeader>
             <TableBody>
-              {filteredActivities.map((activity: Activity) => (
+              {activities.map((activity: Activity) => (
                 <TableRow key={activity.id} className="border-gray-50 hover:bg-gray-50/60">
                   <TableCell className="py-3 px-4">
                     <div className="flex items-center gap-3">
@@ -161,7 +157,7 @@ export default function ActivityPage() {
                   </TableCell>
                 </TableRow>
               ))}
-              {!isLoading && filteredActivities.length === 0 && (
+              {!isLoading && activities.length === 0 && (
                 <TableRow>
                   <TableCell colSpan={6} className="text-center py-10 text-gray-500">
                     No activities found

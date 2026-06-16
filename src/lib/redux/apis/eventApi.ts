@@ -3,8 +3,12 @@ import type { EventDetailResponse, EventsResponse } from "@/types/event";
 
 export const eventApi = apiSlice.injectEndpoints({
   endpoints: (builder) => ({
-    getEvents: builder.query<EventsResponse, { page: number; limit: number }>({
-      query: ({ page, limit }) => `admin/events?page=${page}&limit=${limit}`,
+    getEvents: builder.query<
+      EventsResponse,
+      { page: number; limit: number; search?: string }
+    >({
+      query: ({ page, limit, search }) =>
+        `admin/events?page=${page}&limit=${limit}${search ? `&search=${search}` : ""}`,
       providesTags: ["Event"],
     }),
     getEventDetails: builder.query<EventDetailResponse, number>({

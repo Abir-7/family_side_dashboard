@@ -1,4 +1,4 @@
-import { Trash2, X } from "lucide-react";
+import { Trash2 } from "lucide-react";
 import {
   Dialog,
   DialogContent,
@@ -22,14 +22,6 @@ export function DeleteActivityModal({
     <Dialog open={isOpen} onOpenChange={onOpenChange}>
       <DialogContent className="sm:max-w-[400px] p-0 gap-0 overflow-hidden rounded-3xl border-none">
         <div className="relative p-6 text-center">
-          {/* Close Button */}
-          <button
-            onClick={() => onOpenChange(false)}
-            className="absolute right-4 top-4 p-2 rounded-full bg-gray-50 text-gray-400 hover:text-gray-600 transition-colors"
-          >
-            <X className="h-4 w-4" />
-          </button>
-
           {/* Icon Header */}
           <div className="flex justify-center mb-6">
             <div className="h-20 w-20 rounded-full flex items-center justify-center bg-red-50">

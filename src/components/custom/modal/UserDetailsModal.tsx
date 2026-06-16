@@ -1,4 +1,3 @@
-import { useState, useEffect } from "react";
 import { Badge } from "@/components/ui/badge";
 import {
   Dialog,
@@ -18,31 +17,7 @@ import {
   User as UserIcon,
   Loader2,
 } from "lucide-react";
-import { useAuth } from "@/lib/auth/useAuth";
-import { toast } from "sonner";
-
-interface Child {
-  id: number;
-  name: string;
-  dob: string;
-  gender: string;
-}
-
-interface UserDetail {
-  id: number;
-  full_name: string;
-  email: string;
-  role: string;
-  join_date: string;
-  location_name: string;
-  status: string;
-  subscription_plan: string;
-  reviews_count: number;
-  activities_count: number;
-  saved_items_count: number;
-  contributor_level: string;
-  children: Child[];
-}
+import { useGetUserDetailsQuery } from "@/lib/redux/apis/userApi";
 
 interface UserDetailModalProps {
   isOpen: boolean;
@@ -55,38 +30,8 @@ export function UserDetailsModal({
   onOpenChange,
   userId,
 }: UserDetailModalProps) {
-  const { accessToken } = useAuth();
-  const [data, setData] = useState<UserDetail | null>(null);
-  const [isLoading, setIsLoading] = useState(false);
-
-  useEffect(() => {
-    const fetchDetails = async () => {
-      if (!userId || !accessToken) return;
-      setIsLoading(true);
-      try {
-        const response = await fetch(`http://10.10.12.60:8015/api/v1/admin/users/${userId}`, {
-          headers: {
-            Authorization: `Bearer ${accessToken}`,
-          },
-        });
-        const result = await response.json();
-        if (result.status === "success") {
-          setData(result.data);
-        } else {
-          toast.error(result.message || "Failed to fetch user details");
-        }
-      } catch (error) {
-        console.error("Fetch user details error:", error);
-        toast.error("An error occurred while fetching user details");
-      } finally {
-        setIsLoading(false);
-      }
-    };
-
-    if (isOpen && userId) {
-      fetchDetails();
-    }
-  }, [isOpen, userId, accessToken]);
+  const { data: response, isLoading } = useGetUserDetailsQuery(userId!, { skip: !isOpen || !userId });
+  const data = response?.data;
 
   return (
     <Dialog open={isOpen} onOpenChange={onOpenChange}>
@@ -111,7 +56,7 @@ export function UserDetailsModal({
               <Avatar className="h-12 w-12 rounded-xl">
                 <AvatarImage src={`https://i.pravatar.cc/150?u=${data.email}`} />
                 <AvatarFallback className="rounded-xl bg-gray-100 text-gray-600 font-semibold">
-                  {data.full_name.split(" ").map(n => n[0]).join("").toUpperCase()}
+                  {data.full_name.split(" ").map((n: string) => n[0]).join("").toUpperCase()}
                 </AvatarFallback>
               </Avatar>
               <div>
@@ -202,11 +147,11 @@ export function UserDetailsModal({
                 <Separator className="flex-1" />
               </div>
               {data.children.length > 0 ? (
-                data.children.map(child => (
+                data.children.map((child: any) => (
                     <div key={child.id} className="flex items-center gap-3 bg-white border border-gray-100 rounded-xl p-3 shadow-sm mb-2">
                     <Avatar className="h-10 w-10 rounded-xl">
                         <AvatarFallback className="rounded-xl bg-brand-100 text-brand-600 font-semibold text-sm">
-                        {child.name.split(" ").map(n => n[0]).join("").toUpperCase()}
+                        {child.name.split(" ").map((n: string) => n[0]).join("").toUpperCase()}
                         </AvatarFallback>
                     </Avatar>
                     <div className="flex-1">

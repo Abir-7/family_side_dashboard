@@ -1,9 +1,11 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import { apiSlice } from "../apiSlice";
 
 export const giftApi = apiSlice.injectEndpoints({
   endpoints: (builder) => ({
-    getGifts: builder.query<any, { page: number; limit: number }>({
-      query: ({ page, limit }) => `admin/gifts?page=${page}&limit=${limit}`,
+    getGifts: builder.query<any, { page: number; limit: number; search?: string }>({
+      query: ({ page, limit, search }) =>
+        `admin/gifts?page=${page}&limit=${limit}${search ? `&search=${search}` : ""}`,
       providesTags: ["Gift"],
     }),
     getGiftDetails: builder.query<any, number>({
@@ -28,4 +30,9 @@ export const giftApi = apiSlice.injectEndpoints({
   }),
 });
 
-export const { useGetGiftsQuery, useGetGiftDetailsQuery, useDeleteGiftMutation, useCreateGiftMutation } = giftApi;
+export const {
+  useGetGiftsQuery,
+  useGetGiftDetailsQuery,
+  useDeleteGiftMutation,
+  useCreateGiftMutation,
+} = giftApi;

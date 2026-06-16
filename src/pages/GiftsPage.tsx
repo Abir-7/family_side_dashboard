@@ -40,7 +40,7 @@ export default function GiftsPage() {
   const [currentPage, setCurrentPage] = useState(1);
   const [limit] = useState(10);
   
-  const { data, isLoading, refetch } = useGetGiftsQuery({ page: currentPage, limit });
+  const { data, isLoading, refetch } = useGetGiftsQuery({ page: currentPage, limit, search: search || undefined });
   const [deleteGift] = useDeleteGiftMutation();
 
   const [isDetailsModalOpen, setIsDetailsModalOpen] = useState(false);
@@ -50,13 +50,6 @@ export default function GiftsPage() {
 
   const gifts: Gift[] = data?.data?.items || [];
   const totalPages = data ? Math.ceil(data.data.total / limit) : 1;
-
-  const filtered = gifts.filter(
-    (g) =>
-      g.name.toLowerCase().includes(search.toLowerCase()) ||
-      g.category.toLowerCase().includes(search.toLowerCase()) ||
-      g.location.toLowerCase().includes(search.toLowerCase()),
-  );
 
   const handleDeleteClick = (gift: Gift) => {
     setSelectedGiftId(gift.id);
@@ -69,7 +62,7 @@ export default function GiftsPage() {
         try {
             await deleteGift(selectedGiftId).unwrap();
             toast.success("Gift deleted successfully");
-            refetch();
+            setIsDeleteModalOpen(false);
         } catch (error: any) {
             toast.error(error.data?.message || "Failed to delete gift");
         }
@@ -139,7 +132,7 @@ export default function GiftsPage() {
             </TableHeader>
 
             <TableBody>
-              {filtered.length === 0 && !isLoading ? (
+              {gifts.length === 0 && !isLoading ? (
                 <TableRow>
                   <TableCell
                     colSpan={6}
@@ -149,7 +142,7 @@ export default function GiftsPage() {
                   </TableCell>
                 </TableRow>
               ) : (
-                filtered.map((gift) => (
+                gifts.map((gift) => (
                   <TableRow
                     key={gift.id}
                     className="border-gray-50 hover:bg-gray-50/60"

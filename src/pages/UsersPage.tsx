@@ -45,7 +45,7 @@ const statusClass: Record<string, string> = {
     "bg-red-100   text-red-500   hover:bg-red-100   border-0 rounded-full font-medium text-[10px] px-2 py-0",
 };
 
-type FilterOption = "All" | "Free" | "Premium" | "Smart";
+type FilterOption = "All" | "Family" | "Provider";
 
 export default function UsersPage() {
   const [filter, setFilter] = useState<FilterOption>("All");
@@ -55,7 +55,7 @@ export default function UsersPage() {
   const { data, isLoading } = useGetUsersQuery({ 
     page: currentPage, 
     limit, 
-    subscription: filter === "All" ? undefined : filter 
+    user_type: filter === "All" ? undefined : filter.toLowerCase() 
   });
 
   const [blockUser] = useBlockUserMutation();
@@ -108,12 +108,12 @@ export default function UsersPage() {
                 variant="outline"
                 className="rounded-full h-11 px-4 text-sm font-medium gap-1.5 border-gray-200"
               >
-                {filter === "All" ? "Users" : filter}
+                {filter === "All" ? "User Type" : filter}
                 <ChevronDown className="w-3.5 h-3.5 text-gray-500" />
               </Button>
             </DropdownMenuTrigger>
             <DropdownMenuContent align="start" className="w-36">
-              {(["All", "Free", "Premium", "Smart"] as FilterOption[]).map(
+              {(["All", "Family", "Provider"] as FilterOption[]).map(
                 (opt) => (
                   <DropdownMenuItem
                     key={opt}
@@ -123,7 +123,7 @@ export default function UsersPage() {
                     }}
                     className={filter === opt ? "bg-muted font-medium" : ""}
                   >
-                    {opt === "All" ? "All Users" : opt}
+                    {opt}
                   </DropdownMenuItem>
                 ),
               )}

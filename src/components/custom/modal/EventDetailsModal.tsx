@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { Badge } from "@/components/ui/badge";
 import { Dialog, DialogContent } from "@/components/ui/dialog";
 import {
@@ -10,24 +10,7 @@ import {
   Loader2,
   ExternalLink,
 } from "lucide-react";
-import { useAuth } from "@/lib/auth/useAuth";
-import { toast } from "sonner";
-
-interface EventDetail {
-  id: number;
-  name: string;
-  image_url: string | null;
-  description: string;
-  website: string | null;
-  location: string;
-  created_by: string;
-  status: string;
-  date_added: string;
-  whatsapp: string | null;
-  date: string;
-  time: string;
-  tags: string[];
-}
+import { useGetEventDetailsQuery } from "@/lib/redux/apis/eventApi";
 
 interface EventDetailModalProps {
   isOpen: boolean;
@@ -77,39 +60,9 @@ export function EventDetailsModal({
   onOpenChange,
   eventId,
 }: EventDetailModalProps) {
-  const { accessToken } = useAuth();
-  const [data, setData] = useState<EventDetail | null>(null);
-  const [isLoading, setIsLoading] = useState(false);
+  const { data: response, isLoading } = useGetEventDetailsQuery(eventId!, { skip: !isOpen || !eventId });
+  const data = response?.data;
   const [isExpanded, setIsExpanded] = useState(false);
-
-  useEffect(() => {
-    const fetchDetails = async () => {
-      if (!eventId || !accessToken) return;
-      setIsLoading(true);
-      try {
-        const response = await fetch(`http://10.10.12.60:8015/api/v1/admin/events/${eventId}`, {
-          headers: {
-            Authorization: `Bearer ${accessToken}`,
-          },
-        });
-        const result = await response.json();
-        if (result.status === "success") {
-          setData(result.data);
-        } else {
-          toast.error(result.message || "Failed to fetch event details");
-        }
-      } catch (error) {
-        console.error("Fetch event details error:", error);
-        toast.error("An error occurred while fetching event details");
-      } finally {
-        setIsLoading(false);
-      }
-    };
-
-    if (isOpen && eventId) {
-      fetchDetails();
-    }
-  }, [isOpen, eventId, accessToken]);
 
   if (!isOpen) return null;
 
@@ -117,7 +70,7 @@ export function EventDetailsModal({
     <Dialog open={isOpen} onOpenChange={onOpenChange}>
       <DialogContent
         className="sm:max-w-md p-2 gap-0 overflow-hidden rounded-2xl border-0 shadow-2xl"
-        showCloseButton={true}
+        showCloseButton={false}
       >
         {isLoading ? (
           <div className="flex items-center justify-center p-20">
@@ -180,7 +133,7 @@ export function EventDetailsModal({
                     Tag
                   </p>
                   <div className="flex flex-wrap gap-1.5">
-                    {data.tags.map((tag, i) => (
+                    {data.tags.map((tag: string, i: number) => (
                       <Badge
                         key={i}
                         className="bg-brand-100 text-brand-600 border-0 rounded-full text-[10px] px-3 py-1 font-medium"

@@ -1,10 +1,18 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import { apiSlice } from "../apiSlice";
-import type { ActivityDetailResponse, ActivitiesResponse } from "@/types/activity";
+import type {
+  ActivityDetailResponse,
+  ActivitiesResponse,
+} from "@/types/activity";
 
 export const activityApi = apiSlice.injectEndpoints({
   endpoints: (builder) => ({
-    getActivities: builder.query<ActivitiesResponse, { page: number; limit: number }>({
-      query: ({ page, limit }) => `admin/activities?page=${page}&limit=${limit}`,
+    getActivities: builder.query<
+      ActivitiesResponse,
+      { page: number; limit: number; search?: string }
+    >({
+      query: ({ page, limit, search }) =>
+        `admin/activities?page=${page}&limit=${limit}${search ? `&search=${search}` : ""}`,
       providesTags: ["Activity"],
     }),
     getActivityDetails: builder.query<ActivityDetailResponse, number>({
@@ -29,4 +37,9 @@ export const activityApi = apiSlice.injectEndpoints({
   }),
 });
 
-export const { useGetActivitiesQuery, useGetActivityDetailsQuery, useDeleteActivityMutation, useCreateActivityMutation } = activityApi;
+export const {
+  useGetActivitiesQuery,
+  useGetActivityDetailsQuery,
+  useDeleteActivityMutation,
+  useCreateActivityMutation,
+} = activityApi;
