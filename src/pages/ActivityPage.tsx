@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { Eye, Trash2, Search, Plus, Loader2 } from "lucide-react";
+import { Eye, Trash2, Search, Plus, Loader2, Download } from "lucide-react";
 import {
   Table,
   TableBody,
@@ -74,12 +74,22 @@ export default function ActivityPage() {
                     className="pl-9 h-11 rounded-full border-gray-200 text-sm focus-visible:ring-0 focus-visible:border-gray-300"
                 />
             </div>
-            <Button
-              className="gap-2 rounded-full"
-              onClick={() => navigate("/dashboard/activity/create")}
-            >
-              <Plus className="w-4 h-4" /> Add Activity
-            </Button>
+            <div className="flex items-center gap-3">
+              <Button
+                variant="outline"
+                className="rounded-full h-11 px-4 text-sm font-medium gap-2 border-gray-200"
+                onClick={() => toast.info("Exporting activities...")}
+              >
+                <Download className="w-4 h-4" />
+                Export
+              </Button>
+              <Button
+                className="gap-2 rounded-full h-11"
+                onClick={() => navigate("/dashboard/activity/create")}
+              >
+                <Plus className="w-4 h-4" /> Add Activity
+              </Button>
+            </div>
         </div>
 
         {isLoading && (

@@ -28,6 +28,9 @@ export const userApi = apiSlice.injectEndpoints({
             ]
           : [{ type: "User", id: "LIST" }],
     }),
+    getAllUsers: builder.query<any, void>({
+      query: () => `admin/users/all`,
+    }),
     getUserDetails: builder.query<any, number>({
       query: (id) => `admin/users/${id}`,
       providesTags: (_result, _error, id) => [{ type: "User", id }],
@@ -70,6 +73,7 @@ export const userApi = apiSlice.injectEndpoints({
 
 export const {
   useGetUsersQuery,
+  useLazyGetAllUsersQuery,
   useGetUserDetailsQuery,
   useBlockUserMutation,
   useUpdateProfileMutation,

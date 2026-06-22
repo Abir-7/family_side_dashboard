@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Eye, Ban, ChevronDown, Loader2 } from "lucide-react";
+import { Eye, Ban, ChevronDown, Loader2, Download } from "lucide-react";
 import {
   Table,
   TableBody,
@@ -26,7 +26,8 @@ import { UserDetailsModal } from "@/components/custom/modal/UserDetailsModal";
 import { BlockUserModal } from "@/components/custom/modal/BlockUserModal";
 import { toast } from "sonner";
 import { Pagination } from "@/components/custom/pagination";
-import { useGetUsersQuery, useBlockUserMutation } from "@/lib/redux/apis/userApi";
+import { useGetUsersQuery, useBlockUserMutation, useLazyGetAllUsersQuery } from "@/lib/redux/apis/userApi";
+import * as XLSX from "xlsx";
 
 const subscriptionClass: Record<string, string> = {
   Free: "bg-purple-100 text-purple-500 hover:bg-purple-100 border-0 rounded-full font-medium text-[10px] px-2 py-0",
@@ -59,6 +60,7 @@ export default function UsersPage() {
   });
 
   const [blockUser] = useBlockUserMutation();
+  const [getAllUsers, { isFetching: isExporting }] = useLazyGetAllUsersQuery();
 
   const [selectedUserId, setSelectedUserId] = useState<number | null>(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -93,6 +95,41 @@ export default function UsersPage() {
     }
   };
 
+  const handleExport = async () => {
+    try {
+      const response = await getAllUsers().unwrap();
+      const usersData = response?.data || [];
+      if (usersData.length === 0) {
+        toast.info("No data available to export");
+        return;
+      }
+
+      const exportData = usersData.map((user: any) => ({
+        ID: user.id,
+        "Full Name": user.full_name || user.name,
+        Email: user.email,
+        Role: user.role || user.user_type,
+        "Join Date": user.join_date,
+        Location: user.location_name || user.location,
+        Status: user.status,
+        "Subscription Plan": user.subscription_plan || user.subscription,
+        "Activities Count": user.activities_count || 0,
+        "Reviews Count": user.reviews_count || 0,
+        "Saved Items Count": user.saved_items_count || 0,
+        "Children Count": user.children ? user.children.length : 0,
+      }));
+
+      const worksheet = XLSX.utils.json_to_sheet(exportData);
+      const workbook = XLSX.utils.book_new();
+      XLSX.utils.book_append_sheet(workbook, worksheet, "Users");
+      XLSX.writeFile(workbook, "UsersExport.xlsx");
+      toast.success("Export successful");
+    } catch (error) {
+      console.error("Export error:", error);
+      toast.error("Failed to export users data");
+    }
+  };
+
   const users = data?.data?.users || [];
   const totalUsers = data?.data?.total || 0;
   const totalPages = Math.ceil(totalUsers / limit);
@@ -102,19 +139,19 @@ export default function UsersPage() {
       <div className="bg-white rounded-2xl border border-gray-100 overflow-hidden">
         {/* Toolbar */}
         <div className="flex items-center justify-between px-5 py-3 border-b border-gray-100">
-          <DropdownMenu>
-            <DropdownMenuTrigger asChild>
-              <Button
-                variant="outline"
-                className="rounded-full h-11 px-4 text-sm font-medium gap-1.5 border-gray-200"
-              >
-                {filter === "All" ? "User Type" : filter}
-                <ChevronDown className="w-3.5 h-3.5 text-gray-500" />
-              </Button>
-            </DropdownMenuTrigger>
-            <DropdownMenuContent align="start" className="w-36">
-              {(["All", "Family", "Provider"] as FilterOption[]).map(
-                (opt) => (
+          <div className="flex items-center gap-3">
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <Button
+                  variant="outline"
+                  className="rounded-full h-11 px-4 text-sm font-medium gap-1.5 border-gray-200"
+                >
+                  {filter === "All" ? "User Type" : filter}
+                  <ChevronDown className="w-3.5 h-3.5 text-gray-500" />
+                </Button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="start" className="w-36">
+                {(["All", "Family", "Provider"] as FilterOption[]).map((opt) => (
                   <DropdownMenuItem
                     key={opt}
                     onClick={() => {
@@ -125,10 +162,20 @@ export default function UsersPage() {
                   >
                     {opt}
                   </DropdownMenuItem>
-                ),
-              )}
-            </DropdownMenuContent>
-          </DropdownMenu>
+                ))}
+              </DropdownMenuContent>
+            </DropdownMenu>
+
+            <Button
+              variant="outline"
+              className="rounded-full h-11 px-4 text-sm font-medium gap-2 border-gray-200"
+              onClick={handleExport}
+              disabled={isExporting}
+            >
+              {isExporting ? <Loader2 className="w-4 h-4 animate-spin" /> : <Download className="w-4 h-4" />}
+              {isExporting ? "Exporting..." : "Export"}
+            </Button>
+          </div>
 
           <span className="text-sm font-semibold text-brand-400">
             {totalUsers.toLocaleString()} Users

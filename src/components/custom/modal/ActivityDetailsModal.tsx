@@ -93,7 +93,7 @@ export function ActivityDetailsModal({
               </span>
             </div>
 
-            <div className="px-2 space-y-3">
+            <div className="px-4 space-y-3">
               <h2 className="text-[15px] font-semibold text-gray-900 leading-tight">
                 {data.name}
               </h2>

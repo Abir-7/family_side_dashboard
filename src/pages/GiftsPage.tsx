@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { Eye, Trash2, Search, Plus, MapPin, Tag, Loader2 } from "lucide-react";
+import { Eye, Trash2, Search, Plus, MapPin, Tag, Loader2, Download } from "lucide-react";
 import {
   Table,
   TableBody,
@@ -90,14 +90,25 @@ export default function GiftsPage() {
             />
           </div>
 
-          {/* Create Gift Button */}
-          <Button
-            className="rounded-full h-11 px-4 text-sm font-semibold bg-brand-400 hover:bg-brand-500 text-white border-0 gap-1.5 shrink-0"
-            onClick={() => navigate("/dashboard/gifts/create")}
-          >
-            Create gift
-            <Plus className="w-4 h-4" />
-          </Button>
+          <div className="flex items-center gap-3">
+            <Button
+              variant="outline"
+              className="rounded-full h-11 px-4 text-sm font-medium gap-2 border-gray-200"
+              onClick={() => toast.info("Exporting gifts...")}
+            >
+              <Download className="w-4 h-4" />
+              Export
+            </Button>
+
+            {/* Create Gift Button */}
+            <Button
+              className="rounded-full h-11 px-4 text-sm font-semibold bg-brand-400 hover:bg-brand-500 text-white border-0 gap-1.5 shrink-0"
+              onClick={() => navigate("/dashboard/gifts/create")}
+            >
+              Create gift
+              <Plus className="w-4 h-4" />
+            </Button>
+          </div>
         </div>
 
         {/* Table */}
