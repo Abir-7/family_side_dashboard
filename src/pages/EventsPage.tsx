@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { Eye, Trash2, Search, Plus, Loader2, Download } from "lucide-react";
+import * as XLSX from "xlsx";
 import {
   Table,
   TableBody,
@@ -22,7 +23,7 @@ import { EventDetailsModal } from "@/components/custom/modal/EventDetailsModal";
 import { DeleteEventModal } from "@/components/custom/modal/DeleteEventModal";
 import { Pagination } from "@/components/custom/pagination";
 import { toast } from "sonner";
-import { useGetEventsQuery, useDeleteEventMutation } from "@/lib/redux/apis/eventApi";
+import { useGetEventsQuery, useDeleteEventMutation, useLazyGetAllEventsQuery } from "@/lib/redux/apis/eventApi";
 import type { Event } from "@/types/event";
 
 export default function EventsPage() {
@@ -34,6 +35,7 @@ export default function EventsPage() {
   
   const { data, isLoading } = useGetEventsQuery({ page: currentPage, limit, search: search || undefined });
   const [deleteEvent] = useDeleteEventMutation();
+  const [getAllEvents, { isFetching: isExporting }] = useLazyGetAllEventsQuery();
 
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
@@ -61,6 +63,35 @@ export default function EventsPage() {
     }
   };
 
+  const handleExport = async () => {
+    try {
+      const response = await getAllEvents().unwrap();
+      const eventsData = response?.data || [];
+      if (eventsData.length === 0) {
+        toast.info("No data available to export");
+        return;
+      }
+
+      const exportData = eventsData.map((event: any) => ({
+        ID: event.id,
+        Name: event.name,
+        "Created By": event.created_by,
+        Category: event.category,
+        Location: event.location,
+        Fee: event.fee,
+      }));
+
+      const worksheet = XLSX.utils.json_to_sheet(exportData);
+      const workbook = XLSX.utils.book_new();
+      XLSX.utils.book_append_sheet(workbook, worksheet, "Events");
+      XLSX.writeFile(workbook, "EventsExport.xlsx");
+      toast.success("Export successful");
+    } catch (error) {
+      console.error("Export error:", error);
+      toast.error("Failed to export events data");
+    }
+  };
+
   return (
     <TooltipProvider>
       <div className="bg-white rounded-2xl border border-gray-100 min-h-[600px] flex flex-col relative">
@@ -78,10 +109,11 @@ export default function EventsPage() {
               <Button
                 variant="outline"
                 className="rounded-full h-11 px-4 text-sm font-medium gap-2 border-gray-200"
-                onClick={() => toast.info("Exporting events...")}
+                onClick={handleExport}
+                disabled={isExporting}
               >
-                <Download className="w-4 h-4" />
-                Export
+                {isExporting ? <Loader2 className="w-4 h-4 animate-spin" /> : <Download className="w-4 h-4" />}
+                {isExporting ? "Exporting..." : "Export"}
               </Button>
               <Button
                 className="gap-2 rounded-full h-11"

@@ -26,6 +26,9 @@ export const activityApi = apiSlice.injectEndpoints({
       }),
       invalidatesTags: ["Activity"],
     }),
+    getAllActivities: builder.query<any, void>({
+      query: () => `admin/activities/all`,
+    }),
     createActivity: builder.mutation<any, FormData>({
       query: (formData) => ({
         url: `admin/activities`,
@@ -40,6 +43,8 @@ export const activityApi = apiSlice.injectEndpoints({
 export const {
   useGetActivitiesQuery,
   useGetActivityDetailsQuery,
+  useGetAllActivitiesQuery,
+  useLazyGetAllActivitiesQuery,
   useDeleteActivityMutation,
   useCreateActivityMutation,
 } = activityApi;

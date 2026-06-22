@@ -22,6 +22,9 @@ export const eventApi = apiSlice.injectEndpoints({
       }),
       invalidatesTags: ["Event"],
     }),
+    getAllEvents: builder.query<any, void>({
+      query: () => `admin/events/all`,
+    }),
     createEvent: builder.mutation<any, FormData>({
       query: (formData) => ({
         url: `admin/events`,
@@ -33,4 +36,4 @@ export const eventApi = apiSlice.injectEndpoints({
   }),
 });
 
-export const { useGetEventsQuery, useGetEventDetailsQuery, useDeleteEventMutation, useCreateEventMutation } = eventApi;
+export const { useGetEventsQuery, useGetEventDetailsQuery, useGetAllEventsQuery, useLazyGetAllEventsQuery, useDeleteEventMutation, useCreateEventMutation } = eventApi;

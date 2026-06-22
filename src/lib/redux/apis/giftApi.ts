@@ -19,6 +19,9 @@ export const giftApi = apiSlice.injectEndpoints({
       }),
       invalidatesTags: ["Gift"],
     }),
+    getAllGifts: builder.query<any, void>({
+      query: () => `admin/gifts/all`,
+    }),
     createGift: builder.mutation<any, FormData>({
       query: (formData) => ({
         url: `admin/gifts`,
@@ -33,6 +36,8 @@ export const giftApi = apiSlice.injectEndpoints({
 export const {
   useGetGiftsQuery,
   useGetGiftDetailsQuery,
+  useGetAllGiftsQuery,
+  useLazyGetAllGiftsQuery,
   useDeleteGiftMutation,
   useCreateGiftMutation,
 } = giftApi;

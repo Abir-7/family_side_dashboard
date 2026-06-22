@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { Eye, Trash2, Search, Plus, MapPin, Tag, Loader2, Download } from "lucide-react";
+import * as XLSX from "xlsx";
 import {
   Table,
   TableBody,
@@ -21,7 +22,7 @@ import { Pagination } from "@/components/custom/pagination";
 import { toast } from "sonner";
 import { GiftDetailModal } from "@/components/custom/modal/GiftDetailsModal";
 import { DeleteGiftModal } from "@/components/custom/modal/DeleteGiftModal";
-import { useGetGiftsQuery, useDeleteGiftMutation } from "@/lib/redux/apis/giftApi";
+import { useGetGiftsQuery, useDeleteGiftMutation, useLazyGetAllGiftsQuery } from "@/lib/redux/apis/giftApi";
 
 interface Gift {
   id: number;
@@ -42,6 +43,7 @@ export default function GiftsPage() {
   
   const { data, isLoading, refetch } = useGetGiftsQuery({ page: currentPage, limit, search: search || undefined });
   const [deleteGift] = useDeleteGiftMutation();
+  const [getAllGifts, { isFetching: isExporting }] = useLazyGetAllGiftsQuery();
 
   const [isDetailsModalOpen, setIsDetailsModalOpen] = useState(false);
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
@@ -74,6 +76,35 @@ export default function GiftsPage() {
     setIsDetailsModalOpen(true);
   };
 
+  const handleExport = async () => {
+    try {
+      const response = await getAllGifts().unwrap();
+      const giftsData = response?.data || [];
+      if (giftsData.length === 0) {
+        toast.info("No data available to export");
+        return;
+      }
+
+      const exportData = giftsData.map((gift: any) => ({
+        ID: gift.id,
+        Name: gift.name,
+        "Created By": gift.created_by,
+        Category: gift.category,
+        Location: gift.location,
+        Fee: gift.fee,
+      }));
+
+      const worksheet = XLSX.utils.json_to_sheet(exportData);
+      const workbook = XLSX.utils.book_new();
+      XLSX.utils.book_append_sheet(workbook, worksheet, "Gifts");
+      XLSX.writeFile(workbook, "GiftsExport.xlsx");
+      toast.success("Export successful");
+    } catch (error) {
+      console.error("Export error:", error);
+      toast.error("Failed to export gifts data");
+    }
+  };
+
   return (
     <TooltipProvider>
       <div className="bg-white rounded-2xl border border-gray-100 overflow-hidden">
@@ -94,10 +125,11 @@ export default function GiftsPage() {
             <Button
               variant="outline"
               className="rounded-full h-11 px-4 text-sm font-medium gap-2 border-gray-200"
-              onClick={() => toast.info("Exporting gifts...")}
+              onClick={handleExport}
+              disabled={isExporting}
             >
-              <Download className="w-4 h-4" />
-              Export
+              {isExporting ? <Loader2 className="w-4 h-4 animate-spin" /> : <Download className="w-4 h-4" />}
+              {isExporting ? "Exporting..." : "Export"}
             </Button>
 
             {/* Create Gift Button */}

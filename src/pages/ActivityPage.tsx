@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { Eye, Trash2, Search, Plus, Loader2, Download } from "lucide-react";
+import * as XLSX from "xlsx";
 import {
   Table,
   TableBody,
@@ -22,7 +23,7 @@ import { ActivityDetailsModal } from "@/components/custom/modal/ActivityDetailsM
 import { DeleteActivityModal } from "@/components/custom/modal/DeleteActivityModal";
 import { Pagination } from "@/components/custom/pagination";
 import { toast } from "sonner";
-import { useGetActivitiesQuery, useDeleteActivityMutation } from "@/lib/redux/apis/activityApi";
+import { useGetActivitiesQuery, useDeleteActivityMutation, useLazyGetAllActivitiesQuery } from "@/lib/redux/apis/activityApi";
 import type { Activity } from "@/types/activity";
 
 export default function ActivityPage() {
@@ -34,6 +35,7 @@ export default function ActivityPage() {
   
   const { data, isLoading } = useGetActivitiesQuery({ page: currentPage, limit, search: search || undefined });
   const [deleteActivity] = useDeleteActivityMutation();
+  const [getAllActivities, { isFetching: isExporting }] = useLazyGetAllActivitiesQuery();
   
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
@@ -61,6 +63,35 @@ export default function ActivityPage() {
     }
   };
 
+  const handleExport = async () => {
+    try {
+      const response = await getAllActivities().unwrap();
+      const activitiesData = response?.data || [];
+      if (activitiesData.length === 0) {
+        toast.info("No data available to export");
+        return;
+      }
+
+      const exportData = activitiesData.map((activity: any) => ({
+        ID: activity.id,
+        Name: activity.name,
+        "Created By": activity.created_by,
+        Category: activity.category,
+        Location: activity.location,
+        Fee: activity.fee,
+      }));
+
+      const worksheet = XLSX.utils.json_to_sheet(exportData);
+      const workbook = XLSX.utils.book_new();
+      XLSX.utils.book_append_sheet(workbook, worksheet, "Activities");
+      XLSX.writeFile(workbook, "ActivitiesExport.xlsx");
+      toast.success("Export successful");
+    } catch (error) {
+      console.error("Export error:", error);
+      toast.error("Failed to export activities data");
+    }
+  };
+
   return (
     <TooltipProvider>
       <div className="bg-white rounded-2xl border border-gray-100 min-h-[600px] flex flex-col relative">
@@ -78,10 +109,11 @@ export default function ActivityPage() {
               <Button
                 variant="outline"
                 className="rounded-full h-11 px-4 text-sm font-medium gap-2 border-gray-200"
-                onClick={() => toast.info("Exporting activities...")}
+                onClick={handleExport}
+                disabled={isExporting}
               >
-                <Download className="w-4 h-4" />
-                Export
+                {isExporting ? <Loader2 className="w-4 h-4 animate-spin" /> : <Download className="w-4 h-4" />}
+                {isExporting ? "Exporting..." : "Export"}
               </Button>
               <Button
                 className="gap-2 rounded-full h-11"
