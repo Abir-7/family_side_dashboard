@@ -1,6 +1,15 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { Eye, Trash2, Search, Plus, MapPin, Tag, Loader2, Download } from "lucide-react";
+import {
+  Eye,
+  Trash2,
+  Search,
+  Plus,
+  MapPin,
+  Tag,
+  Loader2,
+  Download,
+} from "lucide-react";
 import * as XLSX from "xlsx";
 import {
   Table,
@@ -22,7 +31,11 @@ import { Pagination } from "@/components/custom/pagination";
 import { toast } from "sonner";
 import { GiftDetailModal } from "@/components/custom/modal/GiftDetailsModal";
 import { DeleteGiftModal } from "@/components/custom/modal/DeleteGiftModal";
-import { useGetGiftsQuery, useDeleteGiftMutation, useLazyGetAllGiftsQuery } from "@/lib/redux/apis/giftApi";
+import {
+  useGetGiftsQuery,
+  useDeleteGiftMutation,
+  useLazyGetAllGiftsQuery,
+} from "@/lib/redux/apis/giftApi";
 
 interface Gift {
   id: number;
@@ -36,12 +49,16 @@ interface Gift {
 
 export default function GiftsPage() {
   const navigate = useNavigate();
-  
+
   const [search, setSearch] = useState("");
   const [currentPage, setCurrentPage] = useState(1);
   const [limit] = useState(10);
-  
-  const { data, isLoading, refetch } = useGetGiftsQuery({ page: currentPage, limit, search: search || undefined });
+
+  const { data, isLoading, refetch } = useGetGiftsQuery({
+    page: currentPage,
+    limit,
+    search: search || undefined,
+  });
   const [deleteGift] = useDeleteGiftMutation();
   const [getAllGifts, { isFetching: isExporting }] = useLazyGetAllGiftsQuery();
 
@@ -61,13 +78,13 @@ export default function GiftsPage() {
 
   const handleDelete = async () => {
     if (selectedGiftId) {
-        try {
-            await deleteGift(selectedGiftId).unwrap();
-            toast.success("Gift deleted successfully");
-            setIsDeleteModalOpen(false);
-        } catch (error: any) {
-            toast.error(error.data?.message || "Failed to delete gift");
-        }
+      try {
+        await deleteGift(selectedGiftId).unwrap();
+        toast.success("Gift deleted successfully");
+        setIsDeleteModalOpen(false);
+      } catch (error: any) {
+        toast.error(error.data?.message || "Failed to delete gift");
+      }
     }
   };
 
@@ -107,7 +124,7 @@ export default function GiftsPage() {
 
   return (
     <TooltipProvider>
-      <div className="bg-white rounded-2xl border border-gray-100 overflow-hidden">
+      <div className="bg-white rounded-2xl border border-gray-100 overflow-hidden min-h-[calc(100vh-115px)] ">
         {/* Toolbar */}
         <div className="flex items-center gap-3 px-5 py-4 border-b border-gray-100">
           {/* Search */}
@@ -128,7 +145,11 @@ export default function GiftsPage() {
               onClick={handleExport}
               disabled={isExporting}
             >
-              {isExporting ? <Loader2 className="w-4 h-4 animate-spin" /> : <Download className="w-4 h-4" />}
+              {isExporting ? (
+                <Loader2 className="w-4 h-4 animate-spin" />
+              ) : (
+                <Download className="w-4 h-4" />
+              )}
               {isExporting ? "Exporting..." : "Export"}
             </Button>
 
@@ -268,7 +289,7 @@ export default function GiftsPage() {
             </TableBody>
           </Table>
         </div>
-        
+
         {/* Pagination */}
         <div className="px-5 pb-5">
           <Pagination

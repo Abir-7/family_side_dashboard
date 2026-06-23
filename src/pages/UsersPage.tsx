@@ -26,7 +26,11 @@ import { UserDetailsModal } from "@/components/custom/modal/UserDetailsModal";
 import { BlockUserModal } from "@/components/custom/modal/BlockUserModal";
 import { toast } from "sonner";
 import { Pagination } from "@/components/custom/pagination";
-import { useGetUsersQuery, useBlockUserMutation, useLazyGetAllUsersQuery } from "@/lib/redux/apis/userApi";
+import {
+  useGetUsersQuery,
+  useBlockUserMutation,
+  useLazyGetAllUsersQuery,
+} from "@/lib/redux/apis/userApi";
 import * as XLSX from "xlsx";
 
 const subscriptionClass: Record<string, string> = {
@@ -53,10 +57,10 @@ export default function UsersPage() {
   const [currentPage, setCurrentPage] = useState(1);
   const [limit] = useState(10);
 
-  const { data, isLoading } = useGetUsersQuery({ 
-    page: currentPage, 
-    limit, 
-    user_type: filter === "All" ? undefined : filter.toLowerCase() 
+  const { data, isLoading } = useGetUsersQuery({
+    page: currentPage,
+    limit,
+    user_type: filter === "All" ? undefined : filter.toLowerCase(),
   });
 
   const [blockUser] = useBlockUserMutation();
@@ -82,8 +86,10 @@ export default function UsersPage() {
   const handleConfirmBlock = async () => {
     if (!selectedUserForBlock) return;
 
-    const action = selectedUserForBlock.status === "Blocked" ? "activate" : "block";
-    const actionDisplayName = selectedUserForBlock.status === "Blocked" ? "unblock" : "block";
+    const action =
+      selectedUserForBlock.status === "Blocked" ? "activate" : "block";
+    const actionDisplayName =
+      selectedUserForBlock.status === "Blocked" ? "unblock" : "block";
 
     try {
       await blockUser({ id: selectedUserForBlock.id, action }).unwrap();
@@ -136,7 +142,7 @@ export default function UsersPage() {
 
   return (
     <TooltipProvider>
-      <div className="bg-white rounded-2xl border border-gray-100 overflow-hidden">
+      <div className="bg-white rounded-2xl border border-gray-100 overflow-hidden min-h-[calc(100vh-115px)]">
         {/* Toolbar */}
         <div className="flex items-center justify-between px-5 py-3 border-b border-gray-100">
           <div className="flex items-center gap-3">
@@ -151,18 +157,20 @@ export default function UsersPage() {
                 </Button>
               </DropdownMenuTrigger>
               <DropdownMenuContent align="start" className="w-36">
-                {(["All", "Family", "Provider"] as FilterOption[]).map((opt) => (
-                  <DropdownMenuItem
-                    key={opt}
-                    onClick={() => {
-                      setFilter(opt);
-                      setCurrentPage(1);
-                    }}
-                    className={filter === opt ? "bg-muted font-medium" : ""}
-                  >
-                    {opt}
-                  </DropdownMenuItem>
-                ))}
+                {(["All", "Family", "Provider"] as FilterOption[]).map(
+                  (opt) => (
+                    <DropdownMenuItem
+                      key={opt}
+                      onClick={() => {
+                        setFilter(opt);
+                        setCurrentPage(1);
+                      }}
+                      className={filter === opt ? "bg-muted font-medium" : ""}
+                    >
+                      {opt}
+                    </DropdownMenuItem>
+                  ),
+                )}
               </DropdownMenuContent>
             </DropdownMenu>
 
@@ -172,7 +180,11 @@ export default function UsersPage() {
               onClick={handleExport}
               disabled={isExporting}
             >
-              {isExporting ? <Loader2 className="w-4 h-4 animate-spin" /> : <Download className="w-4 h-4" />}
+              {isExporting ? (
+                <Loader2 className="w-4 h-4 animate-spin" />
+              ) : (
+                <Download className="w-4 h-4" />
+              )}
               {isExporting ? "Exporting..." : "Export"}
             </Button>
           </div>
@@ -192,32 +204,68 @@ export default function UsersPage() {
           <Table>
             <TableHeader>
               <TableRow className="hover:bg-transparent border-gray-100">
-                <TableHead className="text-gray-400 text-xs font-medium px-5">Name</TableHead>
-                <TableHead className="text-gray-400 text-xs font-medium">Email address</TableHead>
-                <TableHead className="text-gray-400 text-xs font-medium">User Type</TableHead>
-                <TableHead className="text-gray-400 text-xs font-medium">Location</TableHead>
-                <TableHead className="text-gray-400 text-xs font-medium">Join Date</TableHead>
-                <TableHead className="text-gray-400 text-xs font-medium">Subscription</TableHead>
-                <TableHead className="text-gray-400 text-xs font-medium">Status</TableHead>
-                <TableHead className="text-gray-400 text-xs font-medium">Action</TableHead>
+                <TableHead className="text-gray-400 text-xs font-medium px-5">
+                  Name
+                </TableHead>
+                <TableHead className="text-gray-400 text-xs font-medium">
+                  Email address
+                </TableHead>
+                <TableHead className="text-gray-400 text-xs font-medium">
+                  User Type
+                </TableHead>
+                <TableHead className="text-gray-400 text-xs font-medium">
+                  Location
+                </TableHead>
+                <TableHead className="text-gray-400 text-xs font-medium">
+                  Join Date
+                </TableHead>
+                <TableHead className="text-gray-400 text-xs font-medium">
+                  Subscription
+                </TableHead>
+                <TableHead className="text-gray-400 text-xs font-medium">
+                  Status
+                </TableHead>
+                <TableHead className="text-gray-400 text-xs font-medium">
+                  Action
+                </TableHead>
               </TableRow>
             </TableHeader>
 
             <TableBody>
               {users.map((user: any) => (
-                <TableRow key={user.id} className="border-gray-50 hover:bg-gray-50/60">
-                  <TableCell className="font-semibold text-sm text-gray-900 py-4 px-5">{user.name}</TableCell>
-                  <TableCell className="text-sm text-gray-400 py-4">{user.email}</TableCell>
-                  <TableCell className="text-sm text-gray-500 py-4">{user.user_type}</TableCell>
-                  <TableCell className="text-sm text-gray-500 py-4 max-w-[200px] truncate">{user.location}</TableCell>
-                  <TableCell className="text-sm text-gray-500 py-4">{user.join_date}</TableCell>
+                <TableRow
+                  key={user.id}
+                  className="border-gray-50 hover:bg-gray-50/60"
+                >
+                  <TableCell className="font-semibold text-sm text-gray-900 py-4 px-5">
+                    {user.name}
+                  </TableCell>
+                  <TableCell className="text-sm text-gray-400 py-4">
+                    {user.email}
+                  </TableCell>
+                  <TableCell className="text-sm text-gray-500 py-4">
+                    {user.user_type}
+                  </TableCell>
+                  <TableCell className="text-sm text-gray-500 py-4 max-w-[200px] truncate">
+                    {user.location}
+                  </TableCell>
+                  <TableCell className="text-sm text-gray-500 py-4">
+                    {user.join_date}
+                  </TableCell>
                   <TableCell className="py-4">
-                    <Badge className={subscriptionClass[user.subscription] || subscriptionClass.Free}>
+                    <Badge
+                      className={
+                        subscriptionClass[user.subscription] ||
+                        subscriptionClass.Free
+                      }
+                    >
                       {user.subscription}
                     </Badge>
                   </TableCell>
                   <TableCell className="py-4">
-                    <Badge className={statusClass[user.status] || statusClass.Active}>
+                    <Badge
+                      className={statusClass[user.status] || statusClass.Active}
+                    >
                       {user.status}
                     </Badge>
                   </TableCell>
@@ -262,7 +310,10 @@ export default function UsersPage() {
               ))}
               {!isLoading && users.length === 0 && (
                 <TableRow>
-                  <TableCell colSpan={8} className="text-center py-10 text-gray-500">
+                  <TableCell
+                    colSpan={8}
+                    className="text-center py-10 text-gray-500"
+                  >
                     No users found
                   </TableCell>
                 </TableRow>
@@ -281,9 +332,9 @@ export default function UsersPage() {
         </div>
 
         {/* User Detail Modal */}
-        <UserDetailsModal 
-          isOpen={isModalOpen} 
-          onOpenChange={setIsModalOpen} 
+        <UserDetailsModal
+          isOpen={isModalOpen}
+          onOpenChange={setIsModalOpen}
           userId={selectedUserId}
         />
 

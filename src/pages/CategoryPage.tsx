@@ -33,8 +33,8 @@ function CategoryCard({
   onEdit: (id: number) => void;
 }) {
   return (
-    <div className="flex items-center gap-3 px-3 py-2.5 rounded-2xl border border-gray-200 bg-white hover:border-gray-300 transition-colors">
-      <div className="w-9 h-9 rounded-xl overflow-hidden shrink-0 bg-brand-50 border border-gray-100 flex items-center justify-center">
+    <div className="flex items-center gap-3 px-3 py-2.5 rounded-2xl border border-gray-200 hover:border-gray-300 transition-colors">
+      <div className="w-9 h-9 rounded-xl overflow-hidden shrink-0 bg-brand-50 border border-gray-100  flex items-center justify-center">
         <img
           src={category.image_url || "/assets/placeholder.png"}
           alt={category.name}
@@ -134,7 +134,7 @@ export default function CategoryPage() {
   };
 
   return (
-    <div className="bg-white rounded-2xl border border-gray-100 p-5 min-h-[600px] flex flex-col relative">
+    <div className=" rounded-2xl border border-gray-100  p-5 min-h-[calc(100vh-115px)] flex flex-col relative">
       {isLoading && (
         <div className="absolute inset-0 bg-white/50 backdrop-blur-[1px] z-20 flex items-center justify-center rounded-2xl">
           <Loader2 className="w-10 h-10 text-brand-400 animate-spin" />

@@ -16,7 +16,7 @@ import { useGetDashboardChartDataQuery } from "@/lib/redux/apis/dashboardApi";
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 type Tab = "activities" | "events" | "users" | "gifts";
-type Period = "2026" | "2025" | "2024";
+type Period = "year" | "month";
 
 const tabLabels: Record<Tab, string> = {
   activities: "Activity",
@@ -25,7 +25,7 @@ const tabLabels: Record<Tab, string> = {
   gifts: "Gifts",
 };
 
-const periods: Period[] = ["2026", "2025", "2024"];
+const periods: Period[] = ["year", "month"];
 
 // ─── Custom tooltip ───────────────────────────────────────────────────────────
 const CustomTooltip = ({ active, payload, label }: any) => {
@@ -45,7 +45,7 @@ const CustomTooltip = ({ active, payload, label }: any) => {
 // ─── Component ────────────────────────────────────────────────────────────────
 export default function ActivityOverview() {
   const [activeTab, setActiveTab] = useState<Tab>("activities");
-  const [period, setPeriod] = useState<Period>("2026");
+  const [period, setPeriod] = useState<Period>("year");
   const [showPeriodMenu, setShowPeriodMenu] = useState(false);
 
   const { data, isLoading } = useGetDashboardChartDataQuery({ tab: activeTab, timeframe: period });
@@ -70,7 +70,7 @@ export default function ActivityOverview() {
             onClick={() => setShowPeriodMenu((v) => !v)}
             className="flex items-center gap-1.5 rounded-lg border border-gray-200 px-3 py-1.5 text-sm text-gray-600 hover:bg-gray-50 transition-colors"
           >
-            {period}
+            {period === "year" ? "Yearly" : "Monthly"}
             <ChevronDown className="h-4 w-4 text-gray-400" />
           </button>
 
@@ -89,7 +89,7 @@ export default function ActivityOverview() {
                       : "text-gray-600"
                   }`}
                 >
-                  {p}
+                  {p === "year" ? "Yearly" : "Monthly"}
                 </button>
               ))}
             </div>
