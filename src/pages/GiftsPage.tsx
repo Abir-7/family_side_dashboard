@@ -54,7 +54,7 @@ export default function GiftsPage() {
   const [currentPage, setCurrentPage] = useState(1);
   const [limit] = useState(10);
 
-  const { data, isLoading, refetch } = useGetGiftsQuery({
+  const { data, isLoading } = useGetGiftsQuery({
     page: currentPage,
     limit,
     search: search || undefined,

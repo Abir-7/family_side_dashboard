@@ -6,6 +6,7 @@ import {
   Map,
   Marker,
   useMapsLibrary,
+  useMap,
   type MapMouseEvent,
 } from "@vis.gl/react-google-maps";
 
@@ -57,6 +58,19 @@ export function FormLocationSearch({
 
   const geocodingLib = useMapsLibrary("geocoding");
   const placesLib = useMapsLibrary("places");
+  const map = useMap("location-picker-map");
+
+  useEffect(() => {
+    mapRef.current = map;
+    if (map && placesLib && !placesServiceRef.current) {
+      placesServiceRef.current = new placesLib.PlacesService(map);
+    }
+    if (map && markerPosition) {
+      map.setCenter(markerPosition);
+      map.setZoom(15);
+    }
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [map, placesLib]);
 
   // Autocomplete service instance for fetching predictions
   const autocompleteService = useMemo(() => {
@@ -433,17 +447,6 @@ export function FormLocationSearch({
               defaultZoom={MAP_ZOOM}
               onClick={handleMapClick}
               mapId="location-picker-map"
-              onMapReady={(map) => {
-                mapRef.current = map;
-                // Create PlacesService once the map is available
-                if (placesLib && !placesServiceRef.current) {
-                  placesServiceRef.current = new placesLib.PlacesService(map);
-                }
-                if (markerPosition) {
-                  map.setCenter(markerPosition);
-                  map.setZoom(15);
-                }
-              }}
             >
               {markerPosition && (
                 <Marker

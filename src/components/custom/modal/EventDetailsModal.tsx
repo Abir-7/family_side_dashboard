@@ -61,7 +61,7 @@ export function EventDetailsModal({
   eventId,
 }: EventDetailModalProps) {
   const { data: response, isLoading } = useGetEventDetailsQuery(eventId!, { skip: !isOpen || !eventId });
-  const data = response?.data;
+  const data = response?.data as any;
   const [isExpanded, setIsExpanded] = useState(false);
 
   if (!isOpen) return null;
