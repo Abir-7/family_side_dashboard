@@ -37,6 +37,8 @@ export function FormLocationSearch({
   const [showMap, setShowMap] = useState(false);
   const [markerPosition, setMarkerPosition] =
     useState<google.maps.LatLngLiteral | null>(null);
+  const [mapCenter, setMapCenter] =
+    useState<google.maps.LatLngLiteral>(DEFAULT_CENTER);
   const [suggestions, setSuggestions] = useState<
     google.maps.places.AutocompletePrediction[]
   >([]);
@@ -44,6 +46,8 @@ export function FormLocationSearch({
   const [selectedSuggestionIndex, setSelectedSuggestionIndex] =
     useState(-1);
   const [isSearching, setIsSearching] = useState(false);
+  const [isGettingLocation, setIsGettingLocation] = useState(false);
+  const [inputValue, setInputValue] = useState("");
 
   const mapRef = useRef<google.maps.Map | null>(null);
   const inputRef = useRef<HTMLInputElement | null>(null);
@@ -93,6 +97,7 @@ export function FormLocationSearch({
     (placeId: string, description: string) => {
       setShowSuggestions(false);
       setSuggestions([]);
+      setInputValue(description);
       setValue(name, description, { shouldValidate: true });
 
       const svc = placesServiceRef.current;
@@ -112,6 +117,7 @@ export function FormLocationSearch({
             const lng = place.geometry.location.lng();
             const address = place.formatted_address || description;
 
+            setInputValue(address);
             setMarkerPosition({ lat, lng });
             setValue(name, address, { shouldValidate: true });
 
@@ -130,6 +136,7 @@ export function FormLocationSearch({
   const handleInputChange = useCallback(
     (e: React.ChangeEvent<HTMLInputElement>) => {
       const value = e.target.value;
+      setInputValue(value);
       setValue(name, value, { shouldValidate: false });
 
       if (debounceRef.current) {
@@ -189,6 +196,13 @@ export function FormLocationSearch({
       document.removeEventListener("mousedown", handleClickOutside);
   }, []);
 
+  // Sync form value into input display (for pre-populated or reset forms)
+  useEffect(() => {
+    if (typeof currentValue === "string") {
+      setInputValue(currentValue);
+    }
+  }, [currentValue]);
+
   // Cleanup debounce on unmount
   useEffect(() => {
     return () => {
@@ -198,22 +212,81 @@ export function FormLocationSearch({
     };
   }, []);
 
-  // Toggle map: when opening, if there's a current value try to geocode it
+  // Get user's current location via browser geolocation
+  const getUserLocation = useCallback((): Promise<google.maps.LatLngLiteral> => {
+    return new Promise((resolve, reject) => {
+      if (!navigator.geolocation) {
+        reject(new Error("Geolocation not supported"));
+        return;
+      }
+      navigator.geolocation.getCurrentPosition(
+        (position) => {
+          resolve({
+            lat: position.coords.latitude,
+            lng: position.coords.longitude,
+          });
+        },
+        (error) => {
+          reject(error);
+        },
+        { enableHighAccuracy: true, timeout: 10000, maximumAge: 60000 },
+      );
+    });
+  }, []);
+
+  // Toggle map: when opening, always try browser geolocation first
   const handleToggleMap = useCallback(async () => {
-    if (!showMap && currentValue && geocodingLib) {
+    if (!showMap) {
+      setIsGettingLocation(true);
+
       try {
-        const geocoder = new geocodingLib.Geocoder();
-        const response = await geocoder.geocode({ address: currentValue });
-        if (response.results[0]?.geometry?.location) {
-          const loc = response.results[0].geometry.location;
-          setMarkerPosition({ lat: loc.lat(), lng: loc.lng() });
+        // Always try browser geolocation first
+        const pos = await getUserLocation();
+        setMarkerPosition(pos);
+        setMapCenter(pos);
+
+        // Reverse geocode to fill the location field
+        if (geocodingLib) {
+          try {
+            const geocoder = new geocodingLib.Geocoder();
+            const response = await geocoder.geocode({ location: pos });
+            if (response.results[0]?.formatted_address) {
+              const address = response.results[0].formatted_address;
+              setInputValue(address);
+              setValue(name, address, { shouldValidate: true });
+            }
+          } catch {
+            // Silently fail
+          }
         }
       } catch {
-        // If geocoding fails, just open map with default center
+        // Geolocation failed or denied — try geocoding existing form value
+        if (currentValue && currentValue.trim() && geocodingLib) {
+          try {
+            const geocoder = new geocodingLib.Geocoder();
+            const response = await geocoder.geocode({ address: currentValue });
+            if (response.results[0]?.geometry?.location) {
+              const loc = response.results[0].geometry.location;
+              const pos = { lat: loc.lat(), lng: loc.lng() };
+              setMarkerPosition(pos);
+              setMapCenter(pos);
+            } else {
+              setMapCenter(DEFAULT_CENTER);
+            }
+          } catch {
+            setMapCenter(DEFAULT_CENTER);
+          }
+        } else {
+          // No existing value and geolocation failed — use default
+          setMapCenter(DEFAULT_CENTER);
+        }
       }
+
+      setIsGettingLocation(false);
     }
+
     setShowMap((prev) => !prev);
-  }, [showMap, currentValue, geocodingLib]);
+  }, [showMap, currentValue, geocodingLib, getUserLocation, name, setValue]);
 
   // Reverse geocode a lat/lng to get the formatted address
   const reverseGeocode = useCallback(
@@ -223,9 +296,9 @@ export function FormLocationSearch({
         const geocoder = new geocodingLib.Geocoder();
         const response = await geocoder.geocode({ location: { lat, lng } });
         if (response.results[0]?.formatted_address) {
-          setValue(name, response.results[0].formatted_address, {
-            shouldValidate: true,
-          });
+          const address = response.results[0].formatted_address;
+          setInputValue(address);
+          setValue(name, address, { shouldValidate: true });
         }
       } catch {
         // Silently fail
@@ -274,7 +347,7 @@ export function FormLocationSearch({
             inputRef.current = el;
           }}
           name={name}
-          defaultValue={currentValue}
+          value={inputValue}
           placeholder={placeholder}
           onChange={handleInputChange}
           onKeyDown={handleKeyDown}
@@ -291,10 +364,13 @@ export function FormLocationSearch({
         <button
           type="button"
           onClick={handleToggleMap}
-          className="h-8 w-8 bg-brand-400 rounded-full flex items-center justify-center shrink-0 hover:bg-brand-500 transition-colors cursor-pointer"
-          title={showMap ? "Hide map" : "Show map"}
+          disabled={isGettingLocation}
+          className="h-8 w-8 bg-brand-400 rounded-full flex items-center justify-center shrink-0 hover:bg-brand-500 transition-colors cursor-pointer disabled:opacity-50 disabled:cursor-wait"
+          title={isGettingLocation ? "Getting your location..." : showMap ? "Hide map" : "Show map"}
         >
-          {showMap ? (
+          {isGettingLocation ? (
+            <Loader2 className="w-4 h-4 text-white animate-spin" />
+          ) : showMap ? (
             <ChevronUp className="w-4 h-4 text-white" />
           ) : (
             <MapPin className="w-4 h-4 text-white" />
@@ -353,7 +429,7 @@ export function FormLocationSearch({
         <div className="relative rounded-xl overflow-hidden border border-gray-200 mt-1">
           <div style={{ height: "350px", width: "100%" }}>
             <Map
-              defaultCenter={DEFAULT_CENTER}
+              center={mapCenter}
               defaultZoom={MAP_ZOOM}
               onClick={handleMapClick}
               mapId="location-picker-map"
