@@ -68,6 +68,14 @@ export const userApi = apiSlice.injectEndpoints({
         body: data,
       }),
     }),
+    updateProfileImage: builder.mutation<any, FormData>({
+      query: (formData) => ({
+        url: `admin/settings/profile/image`,
+        method: "PATCH",
+        body: formData,
+      }),
+      invalidatesTags: ["User"],
+    }),
   }),
 });
 
@@ -79,4 +87,5 @@ export const {
   useUpdateProfileMutation,
   useGetProfileQuery,
   useChangePasswordMutation,
+  useUpdateProfileImageMutation,
 } = userApi;

@@ -2,10 +2,18 @@ import { Outlet, Link, useLocation } from "react-router-dom";
 import { SidebarProvider, SidebarTrigger } from "@/components/ui/sidebar";
 import { AppSidebar } from "@/components/custom/sidebar";
 import { Separator } from "@/components/ui/separator";
-import { Bell } from "lucide-react";
+import { Bell, Camera, Loader2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { useGetProfileQuery } from "@/lib/redux/apis/userApi";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
+import { useGetProfileQuery, useUpdateProfileImageMutation } from "@/lib/redux/apis/userApi";
+import { toast } from "sonner";
+import { useRef } from "react";
 
 const PAGE_INFO: Record<string, { title: string; subtitle: string }> = {
   "/dashboard": { title: "Overview", subtitle: "Welcome back to your dashboard" },
@@ -26,7 +34,28 @@ const PAGE_INFO: Record<string, { title: string; subtitle: string }> = {
 export default function DashboardLayout() {
   const location = useLocation();
   const info = PAGE_INFO[location.pathname] || { title: "Dashboard", subtitle: "Management portal" };
-  const { data: profileResponse } = useGetProfileQuery();
+  const { data: profileResponse, refetch } = useGetProfileQuery();
+  const [updateProfileImage, { isLoading: isUploading }] = useUpdateProfileImageMutation();
+  const fileInputRef = useRef<HTMLInputElement>(null);
+
+  const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    const formData = new FormData();
+    formData.append("image", file);
+
+    try {
+      await updateProfileImage(formData).unwrap();
+      refetch();
+      toast.success("Profile image updated successfully");
+    } catch (error: any) {
+      toast.error(error?.data?.message || "Failed to update profile image");
+    }
+
+    // Reset input so the same file can be selected again
+    if (fileInputRef.current) fileInputRef.current.value = "";
+  };
 
   return (
     <SidebarProvider>
@@ -47,10 +76,40 @@ export default function DashboardLayout() {
                 <Bell className="h-5 w-5" />
               </Link>
             </Button>
-            <Avatar className="size-8">
-              <AvatarImage src={profileResponse?.data?.image_url} />
-              <AvatarFallback>{profileResponse?.data?.name?.charAt(0) || "S"}</AvatarFallback>
-            </Avatar>
+
+            {/* Hidden file input */}
+            <input
+              ref={fileInputRef}
+              type="file"
+              accept="image/*"
+              className="hidden"
+              onChange={handleFileChange}
+            />
+
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <button className="outline-none rounded-full">
+                  <Avatar className="size-8 cursor-pointer">
+                    <AvatarImage src={profileResponse?.data?.image_url} />
+                    <AvatarFallback>{profileResponse?.data?.name?.charAt(0) || "S"}</AvatarFallback>
+                  </Avatar>
+                </button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="end" className="w-48">
+                <DropdownMenuItem
+                  onClick={() => fileInputRef.current?.click()}
+                  disabled={isUploading}
+                  className="cursor-pointer gap-2"
+                >
+                  {isUploading ? (
+                    <Loader2 className="h-4 w-4 animate-spin" />
+                  ) : (
+                    <Camera className="h-4 w-4" />
+                  )}
+                  <span>{isUploading ? "Uploading..." : "Change Profile Image"}</span>
+                </DropdownMenuItem>
+              </DropdownMenuContent>
+            </DropdownMenu>
           </div>
         </header>
         <div className="p-6">
