@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import {
@@ -14,7 +15,10 @@ import { FormSelect } from "@/components/forms/FormSelect";
 import { FormImageUpload } from "@/components/forms/FormImageUpload";
 import { Plus, Loader2 } from "lucide-react";
 import { z } from "zod";
-import { useGetAllCategoriesQuery, useCreateSubCategoryMutation } from "@/lib/redux/apis/categoryApi";
+import {
+  useGetAllCategoriesQuery,
+  useCreateSubCategoryMutation,
+} from "@/lib/redux/apis/categoryApi";
 import { toast } from "sonner";
 
 const subCategorySchema = z.object({
@@ -27,8 +31,10 @@ type SubCategoryFormValues = z.infer<typeof subCategorySchema>;
 
 export function CreateSubCategoryModal() {
   const [isOpen, setIsOpen] = useState(false);
-  const { data: categoriesResponse, isLoading: categoriesLoading } = useGetAllCategoriesQuery();
-  const [createSubCategory, { isLoading: isCreating }] = useCreateSubCategoryMutation();
+  const { data: categoriesResponse, isLoading: categoriesLoading } =
+    useGetAllCategoriesQuery();
+  const [createSubCategory, { isLoading: isCreating }] =
+    useCreateSubCategoryMutation();
 
   const categories = categoriesResponse?.data || [];
   const CATEGORY_OPTIONS = categories.map((cat: any) => ({
@@ -50,7 +56,10 @@ export function CreateSubCategoryModal() {
       setIsOpen(false);
     } catch (error: any) {
       console.error("Create sub-category error:", error);
-      toast.error(error.data?.message || "Failed to create sub-category");
+      toast.error(
+        error?.data?.detail ||
+          "An error occurred while creating the sub-category",
+      );
     }
   };
 
@@ -82,7 +91,9 @@ export function CreateSubCategoryModal() {
           <FormSelect
             name="category_id"
             label="Select Category"
-            placeholder={categoriesLoading ? "Loading categories..." : "Select a category"}
+            placeholder={
+              categoriesLoading ? "Loading categories..." : "Select a category"
+            }
             options={CATEGORY_OPTIONS}
             disabled={categoriesLoading}
           />
@@ -90,18 +101,18 @@ export function CreateSubCategoryModal() {
           <FormImageUpload name="images" label="Sub-Category Logo" />
 
           <DialogFooter className="pt-4">
-            <Button 
-                type="button" 
-                variant="outline" 
-                className="rounded-full"
-                onClick={() => setIsOpen(false)}
+            <Button
+              type="button"
+              variant="outline"
+              className="rounded-full"
+              onClick={() => setIsOpen(false)}
             >
-                Cancel
+              Cancel
             </Button>
-            <Button 
-                type="submit" 
-                className="rounded-full" 
-                disabled={isCreating}
+            <Button
+              type="submit"
+              className="rounded-full"
+              disabled={isCreating}
             >
               {isCreating && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
               Create

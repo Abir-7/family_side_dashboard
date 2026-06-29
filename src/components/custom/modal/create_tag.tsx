@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import {
@@ -29,13 +30,13 @@ export function CreateTagModal() {
   const onSubmit = async (data: TagFormValues) => {
     const formData = new FormData();
     formData.append("name", data.name);
-    
+
     try {
-        await createTag(formData).unwrap();
-        toast.success("Tag created successfully");
-        setOpen(false);
+      await createTag(formData).unwrap();
+      toast.success("Tag created successfully");
+      setOpen(false);
     } catch (error: any) {
-        toast.error(error.data?.message || "Failed to create tag");
+      toast.error(error.data?.detail || "Failed to create tag");
     }
   };
 
@@ -71,8 +72,8 @@ export function CreateTagModal() {
               </Button>
             </DialogClose>
             <Button type="submit" className="rounded-full" disabled={isLoading}>
-                {isLoading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-                Create
+              {isLoading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+              Create
             </Button>
           </DialogFooter>
         </FormWrapper>

@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import { Button } from "@/components/ui/button";
 import {
   Dialog,
@@ -27,7 +28,11 @@ interface CreateCategoryModalProps {
   onSuccess: () => void;
 }
 
-export function CreateCategoryModal({ isOpen, onOpenChange, onSuccess }: CreateCategoryModalProps) {
+export function CreateCategoryModal({
+  isOpen,
+  onOpenChange,
+  onSuccess,
+}: CreateCategoryModalProps) {
   const [createCategory, { isLoading }] = useCreateCategoryMutation();
 
   const onSubmit = async (data: CategoryFormValues) => {
@@ -42,9 +47,12 @@ export function CreateCategoryModal({ isOpen, onOpenChange, onSuccess }: CreateC
       toast.success("Category created successfully");
       onSuccess();
       onOpenChange(false);
-    } catch (error) {
-      console.error("Create category error:", error);
-      toast.error("An error occurred while creating the category");
+    } catch (error: any) {
+      console.log();
+      console.error("Create category error:", error?.data);
+      toast.error(
+        error?.data?.detail || "An error occurred while creating the category",
+      );
     }
   };
 
@@ -70,7 +78,12 @@ export function CreateCategoryModal({ isOpen, onOpenChange, onSuccess }: CreateC
           <FormImageUpload name="images" label="Category Logo" />
 
           <DialogFooter className="pt-4">
-            <Button type="button" variant="outline" className="rounded-full" onClick={() => onOpenChange(false)}>
+            <Button
+              type="button"
+              variant="outline"
+              className="rounded-full"
+              onClick={() => onOpenChange(false)}
+            >
               Cancel
             </Button>
             <Button type="submit" className="rounded-full" disabled={isLoading}>
