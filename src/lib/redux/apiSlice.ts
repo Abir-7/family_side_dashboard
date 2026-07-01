@@ -4,7 +4,7 @@ import type { RootState } from "./store";
 export const apiSlice = createApi({
   reducerPath: "api",
   baseQuery: fetchBaseQuery({
-    baseUrl: "http://10.10.29.59:8015/api/v1/",
+    baseUrl: "https://api.familyside.it/api/v1/",
     prepareHeaders: (headers, { getState }) => {
       const token = (getState() as RootState).auth.accessToken;
       console.log(token, "token");
@@ -15,6 +15,14 @@ export const apiSlice = createApi({
       return headers;
     },
   }),
-  tagTypes: ["User", "Activity", "Event", "Gift", "Category", "Tag", "Notification"],
+  tagTypes: [
+    "User",
+    "Activity",
+    "Event",
+    "Gift",
+    "Category",
+    "Tag",
+    "Notification",
+  ],
   endpoints: () => ({}),
 });
